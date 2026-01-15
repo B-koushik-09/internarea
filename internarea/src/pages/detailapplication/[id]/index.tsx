@@ -1,13 +1,19 @@
 import axios from "axios";
 import { Building2, Calendar, FileText, Loader2, User } from "lucide-react";
 import { useRouter } from "next/router";
+import { useSelector } from "react-redux";
 import React, { useEffect, useState } from "react";
+import { selectLanguage } from "@/Feature/LanguageSlice";
+import { translations } from "@/utils/translations";
 
 const index = () => {
   const router = useRouter();
   const { id } = router.query;
   const [loading, setloading] = useState(false);
   const [data, setdata] = useState<any>([]);
+
+  const currentLanguage = useSelector(selectLanguage);
+  const t = { ...translations["English"], ...((translations as any)[currentLanguage] || {}) };
   useEffect(() => {
     const fetchdata = async () => {
       try {
@@ -32,7 +38,7 @@ const index = () => {
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
         <span className="ml-2 text-gray-600">
-          Loading application details...
+          {t?.app_detail_loading || "Loading application details..."}
         </span>
       </div>
     );
@@ -51,16 +57,15 @@ const index = () => {
               />
               {data.status && (
                 <div
-                  className={`absolute top-4 right-4 px-4 py-2 rounded-full ${
-                    data.status === "accepted"
-                      ? "bg-green-100 text-green-600"
-                      : data.status === "rejected"
+                  className={`absolute top-4 right-4 px-4 py-2 rounded-full ${data.status === "accepted"
+                    ? "bg-green-100 text-green-600"
+                    : data.status === "rejected"
                       ? "bg-red-100 text-red-600"
                       : "bg-yellow-100 text-yellow-600"
-                  }`}
+                    }`}
                 >
                   <span className="font-semibold capitalize">
-                    {data.status}
+                    {t?.[`app_status_${data.status}`] || data.status}
                   </span>
                 </div>
               )}
@@ -71,7 +76,7 @@ const index = () => {
               <div className="mb-8">
                 <div className="flex items-center mb-6">
                   <Building2 className="w-5 h-5 text-blue-600 mr-2" />
-                  <h2 className="text-sm font-medium text-gray-500">Company</h2>
+                  <h2 className="text-sm font-medium text-gray-500">{t?.app_label_company || "Company"}</h2>
                 </div>
                 <h1 className="text-2xl font-bold text-gray-900 mb-4">
                   {data.company}
@@ -82,7 +87,7 @@ const index = () => {
                 <div className="flex items-center mb-4">
                   <FileText className="w-5 h-5 text-blue-600 mr-2" />
                   <h2 className="text-sm font-medium text-gray-500">
-                    Cover Letter
+                    {t?.app_label_cover_letter || "Cover Letter"}
                   </h2>
                 </div>
                 <p className="text-gray-600 leading-relaxed">
@@ -95,7 +100,7 @@ const index = () => {
                   <div className="flex items-center mb-2">
                     <Calendar className="w-5 h-5 text-blue-600 mr-2" />
                     <span className="text-sm font-medium text-gray-500">
-                      Application Date
+                      {t?.app_label_date || "Application Date"}
                     </span>
                   </div>
                   <p className="text-gray-900 font-semibold">
@@ -111,7 +116,7 @@ const index = () => {
                   <div className="flex items-center mb-2">
                     <User className="w-5 h-5 text-blue-600 mr-2" />
                     <span className="text-sm font-medium text-gray-500">
-                      Applied By
+                      {t?.app_label_by || "Applied By"}
                     </span>
                   </div>
                   <p className="text-gray-900 font-semibold">

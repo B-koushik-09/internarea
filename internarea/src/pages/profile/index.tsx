@@ -3,19 +3,19 @@ import { ExternalLink, Mail, User } from "lucide-react";
 import Link from "next/link";
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
+import { selectLanguage } from "@/Feature/LanguageSlice";
+import { translations } from "@/utils/translations";
+
 interface User {
   name: string;
   email: string;
   photo: string;
 }
 const index = () => {
-  // const [user, setuser] = useState<User | null>({
-  //   name: "Rahul",
-  //   email: "xyz@gmail.com",
-  //   photo:
-  //     "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=64&h=64&fit=crop&crop=faces",
-  // });
-  const user=useSelector(selectuser)
+  const user = useSelector(selectuser)
+  const currentLanguage = useSelector(selectLanguage);
+  const t = { ...translations["English"], ...((translations as any)[currentLanguage] || {}) };
+
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -56,7 +56,7 @@ const index = () => {
                     0
                   </span>
                   <p className="text-blue-600 text-sm mt-1">
-                    Active Applications
+                    {t?.profile_active_apps || "Active Applications"}
                   </p>
                 </div>
                 <div className="bg-green-50 rounded-lg p-4 text-center">
@@ -64,7 +64,7 @@ const index = () => {
                     0
                   </span>
                   <p className="text-green-600 text-sm mt-1">
-                    Accepted Applications
+                    {t?.profile_accepted_apps || "Accepted Applications"}
                   </p>
                 </div>
               </div>
@@ -75,7 +75,7 @@ const index = () => {
                   href="/userapplication"
                   className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200"
                 >
-                  View Applications
+                  {t?.profile_view_apps || "View Applications"}
                   <ExternalLink className="ml-2 h-4 w-4" />
                 </Link>
               </div>

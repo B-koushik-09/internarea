@@ -13,9 +13,35 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import axios from "axios";
+import { useSelector } from "react-redux";
+import { selectLanguage } from "@/Feature/LanguageSlice";
+import { translations } from "@/utils/translations";
+
+interface Internship {
+  _id: string;
+  title: string;
+  company: string;
+  location: string;
+  stipend: string;
+  duration: string;
+  category: string;
+}
+
+interface Job {
+  _id: string;
+  title: string;
+  company: string;
+  location: string;
+  CTC: string;
+  Experience: string;
+  category: string;
+}
 
 export default function SvgSlider() {
-  const categories = [
+  const currentLanguage = useSelector(selectLanguage);
+  const t = { ...translations["English"], ...((translations as any)[currentLanguage] || {}) };
+
+  const categories = t?.home_categories || [
     "Big Brands",
     "Work From Home",
     "Part-time",
@@ -25,96 +51,38 @@ export default function SvgSlider() {
     "Design",
     "Data Science",
   ];
-  // const internships = [
-  //   {
-  //     _id: "1",
-  //     title: "Software Engineering Intern",
-  //     company: "Google",
-  //     location: "Remote",
-  //     stipend: "$1,500/month",
-  //     duration: "3 months",
-  //     category: "Engineering",
-  //   },
-  //   {
-  //     _id: "2",
-  //     title: "Marketing Intern",
-  //     company: "Meta",
-  //     location: "New York",
-  //     stipend: "$1,200/month",
-  //     duration: "6 months",
-  //     category: "Media",
-  //   },
-  //   {
-  //     _id: "3",
-  //     title: "Graphic Design Intern",
-  //     company: "Adobe",
-  //     location: "San Francisco",
-  //     stipend: "$1,000/month",
-  //     duration: "4 months",
-  //     category: "Design",
-  //   },
-  // ];
 
-  // const jobs = [
-  //   {
-  //     _id: "101",
-  //     title: "Frontend Developer",
-  //     company: "Amazon",
-  //     location: "Seattle",
-  //     CTC: "$100K/year",
-  //     Experience: "2+ years",
-  //     category: "Engineering",
-  //   },
-  //   {
-  //     _id: "102",
-  //     title: "Data Analyst",
-  //     company: "Microsoft",
-  //     location: "Remote",
-  //     CTC: "$90K/year",
-  //     Experience: "1+ years",
-  //     category: "Data Science",
-  //   },
-  //   {
-  //     _id: "103",
-  //     title: "UX Designer",
-  //     company: "Apple",
-  //     location: "California",
-  //     CTC: "$110K/year",
-  //     Experience: "3+ years",
-  //     category: "Design",
-  //   },
-  // ];
   const slides = [
     {
       pattern: "pattern-1",
-      title: "Start Your Career Journey",
+      title: t?.slide_title_1 || "Start Your Career Journey",
       bgColor: "bg-indigo-600",
     },
     {
       pattern: "pattern-2",
-      title: "Learn From The Best",
+      title: t?.slide_title_2 || "Learn From The Best",
       bgColor: "bg-blue-600",
     },
     {
       pattern: "pattern-3",
-      title: "Grow Your Skills",
+      title: t?.slide_title_3 || "Grow Your Skills",
       bgColor: "bg-purple-600",
     },
     {
       pattern: "pattern-4",
-      title: "Connect With Top Companies",
+      title: t?.slide_title_4 || "Connect With Top Companies",
       bgColor: "bg-teal-600",
     },
   ];
 
   const stats = [
-    { number: "300K+", label: "companies hiring" },
-    { number: "10K+", label: "new openings everyday" },
-    { number: "21Mn+", label: "active students" },
-    { number: "600K+", label: "learners" },
+    { number: "300K+", label: t?.stat_companies || "companies hiring" },
+    { number: "10K+", label: t?.stat_openings || "new openings everyday" },
+    { number: "21Mn+", label: t?.stat_students || "active students" },
+    { number: "600K+", label: t?.stat_learners || "learners" },
   ];
-  const [internships, setinternship] = useState<any>([]);
-  const [jobs, setjob] = useState<any>([]);
+  const [internships, setinternship] = useState<Internship[]>([]);
+  const [jobs, setjob] = useState<Job[]>([]);
   useEffect(() => {
     const fetchdata = async () => {
       try {
@@ -132,19 +100,19 @@ export default function SvgSlider() {
   }, []);
   const [selectedCategory, setSelectedCategory] = useState("");
   const filteredInternships = internships.filter(
-    (item: any) => !selectedCategory || item.category === selectedCategory
+    (item) => !selectedCategory || item.category === selectedCategory
   );
   const filteredJobs = jobs.filter(
-    (item: any) => !selectedCategory || item.category === selectedCategory
+    (item) => !selectedCategory || item.category === selectedCategory
   );
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* hero section */}
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          Make your dream career a reality
+          {t?.hero_title}
         </h1>
-        <p className="text-xl text-gray-600">Trending on InternArea 🔥</p>
+        <p className="text-xl text-gray-600">{t?.hero_trending}</p>
       </div>
       {/* Swiper section */}
       <div className="mb-16">
@@ -242,83 +210,84 @@ export default function SvgSlider() {
         </Swiper>
       </div>
       {/* Category section */}
-      <div className="mb-12">
+      < div className="mb-12" >
         <h2 className="text-2xl font-bold text-gray-900 mb-6">
-          Latest internships on Intern Area
+          {t?.latest_internships}
         </h2>
         <div className="flex flex-wrap gap-4">
-          <span className="text-gray-700 font-medium">POPULAR CATEGORIES:</span>
-          {categories.map((category) => (
+          <span className="text-gray-700 font-medium">{t?.popular_categories}</span>
+          {categories.map((category: string) => (
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
-              className={`px-4 py-2 rounded-full transition-colors ${
-                selectedCategory === category
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
+              className={`px-4 py-2 rounded-full transition-colors ${selectedCategory === category
+                ? "bg-blue-600 text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
             >
               {category}
             </button>
           ))}
         </div>
-      </div>
+      </div >
       {/* INternship grid   */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-        {filteredInternships.map((internship: any, index: any) => (
-          <div
-            key={index}
-            className="bg-white rounded-lg shadow-md p-6 transition-transform hover:transform hover:scale-105"
-          >
-            <div className="flex items-center gap-2 text-blue-600 mb-4">
-              <ArrowUpRight size={20} />
-              <span className="font-medium">Actively Hiring</span>
-            </div>
-            <h3 className="text-lg font-semibold mb-2 text-gray-800">
-              {internship.title}
-            </h3>
-            <p className="text-gray-500 mb-4">{internship.company}</p>
-            <div className="space-y-3 text-gray-600">
-              <div className="flex items-center gap-2">
-                <MapPin size={18} />
-                <span>{internship.location}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Banknote size={18} />
-                <span>{internship.stipend}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Calendar size={18} />
-                <span>{internship.duration}</span>
-              </div>
-            </div>
-            <div className="flex items-center justify-between mt-6">
-              <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">
-                Internship
-              </span>
-              <Link
-                href={`/detailiternship/${internship._id}`}
-                className="text-blue-600 hover:text-blue-700 flex items-center gap-1"
-              >
-                View details
-                <ChevronRight size={16} />
-              </Link>
-            </div>
-          </div>
-        ))}
-      </div>
-      {/* Jobs grid   */}
-      <div className="mb-12">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Latest Jobs</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-          {filteredJobs.map((job: any, index: any) => (
+      < div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16" >
+        {
+          filteredInternships.map((internship, index) => (
             <div
               key={index}
               className="bg-white rounded-lg shadow-md p-6 transition-transform hover:transform hover:scale-105"
             >
               <div className="flex items-center gap-2 text-blue-600 mb-4">
                 <ArrowUpRight size={20} />
-                <span className="font-medium">Actively Hiring</span>
+                <span className="font-medium">{t.actively_hiring}</span>
+              </div>
+              <h3 className="text-lg font-semibold mb-2 text-gray-800">
+                {internship.title}
+              </h3>
+              <p className="text-gray-500 mb-4">{internship.company}</p>
+              <div className="space-y-3 text-gray-600">
+                <div className="flex items-center gap-2">
+                  <MapPin size={18} />
+                  <span>{internship.location}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Banknote size={18} />
+                  <span>{internship.stipend}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Calendar size={18} />
+                  <span>{internship.duration}</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between mt-6">
+                <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">
+                  Internship
+                </span>
+                <Link
+                  href={`/detailiternship/${internship._id}`}
+                  className="text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                >
+                  {t.view_details}
+                  <ChevronRight size={16} />
+                </Link>
+              </div>
+            </div>
+          ))
+        }
+      </div >
+      {/* Jobs grid   */}
+      < div className="mb-12" >
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">{t.latest_jobs}</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+          {filteredJobs.map((job, index) => (
+            <div
+              key={index}
+              className="bg-white rounded-lg shadow-md p-6 transition-transform hover:transform hover:scale-105"
+            >
+              <div className="flex items-center gap-2 text-blue-600 mb-4">
+                <ArrowUpRight size={20} />
+                <span className="font-medium">{t.actively_hiring}</span>
               </div>
               <h3 className="text-lg font-semibold mb-2 text-gray-800">
                 {job.title}
@@ -346,27 +315,35 @@ export default function SvgSlider() {
                   href={`/detailInternship?q=${job._id}`}
                   className="text-blue-600 hover:text-blue-700 flex items-center gap-1"
                 >
-                  View details
+                  {t.view_details}
                   <ChevronRight size={16} />
                 </Link>
               </div>
             </div>
           ))}
         </div>
-      </div>
+      </div >
       {/* Stat Section  */}
-      <div className="bg-white rounded-xl shadow-lg p-8 mb-16">
+      < div className="bg-white rounded-xl shadow-lg p-8 mb-16" >
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          {stats.map((stat, index) => (
-            <div key={index} className="text-center">
-              <div className="text-4xl font-bold text-blue-600 mb-2">
-                {stat.number}
-              </div>
-              <div className="text-gray-600">{stat.label}</div>
-            </div>
-          ))}
+          <div className="text-center">
+            <div className="text-4xl font-bold text-blue-600 mb-2">300K+</div>
+            <div className="text-gray-600">{t.stat_companies}</div>
+          </div>
+          <div className="text-center">
+            <div className="text-4xl font-bold text-blue-600 mb-2">10K+</div>
+            <div className="text-gray-600">{t.stat_openings}</div>
+          </div>
+          <div className="text-center">
+            <div className="text-4xl font-bold text-blue-600 mb-2">21Mn+</div>
+            <div className="text-gray-600">{t.stat_students}</div>
+          </div>
+          <div className="text-center">
+            <div className="text-4xl font-bold text-blue-600 mb-2">600K+</div>
+            <div className="text-gray-600">{t.stat_learners}</div>
+          </div>
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }

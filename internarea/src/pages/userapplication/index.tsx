@@ -12,6 +12,9 @@ import Link from "next/link";
 import axios from "axios";
 import { selectuser } from "@/Feature/Userslice";
 import { useSelector } from "react-redux";
+import { selectLanguage } from "@/Feature/LanguageSlice";
+import { translations } from "@/utils/translations";
+
 const Applications = [
   {
     _id: "1",
@@ -51,13 +54,9 @@ const getStatusColor = (status: any) => {
 const index = () => {
   const [searchTerm, setsearchTerm] = useState("");
   const [filter, setFilter] = useState("all");
-  const user=useSelector(selectuser)
-  // const [user, setuser] = useState<any>({
-  //   name: "Rahul",
-  //   email: "xyz@gmail.com",
-  //   photo:
-  //     "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=64&h=64&fit=crop&crop=faces",
-  // });
+  const user = useSelector(selectuser)
+  const currentLanguage = useSelector(selectLanguage);
+  const t = { ...translations["English"], ...((translations as any)[currentLanguage] || {}) };
 
   const [data, setdata] = useState<any>([]);
   useEffect(() => {
@@ -72,9 +71,9 @@ const index = () => {
     fetchdata();
   }, []);
   const userapplication = data.filter(
-    (app:any) => app.user?.name === user?.name
+    (app: any) => app.user?.name === user?.name
   );
-  const filteredapplications = userapplication.filter((application:any) => {
+  const filteredapplications = userapplication.filter((application: any) => {
     const searchmatch =
       application.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
       application.category.toLowerCase().includes(searchTerm.toLowerCase());
@@ -88,9 +87,9 @@ const index = () => {
         <div className="bg-white rounded-lg shadow-sm">
           {/* Header */}
           <div className="border-b border-gray-200 px-6 py-4">
-            <h1 className="text-2xl font-bold text-gray-900">My Applications</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{t?.app_title || "My Applications"}</h1>
             <p className="mt-1 text-sm text-gray-500">
-              Track and manage your job and intenrhsip applications
+              {t?.app_desc || "Track and manage your job and internship applications"}
             </p>
           </div>
 
@@ -103,7 +102,7 @@ const index = () => {
                     type="text"
                     value={searchTerm}
                     onChange={(e) => setsearchTerm(e.target.value)}
-                    placeholder="Search by company, category, or applicant..."
+                    placeholder={t?.app_search_ph || "Search by company, category, or applicant..."}
                     className="text-black w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <Mail className="absolute top-3 left-3 text-gray-400" />
@@ -112,43 +111,39 @@ const index = () => {
               <div className="flex gap-2">
                 <button
                   onClick={() => setFilter("all")}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                    filter === "all"
+                  className={`px-4 py-2 rounded-lg text-sm font-medium ${filter === "all"
                       ? "bg-blue-100 text-blue-800"
                       : "bg-gray-100 text-gray-800"
-                  }`}
+                    }`}
                 >
-                  All
+                  {t?.app_filter_all || "All"}
                 </button>
                 <button
                   onClick={() => setFilter("pending")}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                    filter === "pending"
+                  className={`px-4 py-2 rounded-lg text-sm font-medium ${filter === "pending"
                       ? "bg-yellow-100 text-yellow-800"
                       : "bg-gray-100 text-gray-800"
-                  }`}
+                    }`}
                 >
-                  Pending
+                  {t?.app_filter_pending || "Pending"}
                 </button>
                 <button
                   onClick={() => setFilter("approved")}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                    filter === "approved"
+                  className={`px-4 py-2 rounded-lg text-sm font-medium ${filter === "approved"
                       ? "bg-green-100 text-green-800"
                       : "bg-gray-100 text-gray-800"
-                  }`}
+                    }`}
                 >
-                  Approved
+                  {t?.app_filter_approved || "Approved"}
                 </button>
                 <button
                   onClick={() => setFilter("rejected")}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                    filter === "rejected"
+                  className={`px-4 py-2 rounded-lg text-sm font-medium ${filter === "rejected"
                       ? "bg-red-100 text-red-800"
                       : "bg-gray-100 text-gray-800"
-                  }`}
+                    }`}
                 >
-                  Rejected
+                  {t?.app_filter_rejected || "Rejected"}
                 </button>
               </div>
             </div>
@@ -162,30 +157,30 @@ const index = () => {
                     scope="col"
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    Company & Category
+                    {t?.app_header_company || "Company & Category"}
                   </th>
                   <th
                     scope="col"
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    Applicant
+                    {t?.app_header_applicant || "Applicant"}
                   </th>
                   <th
                     scope="col"
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    Applied Date
+                    {t?.app_header_date || "Applied Date"}
                   </th>
                   <th
                     scope="col"
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    Status
+                    {t?.app_header_status || "Status"}
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {filteredapplications.map((application:any) => (
+                {filteredapplications.map((application: any) => (
                   <tr key={application._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -237,7 +232,7 @@ const index = () => {
                         {application.status}
                       </span>
                     </td>
-                  
+
                   </tr>
                 ))}
               </tbody>

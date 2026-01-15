@@ -11,6 +11,9 @@ import {
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
+import { selectLanguage } from "@/Feature/LanguageSlice";
+import { translations } from "@/utils/translations";
 // const Applications = [
 //   {
 //     _id: "1",
@@ -51,6 +54,10 @@ const index = () => {
   const [searchTerm, setsearchTerm] = useState("");
   const [filter, setFilter] = useState("all");
   const [data, setdata] = useState<any>([]);
+
+  const currentLanguage = useSelector(selectLanguage);
+  const t = { ...translations["English"], ...((translations as any)[currentLanguage] || {}) };
+
   useEffect(() => {
     const fetchdata = async () => {
       try {
@@ -93,9 +100,9 @@ const index = () => {
         <div className="bg-white rounded-lg shadow-sm">
           {/* Header */}
           <div className="border-b border-gray-200 px-6 py-4">
-            <h1 className="text-2xl font-bold text-gray-900">Applications</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{t?.admin_menu_view_apps || "Applications"}</h1>
             <p className="mt-1 text-sm text-gray-500">
-              Manage and review all applications
+              {t?.admin_menu_view_apps_desc || "Manage and review all applications"}
             </p>
           </div>
 
@@ -108,7 +115,7 @@ const index = () => {
                     type="text"
                     value={searchTerm}
                     onChange={(e) => setsearchTerm(e.target.value)}
-                    placeholder="Search by company, category, or applicant..."
+                    placeholder={t?.app_search_ph || "Search by company, category, or applicant..."}
                     className="text-black w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <Mail className="absolute top-3 left-3 text-gray-400" />
@@ -117,43 +124,39 @@ const index = () => {
               <div className="flex gap-2">
                 <button
                   onClick={() => setFilter("all")}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                    filter === "all"
-                      ? "bg-blue-100 text-blue-800"
-                      : "bg-gray-100 text-gray-800"
-                  }`}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium ${filter === "all"
+                    ? "bg-blue-100 text-blue-800"
+                    : "bg-gray-100 text-gray-800"
+                    }`}
                 >
-                  All
+                  {t?.app_filter_all || "All"}
                 </button>
                 <button
                   onClick={() => setFilter("pending")}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                    filter === "pending"
-                      ? "bg-yellow-100 text-yellow-800"
-                      : "bg-gray-100 text-gray-800"
-                  }`}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium ${filter === "pending"
+                    ? "bg-yellow-100 text-yellow-800"
+                    : "bg-gray-100 text-gray-800"
+                    }`}
                 >
-                  Pending
+                  {t?.app_filter_pending || "Pending"}
                 </button>
                 <button
                   onClick={() => setFilter("approved")}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                    filter === "approved"
-                      ? "bg-green-100 text-green-800"
-                      : "bg-gray-100 text-gray-800"
-                  }`}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium ${filter === "approved"
+                    ? "bg-green-100 text-green-800"
+                    : "bg-gray-100 text-gray-800"
+                    }`}
                 >
-                  Approved
+                  {t?.app_filter_approved || "Approved"}
                 </button>
                 <button
                   onClick={() => setFilter("rejected")}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                    filter === "rejected"
-                      ? "bg-red-100 text-red-800"
-                      : "bg-gray-100 text-gray-800"
-                  }`}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium ${filter === "rejected"
+                    ? "bg-red-100 text-red-800"
+                    : "bg-gray-100 text-gray-800"
+                    }`}
                 >
-                  Rejected
+                  {t?.app_filter_rejected || "Rejected"}
                 </button>
               </div>
             </div>
@@ -167,25 +170,25 @@ const index = () => {
                     scope="col"
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    Company & Category
+                    {t?.app_header_company || "Company & Category"}
                   </th>
                   <th
                     scope="col"
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    Applicant
+                    {t?.app_header_applicant || "Applicant"}
                   </th>
                   <th
                     scope="col"
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    Applied Date
+                    {t?.app_header_date || "Applied Date"}
                   </th>
                   <th
                     scope="col"
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    Status
+                    {t?.app_header_status || "Status"}
                   </th>
                   <th
                     scope="col"
@@ -254,7 +257,7 @@ const index = () => {
                           href={`/detailapplication/${application._id}`}
                           className="text-blue-600 hover:text-blue-900"
                         >
-                          View Details
+                          {t?.listing_view || "View Details"}
                         </Link>
                         <button
                           onClick={() => {

@@ -13,6 +13,10 @@ import {
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
+import { selectLanguage } from "@/Feature/LanguageSlice";
+import { translations } from "@/utils/translations";
+
 const index = () => {
   const [formData, setFormData] = useState({
     title: "",
@@ -30,6 +34,10 @@ const index = () => {
   });
   const router = useRouter();
   const [isloading, setisloading] = useState(false);
+
+  const currentLanguage = useSelector(selectLanguage);
+  const t = { ...translations["English"], ...((translations as any)[currentLanguage] || {}) };
+
   const handleChange = (e: any) => {
     const { name, value } = e.target;
 
@@ -42,17 +50,17 @@ const index = () => {
     e.preventDefault();
     const hasemptyfields = Object.values(formData).some((val) => !val.trim());
     if (hasemptyfields) {
-      toast.error("Please fill in all detials");
+      toast.error(t?.post_fill_all || "Please fill in all detials");
       return;
     }
     try {
       setisloading(true);
       const res = await axios.post("https://internshala-clone-y2p2.onrender.com/api/internship", formData);
-      toast.success("job posted successfuly");
+      toast.success(t?.post_success || "job posted successfuly");
       router.push("/adminpanel");
     } catch (error) {
       console.log(error);
-      toast.error("error posting job");
+      toast.error(t?.post_error || "error posting job");
     } finally {
       setisloading(false);
     }
@@ -63,10 +71,10 @@ const index = () => {
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="mb-8">
             <h1 className="text-2xl font-bold text-gray-900">
-              Post New Internship
+              {t?.post_internship_title || "Post New Internship"}
             </h1>
             <p className="mt-2 text-sm text-gray-600">
-              Create a new internship opportunity for students
+              {t?.post_internship_desc || "Create a new internship opportunity for students"}
             </p>
           </div>
 
@@ -78,7 +86,7 @@ const index = () => {
                   <label className="block text-sm font-medium text-gray-700">
                     <div className="flex items-center mb-1">
                       <Briefcase className="h-4 w-4 mr-1" />
-                      Title*
+                      {t?.post_label_title || "Title"}*
                     </div>
                   </label>
                   <input
@@ -87,7 +95,7 @@ const index = () => {
                     value={formData.title}
                     onChange={handleChange}
                     className="text-black  mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                    placeholder="e.g. Frontend Developer Intern"
+                    placeholder={t?.post_ph_title || "e.g. Frontend Developer Intern"}
                   />
                 </div>
 
@@ -95,7 +103,7 @@ const index = () => {
                   <label className="block text-sm font-medium text-gray-700">
                     <div className="flex items-center mb-1">
                       <Building2 className="h-4 w-4 mr-1" />
-                      Company Name*
+                      {t?.post_label_company || "Company Name"}*
                     </div>
                   </label>
                   <input
@@ -104,7 +112,7 @@ const index = () => {
                     value={formData.company}
                     onChange={handleChange}
                     className="text-black mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                    placeholder="e.g. Tech Solutions Inc"
+                    placeholder={t?.post_ph_company || "e.g. Tech Solutions Inc"}
                   />
                 </div>
               </div>
@@ -114,7 +122,7 @@ const index = () => {
                   <label className="block text-sm font-medium text-gray-700">
                     <div className="flex items-center mb-1">
                       <MapPin className="h-4 w-4 mr-1" />
-                      Location*
+                      {t?.post_label_location || "Location"}*
                     </div>
                   </label>
                   <input
@@ -123,7 +131,7 @@ const index = () => {
                     value={formData.location}
                     onChange={handleChange}
                     className="text-black mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                    placeholder="e.g. Mumbai, India"
+                    placeholder={t?.post_ph_location || "e.g. Mumbai, India"}
                   />
                 </div>
 
@@ -131,7 +139,7 @@ const index = () => {
                   <label className="block text-sm font-medium text-gray-700">
                     <div className="flex items-center mb-1">
                       <Tags className="h-4 w-4 mr-1" />
-                      Category*
+                      {t?.post_label_category || "Category"}*
                     </div>
                   </label>
                   <input
@@ -140,7 +148,7 @@ const index = () => {
                     value={formData.category}
                     onChange={handleChange}
                     className=" text-black mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                    placeholder="e.g. Software Development"
+                    placeholder={t?.post_ph_category || "e.g. Software Development"}
                   />
                 </div>
               </div>
@@ -152,7 +160,7 @@ const index = () => {
                 <label className="block text-sm font-medium text-gray-700">
                   <div className="flex items-center mb-1">
                     <Info className="h-4 w-4 mr-1" />
-                    About Company*
+                    {t?.post_label_about_company || "About Company"}*
                   </div>
                 </label>
                 <textarea
@@ -161,7 +169,7 @@ const index = () => {
                   onChange={handleChange}
                   rows={4}
                   className="text-black mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                  placeholder="Describe your company..."
+                  placeholder={t?.post_ph_company_desc || "Describe your company..."}
                 />
               </div>
 
@@ -169,7 +177,7 @@ const index = () => {
                 <label className="block text-sm font-medium text-gray-700">
                   <div className="flex items-center mb-1">
                     <Briefcase className="h-4 w-4 mr-1" />
-                    About Internship*
+                    {t?.post_label_about_internship || "About Internship"}*
                   </div>
                 </label>
                 <textarea
@@ -178,7 +186,7 @@ const index = () => {
                   onChange={handleChange}
                   rows={4}
                   className="text-black mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                  placeholder="Describe the internship role..."
+                  placeholder={t?.post_ph_role_desc || "Describe the internship role..."}
                 />
               </div>
             </div>
@@ -189,7 +197,7 @@ const index = () => {
                 <label className="block text-sm font-medium text-gray-700">
                   <div className="flex items-center mb-1">
                     <Users className="h-4 w-4 mr-1" />
-                    Who Can Apply*
+                    {t?.post_label_who || "Who Can Apply"}*
                   </div>
                 </label>
                 <textarea
@@ -198,7 +206,7 @@ const index = () => {
                   onChange={handleChange}
                   rows={3}
                   className="text-black mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                  placeholder="Eligibility criteria..."
+                  placeholder={t?.post_ph_eligibility || "Eligibility criteria..."}
                 />
               </div>
 
@@ -206,7 +214,7 @@ const index = () => {
                 <label className="block text-sm font-medium text-gray-700">
                   <div className="flex items-center mb-1">
                     <Info className="h-4 w-4 mr-1" />
-                    Perks*
+                    {t?.post_label_perks || "Perks"}*
                   </div>
                 </label>
                 <textarea
@@ -215,7 +223,7 @@ const index = () => {
                   onChange={handleChange}
                   rows={3}
                   className="text-black mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                  placeholder="List the perks..."
+                  placeholder={t?.post_ph_perks || "List the perks..."}
                 />
               </div>
             </div>
@@ -226,7 +234,7 @@ const index = () => {
                 <label className="block text-sm font-medium text-gray-700">
                   <div className="flex items-center mb-1">
                     <Users className="h-4 w-4 mr-1" />
-                    Number of Openings*
+                    {t?.post_label_openings || "Number of Openings"}*
                   </div>
                 </label>
                 <input
@@ -236,7 +244,7 @@ const index = () => {
                   onChange={handleChange}
                   min="1"
                   className="text-black mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                  placeholder="e.g. 5"
+                  placeholder={t?.post_ph_openings || "e.g. 5"}
                 />
               </div>
 
@@ -244,7 +252,7 @@ const index = () => {
                 <label className="block text-sm font-medium text-gray-700">
                   <div className="flex items-center mb-1">
                     <DollarSign className="h-4 w-4 mr-1" />
-                    Stipend*
+                    {t?.post_label_stipend || "Stipend"}*
                   </div>
                 </label>
                 <input
@@ -253,7 +261,7 @@ const index = () => {
                   value={formData.stipend}
                   onChange={handleChange}
                   className="text-black mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                  placeholder="e.g. ₹15,000/month"
+                  placeholder={t?.post_ph_stipend || "e.g. ₹15,000/month"}
                 />
               </div>
 
@@ -261,7 +269,7 @@ const index = () => {
                 <label className="block text-sm font-medium text-gray-700">
                   <div className="flex items-center mb-1">
                     <Calendar className="h-4 w-4 mr-1" />
-                    Start Date*
+                    {t?.post_label_start_date || "Start Date"}*
                   </div>
                 </label>
                 <input
@@ -277,7 +285,7 @@ const index = () => {
                 <label className="block text-sm font-medium text-gray-700">
                   <div className="flex items-center mb-1">
                     <Info className="h-4 w-4 mr-1" />
-                    Additional Information*
+                    {t?.post_label_additional || "Additional Information"}*
                   </div>
                 </label>
                 <textarea
@@ -286,7 +294,7 @@ const index = () => {
                   onChange={handleChange}
                   rows={3}
                   className="text-black mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                  placeholder="Any additional details..."
+                  placeholder={t?.post_ph_additional || "Any additional details..."}
                 />
               </div>
             </div>
@@ -297,13 +305,13 @@ const index = () => {
                 disabled={isloading}
                 className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                 {isloading ? (
+                {isloading ? (
                   <div className="flex items-center">
                     <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white mr-2"></div>
-                    Posting Internship...
+                    {t?.post_posting_internship || "Posting Internship..."}
                   </div>
                 ) : (
-                  "Post Internship"
+                  t?.post_btn_internship || "Post Internship"
                 )}
               </button>
             </div>

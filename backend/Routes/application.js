@@ -1,24 +1,58 @@
 const express = require("express");
 const router = express.Router();
 const application = require("../Model/Application");
+const User = require("../Model/User");
 
+// ✅ CREATE APPLICATION WITH SUBSCRIPTION LIMIT CHECK
 router.post("/", async (req, res) => {
-  const applicationipdata = new application({
-    company: req.body.company,
-    category: req.body.category,
-    coverLetter: req.body.coverLetter,
-    user: req.body.user,
-    Application: req.body.Application,
-    body: req.body.body,
-  });
-  await applicationipdata
-    .save()
-    .then((data) => {
-      res.send(data);
-    })
-    .catch((error) => {
-      console.log(error);
+  try {
+    const userId = req.body.user?._id;
+
+    // Check subscription limit before creating application
+    if (userId) {
+      const user = await User.findById(userId);
+      const plan = user?.subscription?.plan || "Free";
+      const limits = { Free: 1, Bronze: 3, Silver: 5, Gold: Infinity };
+      const limit = limits[plan] || 1;
+
+      // Count applications this month
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+
+      const monthlyCount = await application.countDocuments({
+        "user._id": userId,
+        createdAt: { $gte: startOfMonth }
+      });
+
+      if (limit !== Infinity && monthlyCount >= limit) {
+        return res.status(403).json({
+          error: `Monthly application limit reached (${monthlyCount}/${limit}). Please upgrade your subscription plan.`,
+          limitReached: true,
+          used: monthlyCount,
+          limit: limit,
+          plan: plan
+        });
+      }
+    }
+
+    // Create the application
+    const applicationipdata = new application({
+      company: req.body.company,
+      category: req.body.category,
+      coverLetter: req.body.coverLetter,
+      user: req.body.user,
+      Application: req.body.Application,
+      body: req.body.body,
     });
+
+    const savedData = await applicationipdata.save();
+    res.status(201).json(savedData);
+
+  } catch (error) {
+    console.error("[application] Error:", error);
+    res.status(500).json({ error: "Failed to submit application" });
+  }
 });
 router.get("/", async (req, res) => {
   try {

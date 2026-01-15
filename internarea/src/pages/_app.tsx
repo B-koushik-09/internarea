@@ -9,38 +9,22 @@ import { auth } from "@/firebase/firebase";
 import { login, logout } from "@/Feature/Userslice";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { AuthProvider } from "@/context/AuthContext";
+
 export default function App({ Component, pageProps }: AppProps) {
-  function AuthListener() {
-    const dispatch = useDispatch();
-    useEffect(() => {
-      auth.onAuthStateChanged((authuser) => {
-        if (authuser) {
-          dispatch(
-            login({
-              uid: authuser.uid,
-              photo: authuser.photoURL,
-              name: authuser.displayName,
-              email: authuser.email,
-              phoneNumber: authuser.phoneNumber,
-            })
-          );
-        } else {
-          dispatch(logout());
-        }
-      });
-    }, [dispatch]);
-    return null;
-  }
+  // Removed internal AuthListener as it is replaced by AuthContext
 
   return (
     <Provider store={store}>
-      <AuthListener />
-      <div className="bg-white">
-        <ToastContainer/>
-        <Navbar />
-        <Component {...pageProps} />
-        <Footer />
-      </div>
+      <AuthProvider>
+        {/* 🔒 Root wrapper prevents horizontal overflow (iPad Mini fix) */}
+        <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-white">
+          <ToastContainer />
+          <Navbar />
+          <Component {...pageProps} />
+          <Footer />
+        </div>
+      </AuthProvider>
     </Provider>
   );
 }

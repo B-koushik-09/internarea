@@ -16,6 +16,8 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { selectuser } from "@/Feature/Userslice";
+import { selectLanguage } from "@/Feature/LanguageSlice";
+import { translations } from "@/utils/translations";
 // const filteredJobs = [
 //     {
 //       _id: "101",
@@ -117,7 +119,9 @@ import { selectuser } from "@/Feature/Userslice";
 //     },
 //   ];
 const index = () => {
-  const user=useSelector(selectuser)
+  const user = useSelector(selectuser)
+  const currentLanguage = useSelector(selectLanguage);
+  const t = { ...translations["English"], ...((translations as any)[currentLanguage] || {}) };
   const router = useRouter();
   const { id } = router.query;
   const [jobdata, setjob] = useState<any>([]);
@@ -152,6 +156,25 @@ const index = () => {
       toast.error("please select your availability");
       return;
     }
+
+    // ✅ CHECK SUBSCRIPTION LIMIT BEFORE APPLYING
+    if (user?._id) {
+      try {
+        const limitCheck = await axios.get(`http://localhost:5000/api/subscription/check-limit/${user._id}`);
+        if (!limitCheck.data.allowed) {
+          toast.error(
+            `🚫 ${limitCheck.data.message}`,
+            { autoClose: 5000 }
+          );
+          toast.info("💡 Visit the Subscription page to upgrade your plan!", { autoClose: 6000 });
+          return;
+        }
+      } catch (limitErr) {
+        console.error("Failed to check subscription limit:", limitErr);
+        // Continue with application if limit check fails (graceful degradation)
+      }
+    }
+
     try {
       const applicationdata = {
         category: jobdata.category,
@@ -162,14 +185,20 @@ const index = () => {
         availability,
       };
       await axios.post(
-        "https://internshala-clone-y2p2.onrender.com/api/application",
+        "http://localhost:5000/api/application",
         applicationdata
       );
-      toast.success("Application submit successfully");
+      toast.success("🎉 Application submitted successfully!");
       router.push("/job");
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast.error("Failed to submit application");
+      // Handle limit reached error from backend
+      if (error.response?.data?.limitReached) {
+        toast.error(`🚫 ${error.response.data.error}`);
+        toast.info("💡 Visit the Subscription page to upgrade your plan!", { autoClose: 6000 });
+      } else {
+        toast.error(error.response?.data?.error || "Failed to submit application");
+      }
     }
   };
   return (
@@ -179,7 +208,7 @@ const index = () => {
         <div className="p-6 border-b">
           <div className="flex items-center space-x-2 text-blue-600 mb-4">
             <ArrowUpRight className="h-5 w-5" />
-            <span className="font-medium">Actively Hiring</span>
+            <span className="font-medium">{t?.actively_hiring || "Actively Hiring"}</span>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             {jobdata.title}
@@ -202,21 +231,21 @@ const index = () => {
           <div className="mt-4 flex items-center space-x-2">
             <Clock className="h-4 w-4 text-green-500" />
             <span className="text-green-500 text-sm">
-              Posted on {jobdata.createAt}
+              {t?.apply_posted_on || "Posted on"} {jobdata.createAt}
             </span>
           </div>
         </div>
         {/* Company Section */}
         <div className="p-6 border-b">
           <h2 className="text-xl font-bold text-gray-900 mb-4">
-            About {jobdata.company}
+            {t?.apply_about_company || "About"} {jobdata.company}
           </h2>
           <div className="flex items-center space-x-2 mb-4">
             <a
               href="#"
               className="text-blue-600 hover:text-blue-700 flex items-center space-x-1"
             >
-              <span>Visit company website</span>
+              <span>{t?.apply_visit_website || "Visit company website"}</span>
               <ExternalLink className="h-4 w-4" />
             </a>
           </div>
@@ -225,20 +254,20 @@ const index = () => {
         {/* Internship Details Section */}
         <div className="p-6 border-b">
           <h2 className="text-xl font-bold text-gray-900 mb-4">
-            About the Internship
+            {t?.post_label_about_job || "About the Job"}
           </h2>
           <p className="text-gray-600 mb-6">{jobdata.aboutJob}</p>
 
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Who can apply
+            {t?.post_label_who || "Who can apply"}
           </h3>
           <p className="text-gray-600 mb-6">{jobdata.whoCanApply}</p>
 
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Perks</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">{t?.post_label_perks || "Perks"}</h3>
           <p className="text-gray-600 mb-6">{jobdata.perks}</p>
 
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Additional Information
+            {t?.post_label_additional || "Additional Information"}
           </h3>
           <p className="text-gray-600 mb-6">{jobdata.AdditionalInfo}</p>
         </div>
@@ -248,7 +277,7 @@ const index = () => {
             onClick={() => setIsModalOpen(true)}
             className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition duration-150"
           >
-            Apply Now
+            {t?.apply_now_btn || "Apply Now"}
           </button>
         </div>
       </div>
@@ -260,7 +289,7 @@ const index = () => {
             <div className="p-6 border-b">
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-gray-900">
-                  Apply to {jobdata.company}
+                  {t?.apply_header || "Apply to"} {jobdata.company}
                 </h2>
                 <button
                   onClick={() => setIsModalOpen(false)}
@@ -274,36 +303,36 @@ const index = () => {
               {/* Resume Section */}
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  Your Resume
+                  {t?.apply_resume_title || "Your Resume"}
                 </h3>
                 <p className="text-gray-600">
-                  Your current resume will be submitted with the application
+                  {t?.apply_resume_desc || "Your current resume will be submitted with the application"}
                 </p>
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  Cover Letter
+                  {t?.apply_cover_letter_title || "Cover Letter"}
                 </h3>
                 <p className="text-gray-600 mb-2">
-                  Why should you be selected for this internship?
+                  {t?.apply_cover_letter_desc || "Why should you be selected for this internship?"}
                 </p>
                 <textarea
                   value={coverLetter}
                   onChange={(e) => setCoverLetter(e.target.value)}
                   className="w-full h-32 p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-black"
-                  placeholder="Write your cover letter here..."
+                  placeholder={t?.apply_cover_letter_ph || "Write your cover letter here..."}
                 ></textarea>
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  Your Availability
+                  {t?.apply_availability_title || "Your Availability"}
                 </h3>
                 <div className="space-y-3">
                   {[
-                    "Yes, I am available to join immediately",
-                    "No, I am currently on notice period",
-                    "No, I will have to serve notice period",
-                    "Other",
+                    t?.apply_availability_opt1 || "Yes, I am available to join immediately",
+                    t?.apply_availability_opt2 || "No, I am currently on notice period",
+                    t?.apply_availability_opt3 || "No, I will have to serve notice period",
+                    t?.apply_availability_opt4 || "Other",
                   ].map((option) => (
                     <label key={option} className="flex items-center space-x-2">
                       <input
@@ -326,14 +355,14 @@ const index = () => {
                     className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
                     onClick={handlesubmitapplication}
                   >
-                    Submit Application
+                    {t?.apply_submit_btn || "Submit Application"}
                   </button>
                 ) : (
                   <Link
                     href={`/`}
                     className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
                   >
-                    Sign up to apply
+                    {t?.apply_signup_link || "Sign up to apply"}
                   </Link>
                 )}
               </div>
