@@ -25,12 +25,19 @@ export default function Subscription() {
     const currentLanguage = useSelector(selectLanguage);
     const t = { ...translations["English"], ...((translations as any)[currentLanguage] || {}) };
 
-    const plans = [
-        { name: "Free", price: 0, apps: 1, color: "bg-gray-100", borderColor: "border-gray-300", icon: Star },
-        { name: "Bronze", price: 100, apps: 3, color: "bg-orange-50", borderColor: "border-orange-400", icon: Zap },
-        { name: "Silver", price: 300, apps: 5, color: "bg-slate-100", borderColor: "border-slate-400", icon: Crown },
-        { name: "Gold", price: 1000, apps: "Unlimited", color: "bg-yellow-50", borderColor: "border-yellow-400", icon: Crown }
+    // Plan names will be translated based on the key
+    const planData = [
+        { key: "Free", price: 0, apps: 1, color: "bg-gray-100", borderColor: "border-gray-300", icon: Star },
+        { key: "Bronze", price: 100, apps: 3, color: "bg-orange-50", borderColor: "border-orange-400", icon: Zap },
+        { key: "Silver", price: 300, apps: 5, color: "bg-slate-100", borderColor: "border-slate-400", icon: Crown },
+        { key: "Gold", price: 1000, apps: "Unlimited", color: "bg-yellow-50", borderColor: "border-yellow-400", icon: Crown }
     ];
+
+    // Get translated plan name
+    const getPlanName = (key: string) => {
+        const nameKey = `sub_${key.toLowerCase()}` as keyof typeof t;
+        return (t as any)[nameKey] || key;
+    };
 
     // Load Razorpay SDK
     const loadRazorpayScript = (): Promise<boolean> => {
@@ -211,14 +218,14 @@ export default function Subscription() {
             {user && (
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8 text-center">
                     <p className="text-blue-800">
-                        <span className="font-semibold">Current Plan:</span>{" "}
+                        <span className="font-semibold">{t?.sub_current_plan_label || "Current Plan:"}</span>{" "}
                         <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-bold">
-                            {currentPlan}
+                            {getPlanName(currentPlan)}
                         </span>
                     </p>
                     {usageInfo && (
                         <p className="text-blue-700 mt-2 text-sm">
-                            Applications this month: <strong>{usageInfo.used}</strong> / {usageInfo.limit}
+                            {t?.sub_apps_this_month || "Applications this month:"} <strong>{usageInfo.used}</strong> / {usageInfo.limit}
                         </p>
                     )}
                 </div>
@@ -236,44 +243,45 @@ export default function Subscription() {
 
             {/* Plans Grid */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                {plans.map((plan) => {
-                    const isCurrentPlan = currentPlan === plan.name;
+                {planData.map((plan) => {
+                    const isCurrentPlan = currentPlan === plan.key;
                     const IconComponent = plan.icon;
+                    const translatedName = getPlanName(plan.key);
 
                     return (
                         <div
-                            key={plan.name}
+                            key={plan.key}
                             className={`${plan.color} rounded-xl shadow-lg p-6 flex flex-col items-center 
                                 transform transition-all duration-300 hover:scale-105 hover:shadow-xl
                                 border-2 ${isCurrentPlan ? plan.borderColor + ' ring-2 ring-offset-2 ring-blue-500' : 'border-transparent'}`}
                         >
                             {isCurrentPlan && (
                                 <span className="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full mb-3">
-                                    ✓ Current Plan
+                                    ✓ {t?.sub_current || "Current Plan"}
                                 </span>
                             )}
 
-                            <IconComponent className={`w-10 h-10 mb-3 ${plan.name === 'Gold' ? 'text-yellow-500' : 'text-gray-600'}`} />
+                            <IconComponent className={`w-10 h-10 mb-3 ${plan.key === 'Gold' ? 'text-yellow-500' : 'text-gray-600'}`} />
 
-                            <h3 className="text-2xl font-bold mb-2 text-gray-800">{plan.name}</h3>
+                            <h3 className="text-2xl font-bold mb-2 text-gray-800">{translatedName}</h3>
                             <p className="text-4xl font-bold mb-4 text-gray-900">
-                                {plan.price === 0 ? "Free" : `₹${plan.price}`}
-                                {plan.price > 0 && <span className="text-sm font-normal text-gray-500">/month</span>}
+                                {plan.price === 0 ? (t?.sub_free || "Free") : `₹${plan.price}`}
+                                {plan.price > 0 && <span className="text-sm font-normal text-gray-500">{t?.sub_per_month || "/month"}</span>}
                             </p>
 
                             <ul className="mb-6 space-y-2 text-center text-gray-600">
                                 <li className="flex items-center gap-2">
                                     <Check className="w-4 h-4 text-green-500" />
-                                    {plan.apps === "Unlimited" ? "Unlimited" : `${plan.apps}/month`} Applications
+                                    {plan.apps === "Unlimited" ? (t?.sub_unlimited || "Unlimited") : `${plan.apps}${t?.sub_per_month || "/month"}`} {t?.sub_apps || "Applications"}
                                 </li>
                                 <li className="flex items-center gap-2">
                                     <Check className="w-4 h-4 text-green-500" />
                                     {t?.sub_priority || "Priority Support"}
                                 </li>
-                                {plan.name === "Gold" && (
+                                {plan.key === "Gold" && (
                                     <li className="flex items-center gap-2">
                                         <Check className="w-4 h-4 text-green-500" />
-                                        Premium Badge
+                                        {t?.sub_premium_badge || "Premium Badge"}
                                     </li>
                                 )}
                             </ul>
@@ -289,10 +297,10 @@ export default function Subscription() {
                                 {isLoading ? (
                                     <span className="flex items-center justify-center gap-2">
                                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                        Processing...
+                                        {t?.sub_processing || "Processing..."}
                                     </span>
                                 ) : isCurrentPlan ? (
-                                    "Current Plan"
+                                    t?.sub_current || "Current Plan"
                                 ) : plan.price === 0 ? (
                                     t?.sub_current || "Current Plan"
                                 ) : (
@@ -306,8 +314,8 @@ export default function Subscription() {
 
             {/* Info Section */}
             <div className="mt-12 text-center text-gray-500 text-sm">
-                <p>💳 Secure payments powered by Razorpay</p>
-                <p className="mt-1">📧 Invoice will be sent to your registered email after successful payment</p>
+                <p>💳 {t?.sub_secure_payments || "Secure payments powered by Razorpay"}</p>
+                <p className="mt-1">📧 {t?.sub_invoice_email || "Invoice will be sent to your registered email after successful payment"}</p>
             </div>
         </div>
     );

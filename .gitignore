@@ -1,0 +1,22 @@
+# ----- IMPORTANT IGNORES -----
+
+# dependencies
+node_modules/
+internarea/node_modules/
+
+# build outputs
+.next/
+internarea/.next/
+build/
+dist/
+
+# environment files
+.env
+.env*
+backend/.env
+
+# vercel
+.vercel
+
+# misc
+.DS_Store
