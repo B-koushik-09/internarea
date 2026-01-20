@@ -132,7 +132,7 @@ const index = () => {
   useEffect(() => {
     const fetchdata = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/job")
+        const res = await axios.get("https://internarea-backend-kd6b.onrender.com/api/job")
         setjob(res.data)
         setfilteredjobs(res.data)
       } catch (error) {

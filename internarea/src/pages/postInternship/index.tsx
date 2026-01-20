@@ -55,7 +55,7 @@ const index = () => {
     }
     try {
       setisloading(true);
-      const res = await axios.post("http://localhost:5000/api/internship", formData);
+      const res = await axios.post("https://internarea-backend-kd6b.onrender.com/api/internship", formData);
       toast.success(t?.post_success || "job posted successfuly");
       router.push("/adminpanel");
     } catch (error) {

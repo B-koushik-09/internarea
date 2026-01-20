@@ -24,7 +24,7 @@ const LoginHistory = () => {
 
     const fetchHistory = async () => {
         try {
-            const res = await axios.get(`http://localhost:5000/api/auth/history/${user.email}`);
+            const res = await axios.get(`https://internarea-backend-kd6b.onrender.com/api/auth/history/${user.email}`);
             setHistory(res.data.history || []);
         } catch (error) {
             console.error("Failed to fetch history", error);

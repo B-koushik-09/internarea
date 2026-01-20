@@ -16,7 +16,7 @@ export default function MessageDrawer() {
 
     useEffect(() => {
         if (isOpen && user?._id) {
-            axios.get(`http://localhost:5000/api/message/inbox/${user._id}`)
+            axios.get(`https://internarea-backend-kd6b.onrender.com/api/message/inbox/${user._id}`)
                 .then(res => setMessages(res.data))
                 .catch(console.error);
         }

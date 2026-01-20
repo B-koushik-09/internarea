@@ -18,7 +18,7 @@ export default function Friends() {
 
   useEffect(() => {
     if (user?._id) {
-      axios.get(`http://localhost:5000/api/friend-routes/list/${user._id}`)
+      axios.get(`https://internarea-backend-kd6b.onrender.com/api/friend-routes/list/${user._id}`)
         .then(res => setFriends(res.data))
         .catch(err => console.error(err));
     }

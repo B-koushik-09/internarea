@@ -14,7 +14,7 @@ const OTPModal = ({ isOpen, onClose, email, onSuccess, purpose }) => {
         setError("");
 
         try {
-            const res = await axios.post("http://localhost:5000/api/auth/verify-otp", {
+            const res = await axios.post("https://internarea-backend-kd6b.onrender.com/api/auth/verify-otp", {
                 identifier: email,
                 otp,
                 purpose: purpose // Include purpose for verification
@@ -34,7 +34,7 @@ const OTPModal = ({ isOpen, onClose, email, onSuccess, purpose }) => {
     const handleSendOTP = async () => {
         try {
             // Trigger backend to send OTP with purpose
-            await axios.post("http://localhost:5000/api/auth/send-otp", {
+            await axios.post("https://internarea-backend-kd6b.onrender.com/api/auth/send-otp", {
                 identifier: email,
                 purpose: purpose // Include purpose for resend
             });

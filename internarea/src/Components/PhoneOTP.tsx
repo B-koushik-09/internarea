@@ -24,7 +24,7 @@ export default function PhoneOTP({ onVerified }: PhoneOTPProps) {
             }
 
             try {
-                const res = await axios.post("http://localhost:5000/api/auth/verify-phone", {
+                const res = await axios.post("https://internarea-backend-kd6b.onrender.com/api/auth/verify-phone", {
                     user_json_url: userObj.user_json_url
                 });
 

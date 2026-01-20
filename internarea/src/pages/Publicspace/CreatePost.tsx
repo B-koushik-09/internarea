@@ -28,7 +28,7 @@ export default function CreatePost({ onPostCreated }: { onPostCreated?: () => vo
     }
 
     try {
-      const res = await axios.post("http://localhost:5000/api/post-routes/create", {
+      const res = await axios.post("https://internarea-backend-kd6b.onrender.com/api/post-routes/create", {
         userId: user._id,
         content,
         mediaUrl
