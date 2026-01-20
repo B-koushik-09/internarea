@@ -211,10 +211,12 @@ const Navbar = () => {
       const user = auth.currentUser;
       if (!user) return;
 
-      // Clear pending flag and set verified flag
+      // Clear pending flag and set verified flag in both session and local storage
       if (typeof window !== 'undefined') {
         sessionStorage.removeItem("chrome_otp_pending");
         sessionStorage.setItem("chrome_verified", "true");
+        // Store in localStorage for persistence across page refreshes
+        localStorage.setItem("chrome_verified_" + user.email, "true");
       }
 
       await recordLogin(user);   // Backend session starts ONLY now
@@ -264,10 +266,15 @@ const Navbar = () => {
   };
 
   const handlelogout = () => {
-    // Clear Chrome verification flags on logout
+    // Clear Chrome verification flags on logout (both session and local storage)
     if (typeof window !== 'undefined') {
+      const currentUser = auth.currentUser;
       sessionStorage.removeItem("chrome_verified");
       sessionStorage.removeItem("chrome_otp_pending");
+      // Also clear localStorage verification for this user
+      if (currentUser?.email) {
+        localStorage.removeItem("chrome_verified_" + currentUser.email);
+      }
     }
     dispatch(logout());
     signOut(auth).then(() => {
@@ -419,6 +426,9 @@ const Navbar = () => {
                       <Link href="/Subscription" className="block px-4 py-2.5 text-sm text-yellow-600 font-semibold hover:bg-yellow-50 transition-colors">
                         💎 {t.nav_subscription || "Plans"}
                       </Link>
+                      <Link href="/ResumeBuilder" className="block px-4 py-2.5 text-sm text-green-600 font-semibold hover:bg-green-50 transition-colors">
+                        📄 {t.nav_resume || "Resume Builder"}
+                      </Link>
                       <button
                         onClick={handlelogout}
                         className="w-full text-left block px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors border-t border-gray-50"
@@ -463,6 +473,7 @@ const Navbar = () => {
                 <div className="space-y-1 border-t border-gray-100 pt-2">
                   <Link href="/profile" className="block px-3 py-2 rounded-md text-sm text-gray-600 hover:bg-gray-50">{t.nav_profile}</Link>
                   <Link href="/LoginHistory" className="block px-3 py-2 rounded-md text-sm text-gray-600 hover:bg-gray-50">{t.nav_history}</Link>
+                  <Link href="/ResumeBuilder" className="block px-3 py-2 rounded-md text-sm text-green-600 font-semibold hover:bg-green-50">📄 {t.nav_resume || "Resume Builder"}</Link>
                   <button onClick={handlelogout} className="w-full text-left block px-3 py-2 rounded-md text-sm text-red-600 hover:bg-red-50">{t.nav_logout}</button>
                 </div>
               ) : (

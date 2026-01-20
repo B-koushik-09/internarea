@@ -7,13 +7,15 @@ const mongoose = require("mongoose");
  * - LANGUAGE_FRENCH: French Language Unlock
  * - FORGOT_PASSWORD_EMAIL: Forgot Password via Email
  * - FORGOT_PASSWORD_SMS: Forgot Password via SMS
+ * - RESUME_PAYMENT: Resume Builder Payment Verification
  */
 const OTP_PURPOSES = [
     'LOGIN_CHROME_GOOGLE',
     'LOGIN_CHROME_PASSWORD',
     'LANGUAGE_FRENCH',
     'FORGOT_PASSWORD_EMAIL',
-    'FORGOT_PASSWORD_SMS'
+    'FORGOT_PASSWORD_SMS',
+    'RESUME_PAYMENT'
 ];
 
 const otpSchema = new mongoose.Schema({

@@ -42,7 +42,7 @@ import { translations } from "@/utils/translations";
 // ];
 const getStatusColor = (status: any) => {
   switch (status.toLowerCase()) {
-    case "approved":
+    case "accepted":
       return "bg-green-100 text-green-800";
     case "rejected":
       return "bg-red-100 text-red-800";
@@ -61,7 +61,7 @@ const index = () => {
   useEffect(() => {
     const fetchdata = async () => {
       try {
-        const res = await axios.get("https://internshala-clone-y2p2.onrender.com/api/application");
+        const res = await axios.get("http://localhost:5000/api/application");
         setdata(res.data);
       } catch (error) {
         console.log(error);
@@ -81,7 +81,7 @@ const index = () => {
   const handleacceptandreject = async (id: any, action: any) => {
     try {
       const res = await axios.put(
-        `https://internshala-clone-y2p2.onrender.com/api/application/${id}`,
+        `http://localhost:5000/api/application/${id}`,
         { action }
       );
       const updateappliacrtion = data.map((app: any) =>
@@ -141,13 +141,13 @@ const index = () => {
                   {t?.app_filter_pending || "Pending"}
                 </button>
                 <button
-                  onClick={() => setFilter("approved")}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium ${filter === "approved"
+                  onClick={() => setFilter("accepted")}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium ${filter === "accepted"
                     ? "bg-green-100 text-green-800"
                     : "bg-gray-100 text-gray-800"
                     }`}
                 >
-                  {t?.app_filter_approved || "Approved"}
+                  {t?.app_filter_approved || "Accepted"}
                 </button>
                 <button
                   onClick={() => setFilter("rejected")}

@@ -1,20 +1,67 @@
 import { selectuser } from "@/Feature/Userslice";
-import { ExternalLink, Mail, User } from "lucide-react";
+import { ExternalLink, Mail, User, Briefcase, CheckCircle } from "lucide-react";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { selectLanguage } from "@/Feature/LanguageSlice";
 import { translations } from "@/utils/translations";
+import axios from "axios";
 
 interface User {
   name: string;
   email: string;
   photo: string;
 }
-const index = () => {
-  const user = useSelector(selectuser)
+
+const ProfilePage = () => {
+  const user = useSelector(selectuser);
   const currentLanguage = useSelector(selectLanguage);
   const t = { ...translations["English"], ...((translations as any)[currentLanguage] || {}) };
+
+  const [activeCount, setActiveCount] = useState(0);
+  const [acceptedCount, setAcceptedCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch application counts
+  useEffect(() => {
+    const fetchApplicationCounts = async () => {
+      if (!user?.name) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const res = await axios.get("http://localhost:5000/api/application");
+        const allApplications = res.data;
+
+        // Filter applications for current user
+        const userApplications = allApplications.filter(
+          (app: any) => app.user?.name === user?.name
+        );
+
+        // Count active (pending) applications
+        const active = userApplications.filter(
+          (app: any) => app.status?.toLowerCase() === "pending"
+        ).length;
+
+        // Count accepted applications (check both 'accepted' and 'approved')
+        const accepted = userApplications.filter(
+          (app: any) =>
+            app.status?.toLowerCase() === "accepted" ||
+            app.status?.toLowerCase() === "approved"
+        ).length;
+
+        setActiveCount(active);
+        setAcceptedCount(accepted);
+      } catch (error) {
+        console.error("Failed to fetch applications:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchApplicationCounts();
+  }, [user]);
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
@@ -52,17 +99,23 @@ const index = () => {
               {/* Quick Stats */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-blue-50 rounded-lg p-4 text-center">
-                  <span className="text-blue-600 font-semibold text-2xl">
-                    0
-                  </span>
+                  <div className="flex items-center justify-center gap-2">
+                    <Briefcase className="h-5 w-5 text-blue-600" />
+                    <span className="text-blue-600 font-semibold text-2xl">
+                      {loading ? "..." : activeCount}
+                    </span>
+                  </div>
                   <p className="text-blue-600 text-sm mt-1">
                     {t?.profile_active_apps || "Active Applications"}
                   </p>
                 </div>
                 <div className="bg-green-50 rounded-lg p-4 text-center">
-                  <span className="text-green-600 font-semibold text-2xl">
-                    0
-                  </span>
+                  <div className="flex items-center justify-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <span className="text-green-600 font-semibold text-2xl">
+                      {loading ? "..." : acceptedCount}
+                    </span>
+                  </div>
                   <p className="text-green-600 text-sm mt-1">
                     {t?.profile_accepted_apps || "Accepted Applications"}
                   </p>
@@ -87,4 +140,4 @@ const index = () => {
   );
 };
 
-export default index;
+export default ProfilePage;

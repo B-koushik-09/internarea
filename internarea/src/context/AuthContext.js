@@ -2,22 +2,50 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase/firebase";
-import { useDispatch } from "react-redux";
-import { login, logout, setLoading } from "@/Feature/Userslice";
+import { useDispatch, useSelector } from "react-redux";
+import { login, logout, setLoading, selectuser } from "@/Feature/Userslice";
 import axios from "axios";
 import { getDeviceInfo } from "@/Components/Security/DeviceChecker";
 
 const AuthContext = createContext(null);
 
+// 🔑 Helper to check for cached standard login user
+const getCachedUser = () => {
+    if (typeof window !== 'undefined') {
+        try {
+            const savedUser = localStorage.getItem("internarea_user");
+            if (savedUser) {
+                return JSON.parse(savedUser);
+            }
+        } catch (e) {
+            console.error("Error reading cached user:", e);
+        }
+    }
+    return null;
+};
+
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLocalLoading] = useState(true);
     const dispatch = useDispatch();
+    const reduxUser = useSelector(selectuser);
 
     useEffect(() => {
+        // 🔑 IMMEDIATE SESSION RESTORE: If we have a cached user, show them immediately
+        // This provides instant session restore without waiting for Firebase
+        const cachedUser = getCachedUser();
+        if (cachedUser && !reduxUser) {
+            console.log("AuthContext: Restoring session from localStorage cache");
+            setUser(cachedUser);
+            // Don't dispatch login here - Redux already loaded it from localStorage in initialState
+            setLocalLoading(false);
+            dispatch(setLoading(false));
+        }
+
         const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
-            setLocalLoading(true);
             if (fbUser) {
+                // Firebase user exists - this is a Google login
+                setLocalLoading(true);
                 try {
                     // 1. Get Device Info for consistent logging
                     const { browser, device, os } = getDeviceInfo();
@@ -36,9 +64,21 @@ export const AuthProvider = ({ children }) => {
                         return; // Don't dispatch login or logout, let Navbar handle it
                     }
 
-                    // If Chrome, we only consider it verified if the session flag is set. 
-                    // Otherwise, false (which triggers OTP_REQUIRED from backend).
-                    const otpVerified = isChrome ? isSessionVerified : true;
+                    // 🔑 KEY FIX: For page refresh scenarios, if Firebase user exists and was previously
+                    // verified (chrome_verified flag exists), trust the session.
+                    // Also check localStorage as a fallback for persistence across page refreshes
+                    let otpVerified = true; // Default for non-Chrome browsers
+
+                    if (isChrome) {
+                        // Check both sessionStorage and localStorage for verified state
+                        const localVerified = typeof window !== 'undefined' && localStorage.getItem("chrome_verified_" + fbUser.email) === "true";
+                        otpVerified = isSessionVerified || localVerified;
+
+                        // If we found verification in localStorage but not sessionStorage, restore it
+                        if (localVerified && !isSessionVerified && typeof window !== 'undefined') {
+                            sessionStorage.setItem("chrome_verified", "true");
+                        }
+                    }
 
                     // 3. Sync with Backend to get full user profile (role, id, etc)
                     const res = await axios.post("http://localhost:5000/api/auth/record-login", {
@@ -53,9 +93,10 @@ export const AuthProvider = ({ children }) => {
                     });
 
                     if (res.data.status === "SUCCESS") {
-                        // Mark as verified in session to prevent future checks on reload
+                        // Mark as verified in both session and local storage for persistence
                         if (isChrome && typeof window !== 'undefined') {
                             sessionStorage.setItem("chrome_verified", "true");
+                            localStorage.setItem("chrome_verified_" + fbUser.email, "true");
                         }
                         setUser(fbUser);
                         dispatch(login(res.data.user));
@@ -85,26 +126,54 @@ export const AuthProvider = ({ children }) => {
 
                 } catch (e) {
                     console.error("Auth Sync Error", e);
-                    // Fallback to basic details from Firebase if API fails?
-                    // Better to retry or show error, but for now lets keep the session alive
-                    setUser(fbUser);
-                    dispatch(login({
-                        uid: fbUser.uid,
-                        email: fbUser.email,
-                        name: fbUser.displayName,
-                        photo: fbUser.photoURL
-                    }));
+
+                    // 🔑 RESILIENT SESSION RESTORE
+                    // If API fails but Firebase user exists and was previously verified,
+                    // keep the session alive using cached Firebase data
+                    const { browser } = getDeviceInfo();
+                    const isChrome = browser === "Chrome";
+                    const localVerified = typeof window !== 'undefined' && localStorage.getItem("chrome_verified_" + fbUser.email) === "true";
+
+                    // For non-Chrome browsers OR verified Chrome sessions, restore from Firebase
+                    if (!isChrome || localVerified) {
+                        console.log("AuthContext: API failed but using cached Firebase user data");
+                        setUser(fbUser);
+                        dispatch(login({
+                            uid: fbUser.uid,
+                            email: fbUser.email,
+                            name: fbUser.displayName,
+                            photo: fbUser.photoURL
+                        }));
+                    } else {
+                        // Chrome browser without prior verification - don't auto-login
+                        console.log("AuthContext: API failed and Chrome not verified - staying logged out");
+                        setUser(null);
+                        dispatch(logout());
+                    }
                 }
+                setLocalLoading(false);
+                dispatch(setLoading(false));
             } else {
-                setUser(null);
-                dispatch(logout());
+                // 🔑 NO Firebase user - but DON'T logout if we have a standard login session!
+                // Standard login users (email/password) don't use Firebase, so fbUser will be null
+                // Only logout if there's also no cached user from standard login
+                const cachedUser = getCachedUser();
+                if (cachedUser) {
+                    console.log("AuthContext: No Firebase user but found cached standard login session");
+                    setUser(cachedUser);
+                    // Don't dispatch logout - keep the cached session
+                } else {
+                    console.log("AuthContext: No Firebase user and no cached session - user is logged out");
+                    setUser(null);
+                    dispatch(logout());
+                }
+                setLocalLoading(false);
+                dispatch(setLoading(false));
             }
-            setLocalLoading(false);
-            dispatch(setLoading(false));
         });
 
         return () => unsubscribe();
-    }, [dispatch]);
+    }, [dispatch, reduxUser]);
 
     return (
         <AuthContext.Provider value={{ user, loading }}>

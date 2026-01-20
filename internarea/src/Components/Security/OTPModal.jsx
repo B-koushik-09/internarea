@@ -52,7 +52,8 @@ const OTPModal = ({ isOpen, onClose, email, onSuccess, purpose }) => {
             'LOGIN_CHROME_PASSWORD': 'Chrome Security: Verify to complete login',
             'LANGUAGE_FRENCH': 'Language Security: Verify to unlock French',
             'FORGOT_PASSWORD_EMAIL': 'Password Reset: Verify your identity',
-            'FORGOT_PASSWORD_SMS': 'Password Reset: Verify your phone'
+            'FORGOT_PASSWORD_SMS': 'Password Reset: Verify your phone',
+            'RESUME_PAYMENT': 'Resume Builder: Verify before payment (₹50)'
         };
         return purposeMap[p] || 'Please verify your email to proceed securely.';
     };

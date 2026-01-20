@@ -62,7 +62,7 @@ const index = () => {
   useEffect(() => {
     const fetchdata = async () => {
       try {
-        const res = await axios.get("https://internshala-clone-y2p2.onrender.com/api/application");
+        const res = await axios.get("http://localhost:5000/api/application");
         setdata(res.data);
       } catch (error) {
         console.log(error);
@@ -79,6 +79,13 @@ const index = () => {
       application.category.toLowerCase().includes(searchTerm.toLowerCase());
 
     if (filter === "all") return searchmatch;
+
+    // Handle "approved" filter to match both "approved" and "accepted" statuses
+    if (filter === "approved") {
+      const status = application.status.toLowerCase();
+      return searchmatch && (status === "approved" || status === "accepted");
+    }
+
     return searchmatch && application.status.toLowerCase() === filter;
   });
   return (
@@ -112,8 +119,8 @@ const index = () => {
                 <button
                   onClick={() => setFilter("all")}
                   className={`px-4 py-2 rounded-lg text-sm font-medium ${filter === "all"
-                      ? "bg-blue-100 text-blue-800"
-                      : "bg-gray-100 text-gray-800"
+                    ? "bg-blue-100 text-blue-800"
+                    : "bg-gray-100 text-gray-800"
                     }`}
                 >
                   {t?.app_filter_all || "All"}
@@ -121,8 +128,8 @@ const index = () => {
                 <button
                   onClick={() => setFilter("pending")}
                   className={`px-4 py-2 rounded-lg text-sm font-medium ${filter === "pending"
-                      ? "bg-yellow-100 text-yellow-800"
-                      : "bg-gray-100 text-gray-800"
+                    ? "bg-yellow-100 text-yellow-800"
+                    : "bg-gray-100 text-gray-800"
                     }`}
                 >
                   {t?.app_filter_pending || "Pending"}
@@ -130,8 +137,8 @@ const index = () => {
                 <button
                   onClick={() => setFilter("approved")}
                   className={`px-4 py-2 rounded-lg text-sm font-medium ${filter === "approved"
-                      ? "bg-green-100 text-green-800"
-                      : "bg-gray-100 text-gray-800"
+                    ? "bg-green-100 text-green-800"
+                    : "bg-gray-100 text-gray-800"
                     }`}
                 >
                   {t?.app_filter_approved || "Approved"}
@@ -139,8 +146,8 @@ const index = () => {
                 <button
                   onClick={() => setFilter("rejected")}
                   className={`px-4 py-2 rounded-lg text-sm font-medium ${filter === "rejected"
-                      ? "bg-red-100 text-red-800"
-                      : "bg-gray-100 text-gray-800"
+                    ? "bg-red-100 text-red-800"
+                    : "bg-gray-100 text-gray-800"
                     }`}
                 >
                   {t?.app_filter_rejected || "Rejected"}

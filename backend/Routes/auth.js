@@ -112,9 +112,9 @@ router.post("/register", async (req, res) => {
 
 router.post("/record-login", async (req, res) => {
     try {
-        const { email, device, browser, os, ip, otpVerified, name } = req.body;
+        const { email, device, browser, os, ip, otpVerified, name, isRefresh } = req.body;
 
-        console.log(`[record-login] Request received for: ${email}`);
+        console.log(`[record-login] Request received for: ${email}, isRefresh: ${isRefresh}, otpVerified: ${otpVerified}`);
 
         if (!email) {
             console.error("[record-login] Error: Email is missing in request body.");
@@ -145,20 +145,33 @@ router.post("/record-login", async (req, res) => {
             }
         }
 
+        // 🔑 SESSION REFRESH HANDLING
+        // If this is a session refresh (page reload, logo click, navigation),
+        // and the user was previously verified (otpVerified=true from localStorage),
+        // skip OTP re-verification and don't add duplicate login history
+        if (isRefresh && otpVerified) {
+            console.log(`[record-login] Session refresh for ${email} - restoring session without OTP re-verification`);
+            return res.json({ status: "SUCCESS", user });
+        }
+
+        // For fresh logins, check Chrome OTP requirement
         if (browser === "Chrome") {
             if (!otpVerified) {
                 return res.status(200).json({ status: "OTP_REQUIRED", message: "OTP verification required for Chrome" });
             }
         }
 
-        user.loginHistory.push({
-            device,
-            browser,
-            os,
-            ip,
-            time: istTime
-        });
-        await user.save();
+        // Only add login history for fresh logins, not refreshes
+        if (!isRefresh) {
+            user.loginHistory.push({
+                device,
+                browser,
+                os,
+                ip,
+                time: istTime
+            });
+            await user.save();
+        }
 
         res.json({ status: "SUCCESS", user });
     } catch (err) {
@@ -179,7 +192,8 @@ const VALID_PURPOSES = [
     'LOGIN_CHROME_PASSWORD',
     'LANGUAGE_FRENCH',
     'FORGOT_PASSWORD_EMAIL',
-    'FORGOT_PASSWORD_SMS'
+    'FORGOT_PASSWORD_SMS',
+    'RESUME_PAYMENT'
 ];
 
 /**
