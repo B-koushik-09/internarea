@@ -1,8 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { getAnalytics, isSupported } from "firebase/analytics";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -18,14 +17,30 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 
-// Enforce local persistence
-import { setPersistence, browserLocalPersistence } from "firebase/auth";
-setPersistence(auth, browserLocalPersistence).catch(error => {
-  console.error("Persistence persistence error:", error);
-});
+// Initialize Analytics only in browser environment
+let analytics = null;
+if (typeof window !== "undefined") {
+  isSupported().then((supported) => {
+    if (supported) {
+      analytics = getAnalytics(app);
+    }
+  });
+}
 
-export { auth, provider };
+// Initialize Auth and Provider
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+// Enforce local persistence (only in browser)
+if (typeof window !== "undefined") {
+  import("firebase/auth").then(({ setPersistence, browserLocalPersistence }) => {
+    setPersistence(auth, browserLocalPersistence).catch(error => {
+      console.error("Persistence error:", error);
+    });
+  });
+}
+
+export { auth, provider, analytics };
 
 
