@@ -3,7 +3,6 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 require("dotenv").config();
 
-const { connect } = require("./db");
 const router = require("./Routes/index");
 
 const app = express();
@@ -20,11 +19,6 @@ app.get("/", (req, res) => {
 
 // API routes
 app.use("/api", router);
-
-// Connect to DB (cached for serverless)
-connect()
-  .then(() => console.log("Database connected"))
-  .catch((err) => console.error("Database error:", err));
 
 // For local development
 if (process.env.NODE_ENV !== "production") {

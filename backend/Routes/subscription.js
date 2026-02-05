@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const axios = require("axios");
+const connect = require("../db");
 const Subscription = require("../Model/Subscription");
 const User = require("../Model/User");
 
@@ -146,6 +147,7 @@ router.post("/create-paypal-order", checkPaymentTime, async (req, res) => {
 // POST /api/subscription/capture-paypal-order
 router.post("/capture-paypal-order", async (req, res) => {
     try {
+        await connect();
         const { orderID, userId, plan, amount } = req.body;
 
         // Validate input
@@ -216,6 +218,7 @@ router.post("/capture-paypal-order", async (req, res) => {
 // GET /api/subscription/check-limit/:userId
 router.get("/check-limit/:userId", async (req, res) => {
     try {
+        await connect();
         const user = await User.findById(req.params.userId);
         if (!user) return res.status(404).json({ error: "User not found" });
 
@@ -255,6 +258,7 @@ router.get("/check-limit/:userId", async (req, res) => {
 // GET /api/subscription/status/:userId
 router.get("/status/:userId", async (req, res) => {
     try {
+        await connect();
         const user = await User.findById(req.params.userId);
         if (!user) return res.status(404).json({ error: "User not found" });
 

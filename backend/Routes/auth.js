@@ -110,7 +110,7 @@ router.post("/register", async (req, res) => {
     }
 });
 
-const { connect } = require("../db");
+const connect = require("../db");
 
 router.post("/record-login", async (req, res) => {
     try {

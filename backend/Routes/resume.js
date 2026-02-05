@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const axios = require("axios");
+const connect = require("../db");
 const Resume = require("../Model/Resume");
 const User = require("../Model/User");
 
@@ -112,6 +113,7 @@ router.post("/create-order", checkPaymentTime, async (req, res) => {
 // ✅ CAPTURE RESUME PAYPAL ORDER
 router.post("/capture-order", async (req, res) => {
     try {
+        await connect();
         const { orderID, userId, details } = req.body;
 
         if (!orderID || !userId || !details) {
@@ -181,6 +183,7 @@ router.post("/capture-order", async (req, res) => {
 // ✅ CREATE RESUME (legacy - requires paymentId)
 router.post("/create", async (req, res) => {
     try {
+        await connect();
         const { userId, details, paymentId } = req.body;
         if (!paymentId) return res.status(400).json({ error: "Payment required" });
         const newResume = await Resume.create({
@@ -201,6 +204,7 @@ router.post("/create", async (req, res) => {
 
 // ✅ GET MY RESUMES
 router.get("/my/:userId", async (req, res) => {
+    await connect();
     const resumes = await Resume.find({ user: req.params.userId });
     res.json(resumes);
 });

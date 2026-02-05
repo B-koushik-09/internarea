@@ -1,11 +1,13 @@
 const express = require("express");
 const router = express.Router();
+const connect = require("../db");
 const application = require("../Model/Application");
 const User = require("../Model/User");
 
 // ✅ CREATE APPLICATION WITH SUBSCRIPTION LIMIT CHECK
 router.post("/", async (req, res) => {
   try {
+    await connect();
     const userId = req.body.user?._id;
 
     // Check subscription limit before creating application
@@ -56,21 +58,23 @@ router.post("/", async (req, res) => {
 });
 router.get("/", async (req, res) => {
   try {
+    await connect();
     const data = await application.find();
-    res.json(data).status(200);
+    res.status(200).json(data);
   } catch (error) {
     console.log(error);
-    res.status(404).json({ error: "internal server error" });
+    res.status(500).json({ error: "internal server error" });
   }
 });
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
   try {
+    await connect();
     const data = await application.findById(id);
     if (!data) {
       res.status(404).json({ error: "application not found" });
     }
-    res.json(data).status(200);
+    res.status(200).json(data);
   } catch (error) {
     console.log(error);
     res.status(404).json({ error: "internal server error" });
@@ -89,6 +93,7 @@ router.put("/:id", async (req, res) => {
     return;
   }
   try {
+    await connect();
     const updateapplication = await application.findByIdAndUpdate(
       id,
       { $set: { status } },

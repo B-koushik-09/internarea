@@ -1,9 +1,11 @@
 const express = require("express");
 const router = express.Router();
+const connect = require("../db");
 const FriendRequest = require("../Model/FriendRequest");
 const User = require("../Model/User");
 
 router.post("/send", async (req, res) => {
+  await connect();
   const { from, to } = req.body;
   const already = await FriendRequest.findOne({ "from": from, "to": to });
   if (already) return res.json({ msg: "Request already sent" });
@@ -13,6 +15,7 @@ router.post("/send", async (req, res) => {
 });
 
 router.post("/accept", async (req, res) => {
+  await connect();
   const { requestId } = req.body;
 
   const request = await FriendRequest.findById(requestId);
@@ -33,6 +36,7 @@ router.post("/accept", async (req, res) => {
 });
 
 router.get("/requests/:userId", async (req, res) => {
+  await connect();
   const data = await FriendRequest.find({
     to: req.params.userId,
     status: "pending"
@@ -42,11 +46,13 @@ router.get("/requests/:userId", async (req, res) => {
 });
 
 router.get("/list/:userId", async (req, res) => {
+  await connect();
   const user = await User.findById(req.params.userId).populate("friends", "name email");
   res.json(user.friends);
 });
 router.get("/search/:query", async (req, res) => {
   try {
+    await connect();
     const query = req.params.query;
     const users = await User.find({
       name: { $regex: query, $options: "i" },

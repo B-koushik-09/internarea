@@ -18,20 +18,23 @@ router.post("/", async (req, res) => {
     CTC: req.body.CTC,
     StartDate: req.body.StartDate,
   });
-  await jobdata.save().then((data)=>{
+  await jobdata.save().then((data) => {
     res.send(data)
-  }).catch((error)=>{
+  }).catch((error) => {
     console.log(error)
   })
 });
 
+const connect = require("../db");
+
 router.get("/", async (req, res) => {
   try {
+    await connect(); // Ensure DB connection
     const data = await Job.find();
-    res.json(data).status(200);
+    res.status(200).json(data);
   } catch (error) {
     console.log(error);
-    res.status(404).json({ error: "internal server error" });
+    res.status(500).json({ error: "internal server error" });
   }
 });
 router.get("/:id", async (req, res) => {
@@ -47,4 +50,4 @@ router.get("/:id", async (req, res) => {
     res.status(404).json({ error: "internal server error" });
   }
 });
-module.exports=router
+module.exports = router
