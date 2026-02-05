@@ -1,9 +1,16 @@
-const axios = require("axios");
+const { MailtrapClient } = require("mailtrap");
 
-const TOKEN = process.env.MAILTRAP_TOKEN;
+const TOKEN = "e2bd686ba704471c7472abb0331be8d2";
 
-console.log("[MAIL] Using Mailtrap Email API (HTTP)");
+console.log("[MAIL] Using Mailtrap SDK");
 console.log("[MAIL] MAILTRAP_TOKEN:", TOKEN ? "Set ✓" : "NOT SET ❌");
+
+const client = new MailtrapClient({ token: TOKEN });
+
+const sender = {
+    email: "hello@demomailtrap.com", // Mailtrap's verified demo sender
+    name: "InternArea Security",
+};
 
 const sendMail = async (to, subject, html) => {
     if (!TOKEN) {
@@ -11,53 +18,43 @@ const sendMail = async (to, subject, html) => {
         return false;
     }
 
+    console.log(`[MAIL] Sending email to: ${to}`);
+
     try {
-        await axios.post(
-            "https://send.api.mailtrap.io/api/send",
-            {
-                from: {
-                    email: "bllkoushik@gmail.com",
-                    name: "InternArea Security",
-                },
-                to: [{ email: to }],
-                subject: subject,
-                html: html,
-                category: "OTP Verification",
-            },
-            {
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${TOKEN}`,
-                },
-            }
-        );
+        const result = await client.send({
+            from: sender,
+            to: [{ email: to }],
+            subject: subject,
+            html: html,
+            category: "OTP Verification",
+        });
 
         console.log(`[MAIL] ✅ Sent to ${to}`);
         return true;
     } catch (error) {
-        console.error("[MAIL] ❌ Mailtrap Error:", error.response?.data || error.message);
+        console.error("[MAIL] ❌ Mailtrap Error:", error.message || error);
         return false;
     }
 };
 
 const sendOtpMail = async (email, otp) => {
     const html = `
-    <h2>Security Verification</h2>
-    <p>Your OTP is:</p>
-    <h1 style="font-size:32px;letter-spacing:5px;color:#2563eb;">${otp}</h1>
-    <p>Valid for 5 minutes.</p>
-  `;
+        <h2>Security Verification</h2>
+        <p>Your OTP is:</p>
+        <h1 style="font-size:32px;letter-spacing:5px;color:#2563eb;">${otp}</h1>
+        <p>Valid for 5 minutes.</p>
+    `;
     return await sendMail(email, "Login Security OTP - InternArea", html);
 };
 
 const sendInvoiceMail = async (email, plan, amount, paymentId) => {
     const html = `
-    <h2>Payment Successful</h2>
-    <p>Thank you for subscribing to the <strong>${plan}</strong> plan.</p>
-    <p>Amount Paid: ₹${amount}</p>
-    <p>Payment ID: ${paymentId}</p>
-    <p>Date: ${new Date().toLocaleString()}</p>
-  `;
+        <h2>Payment Successful</h2>
+        <p>Thank you for subscribing to the <strong>${plan}</strong> plan.</p>
+        <p>Amount Paid: ₹${amount}</p>
+        <p>Payment ID: ${paymentId}</p>
+        <p>Date: ${new Date().toLocaleString()}</p>
+    `;
     return await sendMail(email, "Subscription Invoice - InternArea", html);
 };
 
