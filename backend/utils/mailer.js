@@ -1,29 +1,46 @@
-const { Resend } = require('resend');
+const { MailtrapClient } = require("mailtrap");
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize Mailtrap Client
+const TOKEN = process.env.MAILTRAP_TOKEN;
+const ENDPOINT = "https://send.api.mailtrap.io/";
 
-console.log("[MAIL] Using Resend HTTP API");
-console.log("[MAIL] RESEND_API_KEY:", process.env.RESEND_API_KEY ? "Set ✓" : "NOT SET ❌");
+const client = new MailtrapClient({ token: TOKEN, endpoint: ENDPOINT });
+
+console.log("[MAIL] Initializing Mailtrap API...");
+console.log("[MAIL] MAILTRAP_TOKEN:", TOKEN ? "Set ✓" : "NOT SET ❌");
 
 const sendMail = async (to, subject, html) => {
     console.log(`[MAIL] Sending email to: ${to}`);
+
+    if (!TOKEN) {
+        console.error("[MAIL] ❌ MAILTRAP_TOKEN not configured");
+        return false;
+    }
+
+    const sender = {
+        email: "mailtrap@demomailtrap.com", // Default sender for free tier
+        name: "InternArea Security",
+    };
+
+    const recipients = [
+        {
+            email: to,
+        }
+    ];
+
     try {
-        const { data, error } = await resend.emails.send({
-            from: "InternArea <onboarding@resend.dev>",
-            to: [to],
+        const response = await client.send({
+            from: sender,
+            to: recipients,
             subject: subject,
             html: html,
+            category: "OTP Verification",
         });
 
-        if (error) {
-            console.error(`[MAIL] ❌ Failed:`, error.message);
-            return false;
-        }
-
-        console.log(`[MAIL] ✅ Sent! ID: ${data.id}`);
+        console.log(`[MAIL] ✅ Sent via Mailtrap! Success: ${response.success}`);
         return true;
     } catch (error) {
-        console.error(`[MAIL] ❌ Error:`, error.message);
+        console.error(`[MAIL] ❌ Mailtrap Failed:`, error);
         return false;
     }
 };
