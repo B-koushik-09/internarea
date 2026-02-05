@@ -62,7 +62,7 @@ const index = () => {
   useEffect(() => {
     const fetchdata = async () => {
       try {
-        const res = await axios.get("https://internarea-backend-kd6b.onrender.com/api/application");
+        const res = await axios.get("https://internarea-production.up.railway.app/api/application");
         setdata(res.data);
       } catch (error) {
         console.log(error);

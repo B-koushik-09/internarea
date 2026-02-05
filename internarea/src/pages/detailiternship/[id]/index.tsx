@@ -80,7 +80,7 @@ const index = () => {
   useEffect(() => {
     const fetchdata = async () => {
       try {
-        const res = await axios.get(`https://internarea-backend-kd6b.onrender.com/api/internship/${id}`)
+        const res = await axios.get(`https://internarea-production.up.railway.app/api/internship/${id}`)
         setinternship(res.data)
       } catch (error) {
         console.log(error)
@@ -114,7 +114,7 @@ const index = () => {
     // ✅ CHECK SUBSCRIPTION LIMIT BEFORE APPLYING
     if (user?._id) {
       try {
-        const limitCheck = await axios.get(`https://internarea-backend-kd6b.onrender.com/api/subscription/check-limit/${user._id}`);
+        const limitCheck = await axios.get(`https://internarea-production.up.railway.app/api/subscription/check-limit/${user._id}`);
         if (!limitCheck.data.allowed) {
           toast.error(
             `🚫 ${limitCheck.data.message}`,
@@ -138,7 +138,7 @@ const index = () => {
         Application: id,
         availability
       }
-      await axios.post("https://internarea-backend-kd6b.onrender.com/api/application", applicationdata)
+      await axios.post("https://internarea-production.up.railway.app/api/application", applicationdata)
       toast.success("🎉 Application submitted successfully!")
       router.push('/internship')
     } catch (error: any) {

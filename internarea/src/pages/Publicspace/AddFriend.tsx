@@ -25,7 +25,7 @@ export default function AddFriend() {
     }
     setLoading(true);
     try {
-      const res = await axios.get(`https://internarea-backend-kd6b.onrender.com/api/friend-routes/search/${val}`);
+      const res = await axios.get(`https://internarea-production.up.railway.app/api/friend-routes/search/${val}`);
       setResults(res.data.filter((u: any) => {
         const isSelfId = user?._id && u._id === user._id;
         const isSelfEmail = user?.email && u.email === user.email;
@@ -41,7 +41,7 @@ export default function AddFriend() {
     if (!user) return toast.error(t?.public_login_req || "Not logged in");
 
     try {
-      await axios.post("https://internarea-backend-kd6b.onrender.com/api/friend-routes/send", {
+      await axios.post("https://internarea-production.up.railway.app/api/friend-routes/send", {
         from: user._id,
         to: toUser._id
       });

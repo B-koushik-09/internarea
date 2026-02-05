@@ -19,7 +19,7 @@ const index = () => {
       try {
         setloading(true);
         const res = await axios.get(
-          `https://internarea-backend-kd6b.onrender.com/api/application/${id}`
+          `https://internarea-production.up.railway.app/api/application/${id}`
         );
         console.log(res.data);
         setdata(res.data);

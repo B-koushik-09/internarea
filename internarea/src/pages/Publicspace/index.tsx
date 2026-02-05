@@ -31,8 +31,8 @@ export default function PublicHome() {
       // Fetch counts
       const fetchData = async () => {
         try {
-          const fRes = await axios.get(`https://internarea-backend-kd6b.onrender.com/api/friend-routes/list/${user._id}`);
-          const pRes = await axios.get(`https://internarea-backend-kd6b.onrender.com/api/post-routes/my/${user._id}`);
+          const fRes = await axios.get(`https://internarea-production.up.railway.app/api/friend-routes/list/${user._id}`);
+          const pRes = await axios.get(`https://internarea-production.up.railway.app/api/post-routes/my/${user._id}`);
           setStats({
             friends: fRes.data.length,
             posts: pRes.data.length,

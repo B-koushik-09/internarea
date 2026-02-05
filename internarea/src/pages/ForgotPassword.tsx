@@ -34,7 +34,7 @@ export default function ForgotPassword() {
 
             // UNIFIED ROUTE: Backend handles both email and phone
             // Daily limit is checked server-side for forgot password purposes
-            const res = await axios.post("https://internarea-backend-kd6b.onrender.com/api/auth/send-otp", {
+            const res = await axios.post("https://internarea-production.up.railway.app/api/auth/send-otp", {
                 identifier: identifier,
                 purpose: purpose
             });
@@ -65,7 +65,7 @@ export default function ForgotPassword() {
             const purpose = method === 'email' ? 'FORGOT_PASSWORD_EMAIL' : 'FORGOT_PASSWORD_SMS';
 
             // UNIFIED ROUTE: Backend handles both email and phone verification
-            await axios.post("https://internarea-backend-kd6b.onrender.com/api/auth/verify-otp", {
+            await axios.post("https://internarea-production.up.railway.app/api/auth/verify-otp", {
                 identifier: identifier,
                 otp,
                 purpose: purpose
@@ -103,7 +103,7 @@ export default function ForgotPassword() {
 
         setLoading(true);
         try {
-            const res = await axios.post("https://internarea-backend-kd6b.onrender.com/api/auth/reset-password", {
+            const res = await axios.post("https://internarea-production.up.railway.app/api/auth/reset-password", {
                 identifier,
                 otp,
                 newPassword

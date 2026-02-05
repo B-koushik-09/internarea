@@ -33,7 +33,7 @@ const index = () => {
     try {
       setisloading(true);
       const res = await axios.post(
-        "https://internarea-backend-kd6b.onrender.com/api/admin/adminlogin",
+        "https://internarea-production.up.railway.app/api/admin/adminlogin",
         formadata
       );
       toast.success("logged in successfuly");

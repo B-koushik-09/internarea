@@ -45,7 +45,7 @@ const Register = () => {
 
         setLoading(true);
         try {
-            const res = await axios.post("https://internarea-backend-kd6b.onrender.com/api/auth/register", {
+            const res = await axios.post("https://internarea-production.up.railway.app/api/auth/register", {
                 name: formData.name,
                 email: formData.email,
                 phone: formData.phone,

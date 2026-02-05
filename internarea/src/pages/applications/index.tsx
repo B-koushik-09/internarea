@@ -61,7 +61,7 @@ const index = () => {
   useEffect(() => {
     const fetchdata = async () => {
       try {
-        const res = await axios.get("https://internarea-backend-kd6b.onrender.com/api/application");
+        const res = await axios.get("https://internarea-production.up.railway.app/api/application");
         setdata(res.data);
       } catch (error) {
         console.log(error);
@@ -81,7 +81,7 @@ const index = () => {
   const handleacceptandreject = async (id: any, action: any) => {
     try {
       const res = await axios.put(
-        `https://internarea-backend-kd6b.onrender.com/api/application/${id}`,
+        `https://internarea-production.up.railway.app/api/application/${id}`,
         { action }
       );
       const updateappliacrtion = data.map((app: any) =>

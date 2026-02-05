@@ -6,6 +6,7 @@ const OTPModal = ({ isOpen, onClose, email, onSuccess, purpose }) => {
     const [otp, setOtp] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    const [resending, setResending] = useState(false);
 
     if (!isOpen) return null;
 
@@ -14,35 +15,40 @@ const OTPModal = ({ isOpen, onClose, email, onSuccess, purpose }) => {
         setError("");
 
         try {
-            const res = await axios.post("https://internarea-backend-kd6b.onrender.com/api/auth/verify-otp", {
+            const res = await axios.post("https://internarea-production.up.railway.app/api/auth/verify-otp", {
                 identifier: email,
                 otp,
                 purpose: purpose // Include purpose for verification
             });
             if (res.data.status === "SUCCESS") {
+                toast.success("OTP Verified!");
                 onSuccess();
                 onClose();
             } else {
                 setError("Invalid OTP");
             }
         } catch (err) {
+            console.error("Verify OTP Error:", err);
             setError(err.response?.data?.error || "Verification failed");
         }
         setLoading(false);
     };
 
     const handleSendOTP = async () => {
+        setResending(true);
         try {
             // Trigger backend to send OTP with purpose
-            await axios.post("https://internarea-backend-kd6b.onrender.com/api/auth/send-otp", {
+            const res = await axios.post("https://internarea-production.up.railway.app/api/auth/send-otp", {
                 identifier: email,
                 purpose: purpose // Include purpose for resend
             });
-            toast.info(`OTP sent to ${email}`);
+            console.log("Resend OTP Response:", res.data);
+            toast.success(`OTP sent to ${email}`);
         } catch (err) {
-            console.error(err);
+            console.error("Resend OTP Error:", err);
             toast.error(err.response?.data?.error || "Failed to send OTP");
         }
+        setResending(false);
     };
 
     // Convert purpose enum to user-friendly text
@@ -114,9 +120,10 @@ const OTPModal = ({ isOpen, onClose, email, onSuccess, purpose }) => {
                     <div className="flex justify-between items-center text-sm pt-2">
                         <button
                             onClick={handleSendOTP}
-                            className="text-blue-600 hover:text-blue-700 font-semibold hover:underline"
+                            disabled={resending}
+                            className={`font-semibold hover:underline ${resending ? 'text-gray-400' : 'text-blue-600 hover:text-blue-700'}`}
                         >
-                            Resend OTP to {email?.split('@')[0]}...
+                            {resending ? "Sending..." : `Resend OTP to ${email?.split('@')[0]}...`}
                         </button>
                         <button
                             onClick={onClose}
