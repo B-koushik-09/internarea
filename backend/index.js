@@ -15,15 +15,18 @@ app.use(bodyparser.urlencoded({ extended: true, limit: "50mb" }));
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.send("hello this is internshala backend");
+  res.status(200).send("Server is running ✅");
 });
 app.use("/api", router);
 
+// Start server immediately for Railway healthcheck
+const server = app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
+
+// Connect to DB in background
 connect().then(() => {
-  console.log("Database connected, starting server...");
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-  });
+  console.log("Database connected successfully");
 }).catch((err) => {
   console.error("Database connection failed:", err);
 });
