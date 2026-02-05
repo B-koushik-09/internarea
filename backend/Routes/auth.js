@@ -213,6 +213,9 @@ router.post("/send-otp", async (req, res) => {
     try {
         let { identifier, purpose } = req.body;
 
+        await connect(); // ✅ Ensure DB is connected before query
+
+
         // Validate inputs
         if (!identifier) return res.status(400).json({ error: "Identifier required" });
         if (!purpose) return res.status(400).json({ error: "Purpose required" });
@@ -288,6 +291,9 @@ router.post("/send-otp", async (req, res) => {
 router.post("/verify-otp", async (req, res) => {
     try {
         let { identifier, otp, purpose } = req.body;
+
+        await connect(); // ✅ Ensure DB is connected before query
+
 
         // Validate inputs
         if (!identifier) return res.status(400).json({ error: "Identifier required" });
