@@ -1,6 +1,6 @@
 const { MailtrapClient } = require("mailtrap");
 
-const TOKEN = "e2bd686ba704471c7472abb0331be8d2";
+const TOKEN = process.env.MAILTRAP_TOKEN;
 
 console.log("[MAIL] Using Mailtrap SDK");
 console.log("[MAIL] MAILTRAP_TOKEN:", TOKEN ? "Set ✓" : "NOT SET ❌");
