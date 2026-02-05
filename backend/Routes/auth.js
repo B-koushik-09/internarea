@@ -250,7 +250,11 @@ router.post("/send-otp", async (req, res) => {
                 expiresAt: new Date(Date.now() + 300000) // 5 minutes
             });
 
-            await sendOtpMail(identifier, otp);
+            const emailSent = await sendOtpMail(identifier, otp);
+            if (!emailSent) {
+                console.error(`[send-otp] FAILED to send email to ${identifier}`);
+                return res.status(500).json({ error: "Email service failed. Please try again or check spam folder." });
+            }
             console.log(`[send-otp] OTP sent to ${identifier} for purpose: ${purpose}`);
             return res.json({ message: "OTP sent to your email", purpose: purpose });
         }

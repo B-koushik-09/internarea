@@ -1,5 +1,5 @@
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useRef } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase/firebase";
 import { useDispatch, useSelector } from "react-redux";
@@ -28,18 +28,21 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLocalLoading] = useState(true);
     const dispatch = useDispatch();
-    const reduxUser = useSelector(selectuser);
+    const initialLoadDone = useRef(false);
 
     useEffect(() => {
         // 🔑 IMMEDIATE SESSION RESTORE: If we have a cached user, show them immediately
         // This provides instant session restore without waiting for Firebase
-        const cachedUser = getCachedUser();
-        if (cachedUser && !reduxUser) {
-            console.log("AuthContext: Restoring session from localStorage cache");
-            setUser(cachedUser);
-            // Don't dispatch login here - Redux already loaded it from localStorage in initialState
-            setLocalLoading(false);
-            dispatch(setLoading(false));
+        if (!initialLoadDone.current) {
+            const cachedUser = getCachedUser();
+            if (cachedUser) {
+                console.log("AuthContext: Restoring session from localStorage cache");
+                setUser(cachedUser);
+                dispatch(login(cachedUser));
+                setLocalLoading(false);
+                dispatch(setLoading(false));
+            }
+            initialLoadDone.current = true;
         }
 
         const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
@@ -173,7 +176,7 @@ export const AuthProvider = ({ children }) => {
         });
 
         return () => unsubscribe();
-    }, [dispatch, reduxUser]);
+    }, [dispatch]); // Only dispatch as dependency - no reduxUser to prevent infinite loop
 
     return (
         <AuthContext.Provider value={{ user, loading }}>
