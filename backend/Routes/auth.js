@@ -110,8 +110,11 @@ router.post("/register", async (req, res) => {
     }
 });
 
+const { connect } = require("../db");
+
 router.post("/record-login", async (req, res) => {
     try {
+        await connect(); // Ensure DB is connected
         const { email, device, browser, os, ip, otpVerified, name, isRefresh } = req.body;
 
         console.log(`[record-login] Request received for: ${email}, isRefresh: ${isRefresh}, otpVerified: ${otpVerified}`);
