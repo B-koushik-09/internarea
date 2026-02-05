@@ -23,8 +23,9 @@ app.get("/", (req, res) => {
 app.use("/api", router);
 
 // START SERVER FIRST - Railway healthcheck needs immediate response
-app.listen(PORT, () => {
+const server = app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server is running on port ${PORT}`);
+  console.log(`Healthcheck available at http://0.0.0.0:${PORT}/`);
 
   // Connect to DB in background AFTER server is listening
   connect()
