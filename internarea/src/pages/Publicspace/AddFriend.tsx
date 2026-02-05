@@ -25,7 +25,7 @@ export default function AddFriend() {
     }
     setLoading(true);
     try {
-      const res = await axios.get(`https://internarea-production.up.railway.app/api/friend-routes/search/${val}`);
+      const res = await axios.get(`https://internarea-wy7x.vercel.app/api/friend-routes/search/${val}`);
       setResults(res.data.filter((u: any) => {
         const isSelfId = user?._id && u._id === user._id;
         const isSelfEmail = user?.email && u.email === user.email;

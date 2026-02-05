@@ -15,7 +15,7 @@ export default function Requests() {
 
   useEffect(() => {
     if (user?._id) {
-      axios.get(`https://internarea-production.up.railway.app/api/friend-routes/requests/${user._id}`)
+      axios.get(`https://internarea-wy7x.vercel.app/api/friend-routes/requests/${user._id}`)
         .then(res => setRequests(res.data))
         .catch(err => console.error("Error fetching requests:", err));
     }
@@ -23,7 +23,7 @@ export default function Requests() {
 
   const accept = async (id: string) => {
     try {
-      await axios.post("https://internarea-production.up.railway.app/api/friend-routes/accept", { requestId: id });
+      await axios.post("https://internarea-wy7x.vercel.app/api/friend-routes/accept", { requestId: id });
       setRequests(requests.filter(r => r._id !== id));
       alert(t?.public_connected || "Friend request accepted!");
     } catch (e) {

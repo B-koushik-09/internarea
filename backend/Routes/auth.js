@@ -175,8 +175,13 @@ router.post("/record-login", async (req, res) => {
 
         res.json({ status: "SUCCESS", user });
     } catch (err) {
-        console.error("[record-login] Error:", err);
-        res.status(500).json({ error: err.message });
+        console.error("[record-login] CRITICAL Error:", err);
+        console.error("[record-login] Stack:", err.stack);
+        res.status(500).json({
+            error: "Internal Server Error",
+            details: err.message,
+            stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+        });
     }
 });
 

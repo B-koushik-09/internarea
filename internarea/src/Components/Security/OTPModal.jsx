@@ -15,7 +15,7 @@ const OTPModal = ({ isOpen, onClose, email, onSuccess, purpose }) => {
         setError("");
 
         try {
-            const res = await axios.post("https://internarea-production.up.railway.app/api/auth/verify-otp", {
+            const res = await axios.post("https://internarea-wy7x.vercel.app/api/auth/verify-otp", {
                 identifier: email,
                 otp,
                 purpose: purpose // Include purpose for verification
@@ -38,7 +38,7 @@ const OTPModal = ({ isOpen, onClose, email, onSuccess, purpose }) => {
         setResending(true);
         try {
             // Trigger backend to send OTP with purpose
-            const res = await axios.post("https://internarea-production.up.railway.app/api/auth/send-otp", {
+            const res = await axios.post("https://internarea-wy7x.vercel.app/api/auth/send-otp", {
                 identifier: email,
                 purpose: purpose // Include purpose for resend
             });

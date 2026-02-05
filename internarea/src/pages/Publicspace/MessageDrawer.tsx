@@ -16,7 +16,7 @@ export default function MessageDrawer() {
 
     useEffect(() => {
         if (isOpen && user?._id) {
-            axios.get(`https://internarea-production.up.railway.app/api/message/inbox/${user._id}`)
+            axios.get(`https://internarea-wy7x.vercel.app/api/message/inbox/${user._id}`)
                 .then(res => setMessages(res.data))
                 .catch(console.error);
         }

@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema({
     ip: String,
     time: { type: Date, default: Date.now }
   }],
-  lastForgotRequest: { type: Date },
+
   lastResetDate: { type: String }, // Store YYYY-MM-DD for once-per-day check
   lastForgotDate: { type: String }, // YYYY-MM-DD for forgot password daily limit
   resumeAccess: { type: Boolean, default: false },

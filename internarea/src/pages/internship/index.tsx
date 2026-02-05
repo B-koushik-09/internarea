@@ -31,7 +31,7 @@ const index = () => {
   useEffect(() => {
     const fetchdata = async () => {
       try {
-        const res = await axios.get("https://internarea-production.up.railway.app/api/internship")
+        const res = await axios.get("https://internarea-wy7x.vercel.app/api/internship")
         setinternship(res.data)
         setfilteredInternships(res.data)
       } catch (error) {

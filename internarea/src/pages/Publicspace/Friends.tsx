@@ -18,7 +18,7 @@ export default function Friends() {
 
   useEffect(() => {
     if (user?._id) {
-      axios.get(`https://internarea-production.up.railway.app/api/friend-routes/list/${user._id}`)
+      axios.get(`https://internarea-wy7x.vercel.app/api/friend-routes/list/${user._id}`)
         .then(res => setFriends(res.data))
         .catch(err => console.error(err));
     }

@@ -24,7 +24,7 @@ export default function PhoneOTP({ onVerified }: PhoneOTPProps) {
             }
 
             try {
-                const res = await axios.post("https://internarea-production.up.railway.app/api/auth/verify-phone", {
+                const res = await axios.post("https://internarea-wy7x.vercel.app/api/auth/verify-phone", {
                     user_json_url: userObj.user_json_url
                 });
 

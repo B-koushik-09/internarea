@@ -55,8 +55,8 @@ export default function Subscription() {
             if (user?._id) {
                 try {
                     const [statusRes, limitRes] = await Promise.all([
-                        axios.get(`https://internarea-production.up.railway.app/api/subscription/status/${user._id}`),
-                        axios.get(`https://internarea-production.up.railway.app/api/subscription/check-limit/${user._id}`)
+                        axios.get(`https://internarea-wy7x.vercel.app/api/subscription/status/${user._id}`),
+                        axios.get(`https://internarea-wy7x.vercel.app/api/subscription/check-limit/${user._id}`)
                     ]);
                     setCurrentPlan(statusRes.data.plan || "Free");
                     setUsageInfo(limitRes.data);
@@ -96,7 +96,7 @@ export default function Subscription() {
             const usdAmount = plan.priceUSD.toFixed(2);
             console.log("[PayPal] Sending to backend - USD amount:", usdAmount);
 
-            const response = await axios.post("https://internarea-production.up.railway.app/api/subscription/create-paypal-order", {
+            const response = await axios.post("https://internarea-wy7x.vercel.app/api/subscription/create-paypal-order", {
                 amount: usdAmount,  // USD amount with 2 decimals
                 amountINR: plan.price,  // Original INR for reference
                 plan: plan.key,
@@ -127,7 +127,7 @@ export default function Subscription() {
             setIsLoading(true);
             const usdAmount = plan.priceUSD.toFixed(2);
 
-            const response = await axios.post("https://internarea-production.up.railway.app/api/subscription/capture-paypal-order", {
+            const response = await axios.post("https://internarea-wy7x.vercel.app/api/subscription/capture-paypal-order", {
                 orderID,
                 userId: user._id,
                 plan: plan.key,

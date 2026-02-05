@@ -56,7 +56,7 @@ export default function ResumeBuilder() {
     const fetchMyResumes = async () => {
         if (user?._id) {
             try {
-                const res = await axios.get(`https://internarea-production.up.railway.app/api/resume/my/${user._id}`);
+                const res = await axios.get(`https://internarea-wy7x.vercel.app/api/resume/my/${user._id}`);
                 setMyResumes(res.data);
             } catch (err) {
                 console.error("Failed to fetch resumes:", err);
@@ -110,7 +110,7 @@ export default function ResumeBuilder() {
     // Step 3: Create PayPal order (using resume-specific endpoint)
     const createPayPalOrder = async (): Promise<string> => {
         try {
-            const response = await axios.post("https://internarea-production.up.railway.app/api/resume/create-order", {
+            const response = await axios.post("https://internarea-wy7x.vercel.app/api/resume/create-order", {
                 amount: RESUME_PRICE_USD,
                 userId: user._id
             });
@@ -128,7 +128,7 @@ export default function ResumeBuilder() {
             setIsLoading(true);
 
             // Capture payment AND create resume in one call
-            const captureRes = await axios.post("https://internarea-production.up.railway.app/api/resume/capture-order", {
+            const captureRes = await axios.post("https://internarea-wy7x.vercel.app/api/resume/capture-order", {
                 orderID,
                 userId: user._id,
                 details

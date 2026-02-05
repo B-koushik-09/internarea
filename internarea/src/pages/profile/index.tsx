@@ -31,7 +31,7 @@ const ProfilePage = () => {
       }
 
       try {
-        const res = await axios.get("https://internarea-production.up.railway.app/api/application");
+        const res = await axios.get("https://internarea-wy7x.vercel.app/api/application");
         const allApplications = res.data;
 
         // Filter applications for current user

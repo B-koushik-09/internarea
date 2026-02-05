@@ -84,7 +84,7 @@ export const AuthProvider = ({ children }) => {
                     }
 
                     // 3. Sync with Backend to get full user profile (role, id, etc)
-                    const res = await axios.post("https://internarea-production.up.railway.app/api/auth/record-login", {
+                    const res = await axios.post("https://internarea-wy7x.vercel.app/api/auth/record-login", {
                         email: fbUser.email,
                         name: fbUser.displayName,
                         device,
