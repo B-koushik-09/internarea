@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { selectuser, login } from "@/Feature/Userslice";
 import { selectLanguage } from "@/Feature/LanguageSlice";
 import { translations } from "@/utils/translations";
+import { API_URL } from "@/utils/apiConfig";
 import { Crown, Check, Zap, Star } from "lucide-react";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
@@ -55,8 +56,8 @@ export default function Subscription() {
             if (user?._id) {
                 try {
                     const [statusRes, limitRes] = await Promise.all([
-                        axios.get(`http://localhost:8080/api/subscription/status/${user._id}`),
-                        axios.get(`http://localhost:8080/api/subscription/check-limit/${user._id}`)
+                        axios.get(`${API_URL}/api/subscription/status/${user._id}`),
+                        axios.get(`${API_URL}/api/subscription/check-limit/${user._id}`)
                     ]);
                     setCurrentPlan(statusRes.data.plan || "Free");
                     setUsageInfo(limitRes.data);
@@ -96,7 +97,7 @@ export default function Subscription() {
             const usdAmount = plan.priceUSD.toFixed(2);
             console.log("[PayPal] Sending to backend - USD amount:", usdAmount);
 
-            const response = await axios.post("http://localhost:8080/api/subscription/create-paypal-order", {
+            const response = await axios.post(`${API_URL}/api/subscription/create-paypal-order`, {
                 amount: usdAmount,  // USD amount with 2 decimals
                 amountINR: plan.price,  // Original INR for reference
                 plan: plan.key,
@@ -127,7 +128,7 @@ export default function Subscription() {
             setIsLoading(true);
             const usdAmount = plan.priceUSD.toFixed(2);
 
-            const response = await axios.post("http://localhost:8080/api/subscription/capture-paypal-order", {
+            const response = await axios.post(`${API_URL}/api/subscription/capture-paypal-order`, {
                 orderID,
                 userId: user._id,
                 plan: plan.key,
@@ -144,7 +145,7 @@ export default function Subscription() {
                     subscription: { ...user.subscription, plan: plan.key, paymentDate: new Date() }
                 }));
 
-                const limitRes = await axios.get(`http://localhost:8080/api/subscription/check-limit/${user._id}`);
+                const limitRes = await axios.get(`${API_URL}/api/subscription/check-limit/${user._id}`);
                 setUsageInfo(limitRes.data);
             }
         } catch (error: any) {

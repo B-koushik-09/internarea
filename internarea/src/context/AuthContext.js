@@ -7,6 +7,7 @@ import { login, logout, setLoading, selectuser } from "@/Feature/Userslice";
 import axios from "axios";
 import { getDeviceInfo } from "@/Components/Security/DeviceChecker";
 import { logout as logoutAction } from "@/Feature/Userslice";
+import { API_URL } from "@/utils/apiConfig";
 
 // 🔑 AXIOS INTERCEPTOR: Handle Token Expiry (401 Unauthorized)
 axios.interceptors.request.use(
@@ -116,7 +117,7 @@ export const AuthProvider = ({ children }) => {
                     }
 
                     // 3. Sync with Backend to get full user profile (role, id, etc)
-                    const res = await axios.post("http://localhost:8080/api/auth/record-login", {
+                    const res = await axios.post(`${API_URL}/api/auth/record-login`, {
                         email: fbUser.email,
                         name: fbUser.displayName,
                         device,

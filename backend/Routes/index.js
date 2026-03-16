@@ -23,4 +23,9 @@ router.use("/subscription", Subscription);
 router.use("/resume", Resume);
 router.use("/message", require("./message-routes"));
 
+// Health check route
+router.get("/health", (req, res) => {
+    res.status(200).json({ status: "alive" });
+});
+
 module.exports = router;

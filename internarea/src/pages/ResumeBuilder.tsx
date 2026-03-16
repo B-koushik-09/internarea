@@ -3,6 +3,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { selectuser } from "@/Feature/Userslice";
+import { API_URL } from "@/utils/apiConfig";
 import OTPModal from "@/Components/Security/OTPModal";
 import { selectLanguage } from "@/Feature/LanguageSlice";
 import { translations } from "@/utils/translations";
@@ -59,7 +60,7 @@ export default function ResumeBuilder() {
     const fetchMyResumes = async () => {
         if (user?._id) {
             try {
-                const res = await axios.get(`http://localhost:8080/api/resume/my/${user._id}`);
+                const res = await axios.get(`${API_URL}/api/resume/my/${user._id}`);
                 console.log("Fetched resumes:", res.data);
                 setMyResumes(res.data);
             } catch (err) {
@@ -114,7 +115,7 @@ export default function ResumeBuilder() {
     // Step 3: Create PayPal order (using resume-specific endpoint)
     const createPayPalOrder = async (): Promise<string> => {
         try {
-            const response = await axios.post("http://localhost:8080/api/resume/create-order", {
+            const response = await axios.post(`${API_URL}/api/resume/create-order`, {
                 amount: RESUME_PRICE_USD,
                 userId: user._id
             });
@@ -132,7 +133,7 @@ export default function ResumeBuilder() {
             setIsLoading(true);
 
             // Capture payment AND create resume in one call
-            const captureRes = await axios.post("http://localhost:8080/api/resume/capture-order", {
+            const captureRes = await axios.post(`${API_URL}/api/resume/capture-order`, {
                 orderID,
                 userId: user._id,
                 details
@@ -158,7 +159,7 @@ export default function ResumeBuilder() {
 
         try {
             setIsLoading(true);
-            await axios.delete(`http://localhost:8080/api/resume/${resumeId}`);
+            await axios.delete(`${API_URL}/api/resume/${resumeId}`);
             toast.success("Resume deleted successfully");
             fetchMyResumes(); // Refresh the list
         } catch (err: any) {

@@ -13,6 +13,7 @@ import LoginModal from "./Security/LoginModal";
 import { getDeviceInfo } from "./Security/DeviceChecker";
 import axios from "axios";
 import { translations } from "@/utils/translations";
+import { API_URL } from "@/utils/apiConfig";
 
 const Navbar = () => {
   const user = useSelector(selectuser);
@@ -69,7 +70,7 @@ const Navbar = () => {
 
     try {
       const { browser, device, os } = getDeviceInfo();
-      const res = await axios.post("http://localhost:8080/api/auth/login", {
+      const res = await axios.post(`${API_URL}/api/auth/login`, {
         identifier,
         password: pass,
         device,
@@ -91,7 +92,7 @@ const Navbar = () => {
         setIsOTPModalOpen(true);
 
         try {
-          await axios.post("http://localhost:8080/api/auth/send-otp", {
+          await axios.post(`${API_URL}/api/auth/send-otp`, {
             identifier,
             purpose: "LOGIN_CHROME_PASSWORD"
           });
@@ -133,7 +134,7 @@ const Navbar = () => {
         setOtpEmail(userEmail);
         setIsOTPModalOpen(true);
 
-        await axios.post("http://localhost:8080/api/auth/send-otp", {
+        await axios.post(`${API_URL}/api/auth/send-otp`, {
           identifier: userEmail,
           purpose: "LOGIN_CHROME_GOOGLE"
         });
@@ -155,7 +156,7 @@ const Navbar = () => {
   const recordLogin = async (firebaseUser: any) => {
     try {
       const { browser, device, os } = getDeviceInfo();
-      const res = await axios.post("http://localhost:8080/api/auth/record-login", {
+      const res = await axios.post(`${API_URL}/api/auth/record-login`, {
         email: firebaseUser.email,
         name: firebaseUser.displayName,
         device,
@@ -186,7 +187,7 @@ const Navbar = () => {
   const updateLoginAfterOTP = async (firebaseUser: any) => {
     const { browser, device, os } = getDeviceInfo();
     try {
-      const res = await axios.post("http://localhost:8080/api/auth/record-login", {
+      const res = await axios.post(`${API_URL}/api/auth/record-login`, {
         email: firebaseUser.email,
         name: firebaseUser.displayName,
         device,
@@ -249,7 +250,7 @@ const Navbar = () => {
       setIsOTPModalOpen(true);
 
       // Trigger OTP send immediately
-      axios.post("http://localhost:8080/api/auth/send-otp", {
+      axios.post(`${API_URL}/api/auth/send-otp`, {
         identifier: email,
         purpose: "LANGUAGE_FRENCH"
       })
@@ -315,7 +316,7 @@ const Navbar = () => {
         onStandardLogin={handleStandardLogin}
         onSignup={async (data) => {
           try {
-            const res = await axios.post("http://localhost:8080/api/auth/register", data);
+            const res = await axios.post(`${API_URL}/api/auth/register`, data);
             if (res.data.status === "SUCCESS") {
               toast.success("Account created! Logging you in...");
               dispatch(login({ ...res.data.user, token: res.data.token }));
