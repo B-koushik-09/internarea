@@ -50,27 +50,38 @@ export default function Feed() {
   // Translate posts dynamically if language changes
   useEffect(() => {
     const translatePosts = async () => {
-      if (currentLanguage === "English") return;
+      if (currentLanguage === "English" || posts.length === 0) return;
       
       const newPosts = [...posts];
       let changed = false;
-      for (let i = 0; i < newPosts.length; i++) {
-        if (newPosts[i].content && !newPosts[i]._translatedContent) {
-          try {
-            const translated = await translateDynamicText(newPosts[i].content, currentLanguage);
-            if (translated && translated !== newPosts[i].content) {
-              newPosts[i]._translatedContent = translated;
-              changed = true;
-            }
-          } catch (e) { console.error(e); }
-        }
+
+      // Group untranslated posts
+      const untranslatedIndices = newPosts
+        .map((p, i) => (p.content && !p._translatedContent ? i : -1))
+        .filter(i => i !== -1);
+
+      if (untranslatedIndices.length === 0) return;
+
+      try {
+        const translations = await Promise.all(
+          untranslatedIndices.map(i => translateDynamicText(newPosts[i].content, currentLanguage))
+        );
+
+        translations.forEach((translated, index) => {
+          const originalIndex = untranslatedIndices[index];
+          if (translated && translated !== newPosts[originalIndex].content) {
+            newPosts[originalIndex]._translatedContent = translated;
+            changed = true;
+          }
+        });
+
+        if (changed) setPosts(newPosts);
+      } catch (e) {
+        console.error("Translation optimization error:", e);
       }
-      if (changed) setPosts(newPosts);
     }
     
-    if (posts.length > 0 && currentLanguage !== "English") {
-      translatePosts();
-    }
+    translatePosts();
   }, [posts, currentLanguage]);
 
   const like = async (id: string) => {

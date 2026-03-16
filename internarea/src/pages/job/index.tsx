@@ -163,22 +163,39 @@ const index = () => {
       
       const newJobs = [...filtered];
       let changed = false;
-      for (let i = 0; i < newJobs.length; i++) {
-        const j = newJobs[i];
-        if (!j._translatedTitle && j.title) {
-          j._translatedTitle = await translateDynamicText(j.title, currentLanguage);
-          changed = true;
-        }
-        if (!j._translatedCompany && j.company) {
-          j._translatedCompany = await translateDynamicText(j.company, currentLanguage);
-          changed = true;
-        }
-        if (!j._translatedLocation && j.location) {
-          j._translatedLocation = await translateDynamicText(j.location, currentLanguage);
-          changed = true;
-        }
+
+      const untranslatedIndices = newJobs
+        .map((j, i) => (!j._translatedTitle || !j._translatedCompany || !j._translatedLocation) ? i : -1)
+        .filter(i => i !== -1);
+
+      if (untranslatedIndices.length === 0) {
+        setfilteredjobs(filtered);
+        return;
       }
-      setfilteredjobs(newJobs);
+
+      try {
+        const translationPromises = untranslatedIndices.flatMap(i => {
+          const j = newJobs[i];
+          const promises = [];
+          if (!j._translatedTitle && j.title) promises.push(translateDynamicText(j.title, currentLanguage).then(res => ({ i, field: '_translatedTitle', res })));
+          if (!j._translatedCompany && j.company) promises.push(translateDynamicText(j.company, currentLanguage).then(res => ({ i, field: '_translatedCompany', res })));
+          if (!j._translatedLocation && j.location) promises.push(translateDynamicText(j.location, currentLanguage).then(res => ({ i, field: '_translatedLocation', res })));
+          return promises;
+        });
+
+        const results = await Promise.all(translationPromises);
+        results.forEach(({ i, field, res }) => {
+          if (res && res !== newJobs[i][field.replace('_translated', '').toLowerCase()]) {
+            newJobs[i][field] = res;
+            changed = true;
+          }
+        });
+
+        setfilteredjobs(newJobs);
+      } catch (e) {
+        console.error("Job translation optimization error:", e);
+        setfilteredjobs(filtered);
+      }
     };
 
     applyTranslations();

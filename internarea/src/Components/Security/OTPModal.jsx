@@ -8,8 +8,10 @@ const OTPModal = ({ isOpen, onClose, email, onSuccess, purpose }) => {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const [resending, setResending] = useState(false);
+    const hasSentInitial = React.useRef(false);
 
     const handleSendOTP = async () => {
+        if (resending) return;
         setResending(true);
         try {
             const res = await axios.post(`${API_URL}/api/auth/send-otp`, {
@@ -27,7 +29,13 @@ const OTPModal = ({ isOpen, onClose, email, onSuccess, purpose }) => {
         if (isOpen) {
             setOtp("");
             setError("");
-            handleSendOTP();
+            // Prevent double trigger on mount/re-render
+            if (!hasSentInitial.current) {
+                handleSendOTP();
+                hasSentInitial.current = true;
+            }
+        } else {
+            hasSentInitial.current = false;
         }
     }, [isOpen, email, purpose]);
 

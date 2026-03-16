@@ -17,6 +17,7 @@ import { useSelector } from "react-redux";
 import { selectLanguage } from "@/Feature/LanguageSlice";
 import { translations } from "@/utils/translations";
 import { API_URL } from "@/utils/apiConfig";
+import { translateDynamicText } from "@/utils/dynamicTranslate";
 
 interface Internship {
   _id: string;
@@ -26,6 +27,9 @@ interface Internship {
   stipend: string;
   duration: string;
   category: string;
+  _translatedTitle?: string;
+  _translatedCompany?: string;
+  _translatedLocation?: string;
 }
 
 interface Job {
@@ -36,6 +40,9 @@ interface Job {
   CTC: string;
   Experience: string;
   category: string;
+  _translatedTitle?: string;
+  _translatedCompany?: string;
+  _translatedLocation?: string;
 }
 
 export default function SvgSlider() {
@@ -106,6 +113,75 @@ export default function SvgSlider() {
   const filteredJobs = jobs.filter(
     (item) => !selectedCategory || item.category === selectedCategory
   );
+
+  // Translation Logic for Home Page Cards
+  useEffect(() => {
+    const translateCards = async () => {
+      if (currentLanguage === "English") return;
+
+      // Handle Internships
+      if (filteredInternships.length > 0) {
+        const untranslatedInternshipIndices = filteredInternships
+          .map((item: any, i) => (!item._translatedTitle || !item._translatedCompany || !item._translatedLocation) ? i : -1)
+          .filter(i => i !== -1);
+
+        if (untranslatedInternshipIndices.length > 0) {
+          const promises = untranslatedInternshipIndices.flatMap(i => {
+            const item = filteredInternships[i];
+            const p = [];
+            if (!item._translatedTitle && item.title) p.push(translateDynamicText(item.title, currentLanguage).then(res => ({ type: 'internship', i, field: '_translatedTitle', res })));
+            if (!item._translatedCompany && item.company) p.push(translateDynamicText(item.company, currentLanguage).then(res => ({ type: 'internship', i, field: '_translatedCompany', res })));
+            if (!item._translatedLocation && item.location) p.push(translateDynamicText(item.location, currentLanguage).then(res => ({ type: 'internship', i, field: '_translatedLocation', res })));
+            return p;
+          });
+
+          const results = await Promise.all(promises);
+          if (results.length > 0) {
+            setinternship(prev => {
+              const next = [...prev];
+              results.forEach(({ i, field, res }) => {
+                const globalIndex = prev.findIndex(item => item._id === filteredInternships[i]._id);
+                if (globalIndex !== -1 && res) next[globalIndex] = { ...next[globalIndex], [field]: res };
+              });
+              return next;
+            });
+          }
+        }
+      }
+
+      // Handle Jobs
+      if (filteredJobs.length > 0) {
+        const untranslatedJobIndices = filteredJobs
+          .map((item: any, i) => (!item._translatedTitle || !item._translatedCompany || !item._translatedLocation) ? i : -1)
+          .filter(i => i !== -1);
+
+        if (untranslatedJobIndices.length > 0) {
+          const promises = untranslatedJobIndices.flatMap(i => {
+            const item = filteredJobs[i];
+            const p = [];
+            if (!item._translatedTitle && item.title) p.push(translateDynamicText(item.title, currentLanguage).then(res => ({ type: 'job', i, field: '_translatedTitle', res })));
+            if (!item._translatedCompany && item.company) p.push(translateDynamicText(item.company, currentLanguage).then(res => ({ type: 'job', i, field: '_translatedCompany', res })));
+            if (!item._translatedLocation && item.location) p.push(translateDynamicText(item.location, currentLanguage).then(res => ({ type: 'job', i, field: '_translatedLocation', res })));
+            return p;
+          });
+
+          const results = await Promise.all(promises);
+          if (results.length > 0) {
+            setjob(prev => {
+              const next = [...prev];
+              results.forEach(({ i, field, res }) => {
+                const globalIndex = prev.findIndex(item => item._id === filteredJobs[i]._id);
+                if (globalIndex !== -1 && res) next[globalIndex] = { ...next[globalIndex], [field]: res };
+              });
+              return next;
+            });
+          }
+        }
+      }
+    };
+
+    translateCards();
+  }, [internships, jobs, currentLanguage]);
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* hero section */}
@@ -244,13 +320,13 @@ export default function SvgSlider() {
                 <span className="font-medium">{t.actively_hiring}</span>
               </div>
               <h3 className="text-lg font-semibold mb-2 text-gray-800">
-                {internship.title}
+                {currentLanguage === "English" ? internship.title : (internship._translatedTitle || internship.title)}
               </h3>
-              <p className="text-gray-500 mb-4">{internship.company}</p>
+              <p className="text-gray-500 mb-4">{currentLanguage === "English" ? internship.company : (internship._translatedCompany || internship.company)}</p>
               <div className="space-y-3 text-gray-600">
                 <div className="flex items-center gap-2">
                   <MapPin size={18} />
-                  <span>{internship.location}</span>
+                  <span>{currentLanguage === "English" ? internship.location : (internship._translatedLocation || internship.location)}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Banknote size={18} />
@@ -291,13 +367,13 @@ export default function SvgSlider() {
                 <span className="font-medium">{t.actively_hiring}</span>
               </div>
               <h3 className="text-lg font-semibold mb-2 text-gray-800">
-                {job.title}
+                {currentLanguage === "English" ? job.title : (job._translatedTitle || job.title)}
               </h3>
-              <p className="text-gray-500 mb-4">{job.company}</p>
+              <p className="text-gray-500 mb-4">{currentLanguage === "English" ? job.company : (job._translatedCompany || job.company)}</p>
               <div className="space-y-3 text-gray-600">
                 <div className="flex items-center gap-2">
                   <MapPin size={18} />
-                  <span>{job.location}</span>
+                  <span>{currentLanguage === "English" ? job.location : (job._translatedLocation || job.location)}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Banknote size={18} />
