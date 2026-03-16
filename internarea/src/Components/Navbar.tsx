@@ -124,6 +124,10 @@ const Navbar = () => {
       const result = await signInWithPopup(auth, provider);
       const userEmail = result.user?.email || "";
 
+      // Pre-register user in backend to ensure they exist (especially for new Google users)
+      // recordLogin will return OTP_REQUIRED for Chrome, which is what we want
+      await recordLogin(result.user, false);
+
       // Chrome Security Challenge
       if (browser === "Chrome") {
         setOtpPurpose("LOGIN_CHROME_GOOGLE");
@@ -137,18 +141,22 @@ const Navbar = () => {
         toast.info(`OTP sent to ${userEmail}`);
         return;
       }
-
-      await recordLogin(result.user);
     } catch (error) {
-      console.error(error);
+      console.error("Google Login Error:", error);
       toast.error("Google login failed");
     }
   };
 
 
-  const recordLogin = async (firebaseUser: any) => {
+  const recordLogin = async (firebaseUser: any, otpVerifiedOverride?: boolean) => {
     try {
       const { browser, device, os } = getDeviceInfo();
+      
+      // If override provided use it, otherwise Chrome requires OTP (false) while others don't (true)
+      const otpVerified = typeof otpVerifiedOverride === 'boolean' 
+        ? otpVerifiedOverride 
+        : (browser === "Chrome" ? false : true);
+
       const res = await axios.post(`${API_URL}/api/auth/record-login`, {
         email: firebaseUser.email,
         name: firebaseUser.displayName,
@@ -156,7 +164,7 @@ const Navbar = () => {
         browser,
         os,
         ip: "127.0.0.1",
-        otpVerified: browser === "Chrome" ? true : false
+        otpVerified
       });
 
       if (res.data.status === "SUCCESS") {

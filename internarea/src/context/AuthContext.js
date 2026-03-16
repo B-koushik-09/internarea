@@ -122,8 +122,12 @@ export const AuthProvider = ({ children }) => {
 
                     } else if (res.data.status === "OTP_REQUIRED") {
                         console.log("AuthContext: Login blocked by Chrome Security. Waiting for OTP.");
+                        // Keep loading as needed, but don't force a full Redux logout yet 
+                        // as Navbar is handling the primary flow.
                         setUser(null);
-                        dispatch(logout()); 
+                        setLocalLoading(false); 
+                        dispatch(setLoading(false));
+                        return;
 
                     } else {
                         console.warn("AuthContext: Backend sync failed, using Firebase fallback. Status:", res.data.status);

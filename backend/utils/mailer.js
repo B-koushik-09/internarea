@@ -7,7 +7,8 @@ const brevo = new BrevoClient({
 // ─── Base sender ───────────────────────────────────────────
 const sendMail = async ({ to, subject, html }) => {
   try {
-    await brevo.transactionalEmails.sendTransacEmail({
+    console.log(`[mailer] Attempting to send email to: ${to} (Subject: ${subject})`);
+    const result = await brevo.transactionalEmails.sendTransacEmail({
       subject: subject,
       htmlContent: html,
       sender: {
@@ -17,11 +18,17 @@ const sendMail = async ({ to, subject, html }) => {
       to: [{ email: to }],
     });
     
-    console.log("✅ Email sent to:", to);
+    console.log("✅ [mailer] Email sent successfully. Message ID:", result.messageId || "N/A");
     return { success: true };
 
   } catch (error) {
-    console.error("❌ Email error:", error.message);
+    console.error("❌ [mailer] Email failure details:", {
+      to,
+      subject,
+      error: error.message,
+      code: error.code,
+      response: error.response?.body
+    });
     return { success: false, error };
   }
 };

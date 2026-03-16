@@ -138,7 +138,9 @@ router.post("/record-login", async (req, res) => {
         // Mobile Access Restriction (10 AM - 1 PM IST)
         if (device && device.toLowerCase().includes("mobile")) {
             const hour = istTime.getHours();
+            console.log(`[record-login] Mobile Check: Hour=${hour}`);
             if (hour < 10 || hour >= 13) {
+                console.warn(`[record-login] Blocked: Mobile access outside 10AM-1PM IST (Attempt: ${hour}h)`);
                 return res.status(403).json({
                     status: "BLOCKED",
                     error: "Access denied. Mobile users can only log in between 10:00 AM and 1:00 PM IST."
