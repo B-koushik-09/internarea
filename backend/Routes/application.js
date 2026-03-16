@@ -3,19 +3,16 @@ const router = express.Router();
 const application = require("../Model/Application");
 const User = require("../Model/User");
 
-// ✅ CREATE APPLICATION WITH SUBSCRIPTION LIMIT CHECK
 router.post("/", async (req, res) => {
   try {
     const userId = req.body.user?._id;
-
-    // Check subscription limit before creating application
+ 
     if (userId) {
       const user = await User.findById(userId);
       const plan = user?.subscription?.plan || "Free";
       const limits = { Free: 1, Bronze: 3, Silver: 5, Gold: Infinity };
       const limit = limits[plan] || 1;
-
-      // Count applications this month
+ 
       const startOfMonth = new Date();
       startOfMonth.setDate(1);
       startOfMonth.setHours(0, 0, 0, 0);
@@ -35,8 +32,7 @@ router.post("/", async (req, res) => {
         });
       }
     }
-
-    // Create the application
+ 
     const applicationipdata = new application({
       company: req.body.company,
       category: req.body.category,

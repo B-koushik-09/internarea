@@ -92,7 +92,7 @@ const index = () => {
 
         setfilteredInternships(newInternships);
       } catch (e) {
-        console.error("Internship translation optimization error:", e);
+        console.error("Translation error:", e);
         setfilteredInternships(filtered);
       }
     };

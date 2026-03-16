@@ -11,13 +11,12 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider } from "@/context/AuthContext";
 
-export default function App({ Component, pageProps }: AppProps) {
-  // Removed internal AuthListener as it is replaced by AuthContext
+export default function App({ Component, pageProps }: AppProps) { 
 
   return (
     <Provider store={store}>
       <AuthProvider>
-        {/* 🔒 Root wrapper prevents horizontal overflow (iPad Mini fix) */}
+        
         <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-white">
           <ToastContainer />
           <Navbar />

@@ -25,8 +25,7 @@ function getNextAllowedDate(lastDate) {
 
 router.post("/login", async (req, res) => {
     try {
-        let { identifier, password } = req.body;
-        // Normalize email to lowercase if it looks like an email
+        let { identifier, password } = req.body; 
         if (identifier && identifier.includes('@')) {
             identifier = identifier.toLowerCase();
         }
@@ -38,8 +37,7 @@ router.post("/login", async (req, res) => {
         if (!user) {
             return res.status(404).json({ error: "Email is wrong" });
         }
-
-        // In production, use bcrypt.compare(password, user.password)
+ 
         if (user.password !== password) {
             return res.status(401).json({ error: "Password fails" });
         }
@@ -48,7 +46,7 @@ router.post("/login", async (req, res) => {
 
         console.log(`[DEBUG] Login: Email=${identifier}, Device=${req.body.device}, Browser=${req.body.browser}, Hour=${istTime.getHours()}`);
 
-        // ⛔ Mobile Access Restriction (10 AM - 1 PM IST)
+        // Mobile Access Restriction (10 AM - 1 PM IST)
         if (req.body.device && req.body.device.toLowerCase().includes("mobile")) {
             const hour = istTime.getHours();
             if (hour < 10 || hour >= 13) {
@@ -58,7 +56,7 @@ router.post("/login", async (req, res) => {
             }
         }
 
-        // ⛔ Chrome Security Rule (Standard Login)
+        // Chrome Security Rule
         if (req.body.browser === "Chrome" && !req.body.otpVerified) {
             return res.json({ status: "OTP_REQUIRED", message: "OTP verification required for Chrome" });
         }
@@ -83,8 +81,7 @@ router.post("/register", async (req, res) => {
         let { name, email, phone, password } = req.body;
 
         if (email) email = email.toLowerCase();
-
-        // Check if user exists
+ 
         const existingUser = await User.findOne({
             $or: [{ email: email }, { phone: phone }]
         });
@@ -93,9 +90,7 @@ router.post("/register", async (req, res) => {
             return res.status(409).json({ error: "Credentials already exist" });
         }
 
-        // Create new user
-        // Note: Password hashing should be implemented here in production
-        const newUser = new User({
+         const newUser = new User({
             name,
             email,
             phone,
@@ -117,7 +112,7 @@ const connect = require("../db");
 
 router.post("/record-login", async (req, res) => {
     try {
-        await connect(); // Ensure DB is connected
+        await connect();  
         const { email, device, browser, os, ip, otpVerified, name, isRefresh } = req.body;
 
         console.log(`[record-login] Request received for: ${email}, isRefresh: ${isRefresh}, otpVerified: ${otpVerified}`);
@@ -140,7 +135,7 @@ router.post("/record-login", async (req, res) => {
 
         const istTime = getISTTime();
 
-        // ⛔ Mobile Access Restriction (10 AM - 1 PM IST)
+        // Mobile Access Restriction (10 AM - 1 PM IST)
         if (device && device.toLowerCase().includes("mobile")) {
             const hour = istTime.getHours();
             if (hour < 10 || hour >= 13) {
@@ -150,24 +145,15 @@ router.post("/record-login", async (req, res) => {
                 });
             }
         }
-
-        // 🔑 SESSION REFRESH HANDLING
-        // If this is a session refresh (page reload, logo click, navigation),
-        // and the user was previously verified (otpVerified=true from localStorage),
-        // skip OTP re-verification and don't add duplicate login history
+ 
         if (isRefresh && otpVerified) {
-            console.log(`[record-login] Session refresh for ${email} - restoring session without OTP re-verification`);
+            console.log(`[record-login] Session refresh for ${email}`);
             return res.json({ status: "SUCCESS", user });
         }
-
-        // For fresh logins, check Chrome OTP requirement
-        if (browser === "Chrome") {
-            if (!otpVerified) {
-                return res.status(200).json({ status: "OTP_REQUIRED", message: "OTP verification required for Chrome" });
-            }
-        }
-
-        // Only add login history for fresh logins, not refreshes
+ 
+        if (browser === "Chrome" && !otpVerified) {
+            return res.status(200).json({ status: "OTP_REQUIRED", message: "OTP verification required for Chrome" });
+        } 
         if (!isRefresh) {
             user.loginHistory.push({
                 device,
@@ -197,8 +183,7 @@ router.post("/record-login", async (req, res) => {
 // Twilio client for phone OTP
 const twilio = require("twilio");
 const client = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH);
-
-// Valid OTP purposes
+ 
 const VALID_PURPOSES = [
     'LOGIN_CHROME_GOOGLE',
     'LOGIN_CHROME_PASSWORD',
@@ -207,20 +192,13 @@ const VALID_PURPOSES = [
     'FORGOT_PASSWORD_SMS',
     'RESUME_PAYMENT'
 ];
-
-/**
- * SEND OTP
- * POST /api/auth/send-otp
- * Body: { identifier: string, purpose: string }
- */
+ 
 router.post("/send-otp", async (req, res) => {
     try {
         let { identifier, purpose } = req.body;
 
-        await connect(); // ✅ Ensure DB is connected before query
+        await connect();  
 
-
-        // Validate inputs
         if (!identifier) return res.status(400).json({ error: "Identifier required" });
         if (!purpose) return res.status(400).json({ error: "Purpose required" });
         if (!VALID_PURPOSES.includes(purpose)) {
@@ -236,14 +214,12 @@ router.post("/send-otp", async (req, res) => {
 
         const today = getTodayKey();
 
-        // ⛔ DAILY LIMIT CHECK - Only for Forgot Password purposes
         if (purpose === 'FORGOT_PASSWORD_EMAIL' || purpose === 'FORGOT_PASSWORD_SMS') {
             if (user.lastForgotDate === today) {
                 return res.status(429).json({
                     error: `You already used forgot password today (${today}). You can use it again on ${getNextAllowedDate(today)}.`
                 });
             }
-            // Update usage date
             user.lastForgotDate = today;
             await user.save();
         }
@@ -253,16 +229,14 @@ router.post("/send-otp", async (req, res) => {
         if (isEmail) {
             const otp = generateOTP();
 
-            // Delete any previous OTPs for same email + purpose (avoid conflicts)
             await Otp.deleteMany({ email: identifier, purpose: purpose });
 
-            // Create new OTP with purpose
             await Otp.create({
                 email: identifier,
                 otp,
                 purpose: purpose,
                 isUsed: false,
-                expiresAt: new Date(Date.now() + 300000) // 5 minutes
+                expiresAt: new Date(Date.now() + 300000) 
             });
 
             const emailSent = await sendOTPMail(identifier, otp);
@@ -274,7 +248,6 @@ router.post("/send-otp", async (req, res) => {
             return res.json({ message: "OTP sent to your email", purpose: purpose });
         }
 
-        // PHONE FLOW → Twilio (for FORGOT_PASSWORD_SMS)
         await client.verify.v2.services(process.env.TWILIO_VERIFY_SID)
             .verifications.create({ to: `+91${identifier}`, channel: "sms" });
 
@@ -286,20 +259,13 @@ router.post("/send-otp", async (req, res) => {
     }
 });
 
-
-/**
- * VERIFY OTP
- * POST /api/auth/verify-otp
- * Body: { identifier: string, otp: string, purpose: string }
- */
+ 
 router.post("/verify-otp", async (req, res) => {
     try {
         let { identifier, otp, purpose } = req.body;
 
-        await connect(); // ✅ Ensure DB is connected before query
+        await connect();  
 
-
-        // Validate inputs
         if (!identifier) return res.status(400).json({ error: "Identifier required" });
         if (!otp) return res.status(400).json({ error: "OTP required" });
         if (!purpose) return res.status(400).json({ error: "Purpose required" });
@@ -323,15 +289,12 @@ router.post("/verify-otp", async (req, res) => {
             if (!validOtp) {
                 console.log(`[verify-otp] Invalid OTP for ${identifier}, purpose: ${purpose}`);
                 return res.status(400).json({ error: "Invalid or Expired OTP" });
-            }
-
-            // Mark OTP as used
+            } 
             validOtp.isUsed = true;
             await validOtp.save();
 
             console.log(`[verify-otp] OTP verified for ${identifier}, purpose: ${purpose}`);
         } else {
-            // PHONE FLOW: Verify via Twilio
             const check = await client.verify.v2.services(process.env.TWILIO_VERIFY_SID)
                 .verificationChecks
                 .create({ to: `+91${identifier}`, code: otp });
@@ -349,28 +312,6 @@ router.post("/verify-otp", async (req, res) => {
     }
 });
 
-// ✅ NEW ROUTE: Send OTP for Phone Forgot Password
-
-// const twilio = require("twilio");
-// const client = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH);
-// router.post("/send-phone-forgot-otp", async (req, res) => {
-
-//     try {
-//         const { phone } = req.body;
-
-//         await client.verify.v2.services(process.env.TWILIO_VERIFY_SID)
-//             .verifications
-//             .create({ to: `+91${phone}`, channel: "sms" });
-
-//         res.json({ message: "OTP sent via SMS" });
-//     } catch (err) {
-//         console.error(err.message);
-//         res.status(500).json({ error: "Failed to send OTP" });
-//     }
-
-// });
-
-// ✅ NEW ROUTE: Verify OTP for Phone Forgot Password
 router.post("/verify-phone-forgot-otp", async (req, res) => {
     try {
         const { phone, otp } = req.body;
@@ -398,7 +339,6 @@ router.post("/reset-password", async (req, res) => {
         });
         if (!user) return res.status(404).json({ error: "User not found" });
 
-        // EMAIL FLOW
         if (identifier.includes("@")) {
             const validOtp = await Otp.findOne({
                 email: identifier,
@@ -409,11 +349,6 @@ router.post("/reset-password", async (req, res) => {
             await Otp.deleteOne({ _id: validOtp._id });
         }
 
-        // PHONE FLOW - OTP was already verified in /verify-phone-forgot-otp
-        // Twilio consumes the verification on first check, so we skip re-verification here
-        // The frontend flow ensures verify-phone-forgot-otp was called before reset-password
-
-        // Check if new password is same as old password
         if (user.password === newPassword) {
             return res.status(400).json({ error: "New password cannot be the same as your old password" });
         }
@@ -436,24 +371,20 @@ router.post("/verify-phone", async (req, res) => {
     try {
         const { user_json_url } = req.body;
 
-        // 1. Verify Phone Number
         const response = await axios.get(user_json_url);
         const data = response.data;
         const phone = data.user_country_code + data.user_phone_number;
-
-        // 2. Find User
         const user = await User.findOne({ phone });
         if (!user) {
             return res.status(404).json({ error: "No user found with this phone number." });
         }
 
-        // 3. Check usage limit (Once per day)
-        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        // Usage limit (Once per day)
+        const today = new Date().toISOString().split('T')[0]; 
         if (user.lastResetDate === today) {
             return res.status(429).json({ error: "You can use this option only once per day." });
         }
 
-        // 4. Generate New Password (Letters only - no numbers or special characters)
         const generatePassword = () => {
             const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
             let p = "";
@@ -461,13 +392,10 @@ router.post("/verify-phone", async (req, res) => {
             return p;
         };
         const newPassword = generatePassword();
-
-        // 5. Update User
-        user.password = newPassword; // Remember: Hash in production!
+ 
+        user.password = newPassword; 
         user.lastResetDate = today;
         await user.save();
-
-        // 6. Return New Password
         res.json({ success: true, newPassword });
 
     } catch (err) {
@@ -477,22 +405,8 @@ router.post("/verify-phone", async (req, res) => {
 });
 
 router.post("/forgot-password", async (req, res) => {
-    // Legacy route kept for backward compatibility if needed, 
-    // or we can remove it if we fully switch. 
-    // For now, I'll comment it out or leave it as is but we won't use it in new flow.
-    // Leaving it might be confusing, but safe.
     try {
-        const { identifier } = req.body;
-        // ... (rest of legacy code)
-        // For brevity in this refactor, I will focus on the new route.
-        // But the user might still hit this if they are on old cached frontend.
-        // Let's just return a message saying use new flow? 
-        // No, let's keep it working for 'simulate' auto-gen password if needed, 
-        // BUT the new requirement is "User sets password".
-        // So the frontend will stop calling this.
-
-        // I will actually REPLACE this block with the new route logic entirely 
-        // to avoid clutter, as the instruction was to refactor.
+        const { identifier } = req.body; 
         res.status(400).json({ error: "Please use the new reset flow." });
     } catch (err) {
         res.status(500).json({ error: err.message });

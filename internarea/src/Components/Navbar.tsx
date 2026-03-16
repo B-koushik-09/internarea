@@ -32,11 +32,10 @@ const Navbar = () => {
 
   const t = { ...translations["English"], ...((translations as any)[currentLanguage] || {}) };
 
-  // 📱 Mobile Time Restriction Check (10 AM - 1 PM IST)
+  // Mobile Time Restriction (10 AM - 1 PM IST)
   const checkMobileTimeRestriction = (): boolean => {
     const { device } = getDeviceInfo();
     if (device.toLowerCase().includes("mobile")) {
-      // Get IST time
       const now = new Date();
       const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
       const istTime = new Date(utc + (3600000 * 5.5));
@@ -44,10 +43,10 @@ const Navbar = () => {
 
       if (hour < 10 || hour >= 13) {
         toast.error("📱 Mobile login is allowed only between 10 AM – 1 PM IST.");
-        return false; // Access denied
+        return false;
       }
     }
-    return true; // Access allowed
+    return true;
   };
 
   const handleGoogleLogin = async () => {
@@ -109,10 +108,7 @@ const Navbar = () => {
   };
 
   const performFirebaseLogin = async () => {
-    // Double-check mobile time restriction
-    if (!checkMobileTimeRestriction()) {
-      return;
-    }
+    if (!checkMobileTimeRestriction()) return;
 
     try {
       const { setPersistence, browserLocalPersistence } = await import("firebase/auth");
@@ -120,7 +116,7 @@ const Navbar = () => {
 
       const { browser } = getDeviceInfo();
 
-      // 🚨 If Chrome, set pending flag BEFORE Firebase auth to prevent AuthContext race
+      // For Chrome, set pending flag before auth
       if (browser === "Chrome" && typeof window !== 'undefined') {
         sessionStorage.setItem("chrome_otp_pending", "true");
       }
@@ -128,7 +124,7 @@ const Navbar = () => {
       const result = await signInWithPopup(auth, provider);
       const userEmail = result.user?.email || "";
 
-      // 🚨 CHROME SECURITY LOCK
+      // Chrome Security Challenge
       if (browser === "Chrome") {
         setOtpPurpose("LOGIN_CHROME_GOOGLE");
         setOtpEmail(userEmail);
@@ -139,13 +135,10 @@ const Navbar = () => {
           purpose: "LOGIN_CHROME_GOOGLE"
         });
         toast.info(`OTP sent to ${userEmail}`);
-
-        return; // ⛔ Stop here until OTP is verified
+        return;
       }
 
-      // Non-chrome → normal login
       await recordLogin(result.user);
-
     } catch (error) {
       console.error(error);
       toast.error("Google login failed");
@@ -212,15 +205,12 @@ const Navbar = () => {
       const user = auth.currentUser;
       if (!user) return;
 
-      // Clear pending flag and set verified flag in both session and local storage
       if (typeof window !== 'undefined') {
         sessionStorage.removeItem("chrome_otp_pending");
         sessionStorage.setItem("chrome_verified", "true");
-        // Store in localStorage for persistence across page refreshes
         localStorage.setItem("chrome_verified_" + user.email, "true");
       }
-
-      await recordLogin(user);   // Backend session starts ONLY now
+      await recordLogin(user);
     }
 
     if (otpPurpose === "LANGUAGE_FRENCH") {

@@ -25,6 +25,8 @@ const OTPModal = ({ isOpen, onClose, email, onSuccess, purpose }) => {
         setResending(false);
     };
 
+    // Prevent double OTP trigger
+    const sentRef = useRef(false);
     useEffect(() => {
         if (isOpen) {
             setOtp("");

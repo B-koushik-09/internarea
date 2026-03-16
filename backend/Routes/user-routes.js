@@ -2,8 +2,7 @@ const express = require("express");
 const router = express.Router();
 const connect = require("../db");
 const User = require("../Model/User");
-
-// Get User by ID
+ 
 router.get("/:id", async (req, res) => {
     try {
         await connect();
@@ -14,8 +13,7 @@ router.get("/:id", async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
-
-// Get User by Email
+ 
 router.get("/by-email/:email", async (req, res) => {
     try {
         await connect();

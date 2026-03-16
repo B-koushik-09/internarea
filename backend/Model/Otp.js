@@ -1,14 +1,6 @@
 const mongoose = require("mongoose");
 
-/**
- * OTP PURPOSE ENUM
- * - LOGIN_CHROME_GOOGLE: Chrome + Google Login
- * - LOGIN_CHROME_PASSWORD: Chrome + Email/Password Login
- * - LANGUAGE_FRENCH: French Language Unlock
- * - FORGOT_PASSWORD_EMAIL: Forgot Password via Email
- * - FORGOT_PASSWORD_SMS: Forgot Password via SMS
- * - RESUME_PAYMENT: Resume Builder Payment Verification
- */
+ 
 const OTP_PURPOSES = [
     'LOGIN_CHROME_GOOGLE',
     'LOGIN_CHROME_PASSWORD',

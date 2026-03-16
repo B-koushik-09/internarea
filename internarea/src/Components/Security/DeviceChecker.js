@@ -3,9 +3,7 @@ export const getDeviceInfo = () => {
     let browser = "Unknown";
     let device = "Desktop";
 
-    // 🔍 Browser Detection - Order matters! Check specific browsers before generic ones
-    // Brave, Edge, Opera all contain "Chrome" in their user agent, so check them first
-
+     
     if (userAgent.indexOf("Firefox") > -1) {
         browser = "Firefox";
     } else if (userAgent.indexOf("SamsungBrowser") > -1) {
@@ -15,13 +13,13 @@ export const getDeviceInfo = () => {
     } else if (userAgent.indexOf("Trident") > -1) {
         browser = "Internet Explorer";
     } else if (userAgent.indexOf("Edg") > -1) {
-        // Note: Modern Edge uses "Edg" (not "Edge") in user agent
+         
         browser = "Edge";
     } else if (userAgent.indexOf("Brave") > -1 || (typeof navigator.brave !== 'undefined')) {
-        // Brave browser detection - checks user agent OR navigator.brave API
+         
         browser = "Brave";
     } else if (userAgent.indexOf("Chrome") > -1) {
-        // Only identify as Chrome if none of the other Chromium-based browsers matched
+         
         browser = "Chrome";
     } else if (userAgent.indexOf("Safari") > -1) {
         browser = "Safari";

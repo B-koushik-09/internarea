@@ -20,29 +20,25 @@ export default function Subscription() {
 
     const currentLanguage = useSelector(selectLanguage);
     const t = { ...translations["English"], ...((translations as any)[currentLanguage] || {}) };
-
-    // Plan data with INR and USD prices
+ 
     const planData = [
         { key: "Free", price: 0, priceUSD: 0, apps: 1, color: "bg-gray-100", borderColor: "border-gray-300", icon: Star },
         { key: "Bronze", price: 100, priceUSD: 1.20, apps: 3, color: "bg-orange-50", borderColor: "border-orange-400", icon: Zap },
         { key: "Silver", price: 300, priceUSD: 3.60, apps: 5, color: "bg-slate-100", borderColor: "border-slate-400", icon: Crown },
         { key: "Gold", price: 1000, priceUSD: 12.00, apps: "Unlimited", color: "bg-yellow-50", borderColor: "border-yellow-400", icon: Crown }
     ];
-
-    // Get translated plan name
+ 
     const getPlanName = (key: string) => {
         const nameKey = `sub_${key.toLowerCase()}` as keyof typeof t;
         return (t as any)[nameKey] || key;
     };
-
-    // Check payment time window (10:00 AM - 11:00 AM IST - PRODUCTION)
+ 
     useEffect(() => {
         const checkTime = () => {
             const now = new Date();
             const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
             const istTime = new Date(utc + (3600000 * 5.5));
             const hour = istTime.getHours();
-            // PRODUCTION: Only allow 10:00 AM - 11:00 AM IST (hour === 10)
             setIsPaymentWindowOpen(hour === 10);
         };
         checkTime();
@@ -50,7 +46,6 @@ export default function Subscription() {
         return () => clearInterval(interval);
     }, []);
 
-    // Fetch current subscription status
     useEffect(() => {
         const fetchStatus = async () => {
             if (user?._id) {
@@ -68,8 +63,7 @@ export default function Subscription() {
         };
         fetchStatus();
     }, [user]);
-
-    // Handle plan selection
+ 
     const handleSelectPlan = (plan: any) => {
         if (!user) {
             toast.error(t?.sub_login_req || "Please login first");
@@ -82,47 +76,34 @@ export default function Subscription() {
         }
         setSelectedPlan(plan);
     };
-
-    // PayPal create order - send USD amount directly for proper formatting
+ 
     const createPayPalOrder = async (plan: any): Promise<string> => {
         console.log("[PayPal] Creating order for plan:", plan.key, "USD:", plan.priceUSD);
 
         try {
-            // Validate plan has USD price
             if (!plan.priceUSD || plan.priceUSD <= 0) {
                 throw new Error(`Invalid USD price for plan ${plan.key}: ${plan.priceUSD}`);
             }
 
-            // Send USD amount with proper 2 decimal places format
             const usdAmount = plan.priceUSD.toFixed(2);
-            console.log("[PayPal] Sending to backend - USD amount:", usdAmount);
-
             const response = await axios.post(`${API_URL}/api/subscription/create-paypal-order`, {
-                amount: usdAmount,  // USD amount with 2 decimals
-                amountINR: plan.price,  // Original INR for reference
+                amount: usdAmount,
+                amountINR: plan.price,
                 plan: plan.key,
                 userId: user._id
             });
-
-            console.log("[PayPal] Order created successfully:", response.data);
-
-            // PayPal expects the order ID as a string
-            if (!response.data.id) {
-                throw new Error("No order ID returned from backend");
-            }
 
             return response.data.id;
         } catch (error: any) {
             console.error("[PayPal] Order creation failed:", error.response?.data || error.message || error);
             const errorMsg = error.response?.data?.error || error.message || "Failed to create order";
             toast.error(errorMsg);
-            throw error; // Re-throw to let PayPal SDK know it failed
+            throw error;  
         }
     };
 
 
-
-    // PayPal capture payment
+ 
     const capturePayPalOrder = async (orderID: string, plan: any) => {
         try {
             setIsLoading(true);
@@ -132,7 +113,7 @@ export default function Subscription() {
                 orderID,
                 userId: user._id,
                 plan: plan.key,
-                amount: usdAmount  // USD amount for consistency
+                amount: usdAmount   
             });
 
             if (response.data.status === "success") {
@@ -156,21 +137,17 @@ export default function Subscription() {
         }
     };
 
-    // PayPal Client ID - NO fallback to "sb" (that's invalid)
     const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
 
-    // Show error if PayPal is not configured
     if (!paypalClientId) {
         console.error("❌ Missing NEXT_PUBLIC_PAYPAL_CLIENT_ID in .env.local");
     }
-
-    // PayPal options - must match backend currency (USD)
-    // disableFunding removes debit/credit card options - PayPal only
+ 
     const paypalOptions = {
         clientId: paypalClientId || "",
         currency: "USD",
         intent: "capture" as const,
-        "disable-funding": "card,credit",  // Hides debit/credit card options
+        "disable-funding": "card,credit",
     };
 
     return (

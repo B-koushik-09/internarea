@@ -13,21 +13,18 @@ app.use(cors());
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ extended: true, limit: "50mb" }));
 
-// Healthcheck route
 app.get("/", (req, res) => {
-  res.status(200).send("Server is running ✅");
+  res.status(200).send("Server is running");
 });
-
-// API routes
+ 
 app.use("/api", router);
-
-// Connect to DB then start server
+ 
 const PORT = process.env.PORT || 8080;
 connectDB().then(() => {
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on port ${PORT}`);
   });
 }).catch((err) => {
-  console.error("❌ Failed to connect to MongoDB:", err);
+  console.error("Failed to connect to MongoDB:", err);
   process.exit(1);
 });

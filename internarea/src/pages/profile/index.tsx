@@ -22,8 +22,7 @@ const ProfilePage = () => {
   const [activeCount, setActiveCount] = useState(0);
   const [acceptedCount, setAcceptedCount] = useState(0);
   const [loading, setLoading] = useState(true);
-
-  // Fetch application counts
+ 
   useEffect(() => {
     const fetchApplicationCounts = async () => {
       if (!user?.name) {
@@ -35,17 +34,13 @@ const ProfilePage = () => {
         const res = await axios.get(`${API_URL}/api/application`);
         const allApplications = res.data;
 
-        // Filter applications for current user
         const userApplications = allApplications.filter(
           (app: any) => app.user?.name === user?.name
         );
 
-        // Count active (pending) applications
         const active = userApplications.filter(
           (app: any) => app.status?.toLowerCase() === "pending"
         ).length;
-
-        // Count accepted applications (check both 'accepted' and 'approved')
         const accepted = userApplications.filter(
           (app: any) =>
             app.status?.toLowerCase() === "accepted" ||

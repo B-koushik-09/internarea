@@ -114,12 +114,9 @@ export default function SvgSlider() {
     (item) => !selectedCategory || item.category === selectedCategory
   );
 
-  // Translation Logic for Home Page Cards
   useEffect(() => {
     const translateCards = async () => {
       if (currentLanguage === "English") return;
-
-      // Handle Internships
       if (filteredInternships.length > 0) {
         const untranslatedInternshipIndices = filteredInternships
           .map((item: any, i) => (!item._translatedTitle || !item._translatedCompany || !item._translatedLocation) ? i : -1)

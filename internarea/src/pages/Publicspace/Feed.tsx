@@ -63,6 +63,7 @@ export default function Feed() {
       if (untranslatedIndices.length === 0) return;
 
       try {
+        // Parallel translation for performance
         const translations = await Promise.all(
           untranslatedIndices.map(i => translateDynamicText(newPosts[i].content, currentLanguage))
         );

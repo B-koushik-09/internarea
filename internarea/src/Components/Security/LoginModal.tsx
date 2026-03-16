@@ -13,12 +13,10 @@ interface LoginModalProps {
 
 const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onGoogleLogin, onStandardLogin, onSignup, t }) => {
     const [view, setView] = useState<'login' | 'signup'>('login');
-
-    // Login State
+ 
     const [identifier, setIdentifier] = useState("");
     const [password, setPassword] = useState("");
-
-    // Signup State
+ 
     const [signupData, setSignupData] = useState({
         name: "",
         email: "",

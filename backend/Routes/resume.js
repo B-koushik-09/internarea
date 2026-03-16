@@ -3,22 +3,13 @@ const router = express.Router();
 const axios = require("axios");
 const Resume = require("../Model/Resume");
 const User = require("../Model/User");
-
-// ✅ PayPal Configuration
+ 
 const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
 const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
 const PAYPAL_API = process.env.PAYPAL_MODE === "live"
     ? "https://api-m.paypal.com"
     : "https://api-m.sandbox.paypal.com";
-
-// ✅ IST TIME UTILITIES
-const getISTTime = () => {
-    const now = new Date();
-    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-    return new Date(utc + (3600000 * 5.5));
-};
-
-// ✅ PAYMENT TIME RESTRICTION MIDDLEWARE (10:00 AM - 11:00 AM IST)
+ 
 const checkPaymentTime = (req, res, next) => {
     const istTime = getISTTime();
     const hour = istTime.getHours();
@@ -31,23 +22,6 @@ const checkPaymentTime = (req, res, next) => {
     next();
 };
 
-// ✅ GET PAYPAL ACCESS TOKEN
-async function getPayPalAccessToken() {
-    const auth = Buffer.from(`${PAYPAL_CLIENT_ID}:${PAYPAL_CLIENT_SECRET}`).toString("base64");
-    const response = await axios.post(
-        `${PAYPAL_API}/v1/oauth2/token`,
-        "grant_type=client_credentials",
-        {
-            headers: {
-                Authorization: `Basic ${auth}`,
-                "Content-Type": "application/x-www-form-urlencoded"
-            }
-        }
-    );
-    return response.data.access_token;
-}
-
-// ✅ CREATE RESUME PAYPAL ORDER
 router.post("/create-order", checkPaymentTime, async (req, res) => {
     try {
         const { amount, userId } = req.body;
@@ -109,7 +83,6 @@ router.post("/create-order", checkPaymentTime, async (req, res) => {
     }
 });
 
-// ✅ CAPTURE RESUME PAYPAL ORDER
 router.post("/capture-order", async (req, res) => {
     try {
         const { orderID, userId, details } = req.body;
@@ -120,7 +93,6 @@ router.post("/capture-order", async (req, res) => {
 
         const accessToken = await getPayPalAccessToken();
 
-        // Capture the PayPal order
         const captureResponse = await axios.post(
             `${PAYPAL_API}/v2/checkout/orders/${orderID}/capture`,
             {},
@@ -137,20 +109,16 @@ router.post("/capture-order", async (req, res) => {
 
         console.log(`[Resume PayPal] Payment captured: ${paymentId}`);
 
-        // Create the resume
         const newResume = await Resume.create({
             user: userId,
             details,
             paymentId
         });
 
-        // Update user profile
         await User.findByIdAndUpdate(userId, {
             resumeAccess: true,
             $push: { resumes: newResume._id }
         });
-
-        // Send invoice email
         const { sendMail } = require("../utils/mailer");
         const user = await User.findById(userId);
         if (user && user.email) {
@@ -178,7 +146,6 @@ router.post("/capture-order", async (req, res) => {
     }
 });
 
-// ✅ CREATE RESUME (legacy - requires paymentId)
 router.post("/create", async (req, res) => {
     try {
         const { userId, details, paymentId } = req.body;
@@ -199,13 +166,10 @@ router.post("/create", async (req, res) => {
     }
 });
 
-// ✅ GET MY RESUMES
 router.get("/my/:userId", async (req, res) => {
     const resumes = await Resume.find({ user: req.params.userId });
     res.json(resumes);
 });
-
-// ✅ DELETE RESUME
 router.delete("/:id", async (req, res) => {
     try {
         const resumeId = req.params.id;
@@ -215,7 +179,6 @@ router.delete("/:id", async (req, res) => {
         const userId = resume.user;
         await Resume.findByIdAndDelete(resumeId);
 
-        // Remove from user's resumes array
         await User.findByIdAndUpdate(userId, {
             $pull: { resumes: resumeId }
         });

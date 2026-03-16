@@ -6,8 +6,7 @@ import { translations } from "@/utils/translations";
 export default function Footer() {
   const currentLanguage = useSelector(selectLanguage);
   const t = { ...translations["English"], ...((translations as any)[currentLanguage] || {}) };
-
-  // Use translations for lists if they exist, else fallback
+ 
   const placesList = t?.footer_places_list || ["New York", "Los Angeles", "Chicago", "San Francisco", "Miami", "Seattle"];
   const streamsList = t?.footer_streams_list || ["About us", "Careers", "Press", "News", "Media kit", "Contact"];
   const jobPlacesList = t?.footer_job_places_list || ["Blog", "Newsletter", "Events", "Help center", "Tutorials", "Supports"];

@@ -11,7 +11,7 @@ const checkLimit = async (userId) => {
   let limit = 0;
   if (friendCount > 10) limit = Infinity;
   else limit = friendCount;
-  console.log(`[Limit Check] User: ${user.name}, Friends: ${friendCount}, Limit: ${limit}`);
+  
   if (limit === 0) return { allowed: false, limit, count: friendCount };
   if (limit === Infinity) return { allowed: true, limit, count: friendCount };
   const startOfDay = new Date();

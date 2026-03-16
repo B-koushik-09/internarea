@@ -30,18 +30,13 @@ export default function ForgotPassword() {
         e.preventDefault();
         setLoading(true);
         try {
-            // Determine purpose based on method (email or phone)
             const purpose = method === 'email' ? 'FORGOT_PASSWORD_EMAIL' : 'FORGOT_PASSWORD_SMS';
-
-            // UNIFIED ROUTE: Backend handles both email and phone
-            // Daily limit is checked server-side for forgot password purposes
             const res = await axios.post(`${API_URL}/api/auth/send-otp`, {
                 identifier: identifier,
                 purpose: purpose
             });
 
             if (res.data.otp) {
-                // Show simulation alert if OTP is returned (Email flow usually, or dev mode)
                 alert(`[SMS SIMULATION]\nYour Phone OTP is: ${res.data.otp}`);
             }
 
@@ -49,7 +44,6 @@ export default function ForgotPassword() {
             setStep('verify');
         } catch (err: any) {
             console.error(err);
-            // Show detailed error if available, else network error message
             const errMsg = err.response?.data?.error || err.message || "Failed to send OTP";
             toast.error(errMsg);
         } finally {
@@ -62,17 +56,14 @@ export default function ForgotPassword() {
         e.preventDefault();
         setLoading(true);
         try {
-            // Determine purpose based on method
             const purpose = method === 'email' ? 'FORGOT_PASSWORD_EMAIL' : 'FORGOT_PASSWORD_SMS';
-
-            // UNIFIED ROUTE: Backend handles both email and phone verification
             await axios.post(`${API_URL}/api/auth/verify-otp`, {
                 identifier: identifier,
                 otp,
                 purpose: purpose
             });
 
-            toast.success(t.fp_btn_verify + " Success"); // "Verify OTP Success"
+            toast.success(t.fp_btn_verify + " Success"); 
             setStep('reset');
         } catch (err: any) {
             console.error(err);
@@ -81,8 +72,7 @@ export default function ForgotPassword() {
             setLoading(false);
         }
     };
-
-    // Helper: Generate Random Password (Letters only)
+ 
     const generatePassword = () => {
         const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
         let ret = "";
@@ -111,7 +101,7 @@ export default function ForgotPassword() {
             });
             toast.success(t.fp_success || "Password changed successfully.");
             setTimeout(() => {
-                router.push("/"); // Redirect to home/login
+                router.push("/"); 
             }, 3000);
         } catch (err: any) {
             toast.error(err.response?.data?.error || "Failed to reset password");
@@ -257,15 +247,7 @@ export default function ForgotPassword() {
                                     <Lock className="h-5 w-5 text-gray-400" />
                                 </div>
                                 <input
-                                    type="text" // Shown as text so user can see generated password initially, or password toggle? 
-                                    // Requirement says: "Automatically filled... User can edit". 
-                                    // Usually "password" type is safer, but "text" is better for visual verification of generated pass.
-                                    // Let's keep it 'text' momentarily or 'password'. 
-                                    // For UX, if I just generated it, I want to see it.
-                                    // But standard is 'password'. I'll stick to 'password' but maybe add a toggle later.
-                                    // Actually, for "Generate Random Password", usually it shows up in a text field or we make it type="text".
-                                    // Let's use type="text" for now since it's a reset flow and user just decided to change it.
-                                    // Or safer: type="text" if generated? No, let's just use text for simplicity as per "User can edit it if they want".
+                                    type="text" 
                                     required
                                     className="focus:ring-blue-500 text-black focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-lg py-3 border"
                                     placeholder="*******"

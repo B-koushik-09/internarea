@@ -1,6 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-// 🔑 PERSISTENT SESSION: Load user from localStorage on initialization
 const loadUserFromStorage = () => {
   if (typeof window !== 'undefined') {
     try {
@@ -15,7 +14,6 @@ const loadUserFromStorage = () => {
   return null;
 };
 
-// 🔑 PERSISTENT SESSION: Save user to localStorage
 const saveUserToStorage = (user) => {
   if (typeof window !== 'undefined') {
     try {
@@ -38,19 +36,17 @@ export const userslice = createSlice({
   name: "user",
   initialState: {
     user: loadUserFromStorage(),
-    isLoading: loadUserFromStorage() ? false : true, // Don't show loading if we have cached user
+    isLoading: loadUserFromStorage() ? false : true, 
   },
   reducers: {
     login: (state, action) => {
       state.user = action.payload;
       state.isLoading = false;
-      // 🔑 Save to localStorage for persistence
       saveUserToStorage(action.payload);
     },
     logout: (state) => {
       state.user = null;
       state.isLoading = false;
-      // 🔑 Clear from localStorage
       saveUserToStorage(null);
     },
     setLoading: (state, action) => {

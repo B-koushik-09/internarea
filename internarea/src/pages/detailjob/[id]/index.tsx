@@ -217,7 +217,6 @@ const index = () => {
       router.push("/job");
     } catch (error: any) {
       console.error(error);
-      // Handle limit reached error from backend
       if (error.response?.data?.limitReached) {
         toast.error(`🚫 ${error.response.data.error}`);
         toast.info("💡 Visit the Subscription page to upgrade your plan!", { autoClose: 6000 });

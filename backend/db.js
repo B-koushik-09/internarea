@@ -4,16 +4,10 @@ const connectDB = async () => {
     const MONGO_URI = process.env.DATABASE_URL || process.env.MONGO_URL;
 
     if (!MONGO_URI) {
-        throw new Error("❌ FATAL: DATABASE_URL is not defined in environment variables!");
+        throw new Error("DATABASE_URL is not defined");
     }
 
-    console.log("[DB] Connecting to MongoDB...");
-
-    await mongoose.connect(MONGO_URI, {
-        serverSelectionTimeoutMS: 5000,
-    });
-
-    console.log("✅ MongoDB Connected Successfully");
+    console.log("MongoDB Connected Successfully");
 };
 
 module.exports = connectDB;

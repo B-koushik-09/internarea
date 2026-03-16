@@ -37,26 +37,22 @@ export default function ResumeBuilder() {
     const currentLanguage = useSelector(selectLanguage);
     const t = { ...translations["English"], ...((translations as any)[currentLanguage] || {}) };
 
-    // Resume price in USD (₹50 ≈ $0.60, but PayPal minimum is $1.00)
     const RESUME_PRICE_INR = 50;
-    const RESUME_PRICE_USD = "1.00"; // Minimum PayPal amount
-
-    // Check payment time window (10:00 AM - 11:00 AM IST)
+    const RESUME_PRICE_USD = "1.00"; 
+ 
     useEffect(() => {
         const checkTime = () => {
             const now = new Date();
             const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
             const istTime = new Date(utc + (3600000 * 5.5));
             const hour = istTime.getHours();
-            // PRODUCTION: Only allow 10:00 AM - 11:00 AM IST (hour === 10)
             setIsPaymentWindowOpen(hour === 10);
         };
         checkTime();
         const interval = setInterval(checkTime, 60000);
         return () => clearInterval(interval);
     }, []);
-
-    // Fetch user's existing resumes
+ 
     const fetchMyResumes = async () => {
         if (user?._id) {
             try {
@@ -72,9 +68,7 @@ export default function ResumeBuilder() {
     useEffect(() => {
         fetchMyResumes();
     }, [user]);
-
-
-    // Validate form before proceeding
+ 
     const validateForm = () => {
         if (!details.name.trim()) {
             toast.error("Please enter your name");
@@ -90,8 +84,7 @@ export default function ResumeBuilder() {
         }
         return true;
     };
-
-    // Step 1: Initiate OTP verification
+ 
     const initiatePayment = async () => {
         if (!user) {
             toast.error(t?.resume_login_req || "Login required");
@@ -104,15 +97,13 @@ export default function ResumeBuilder() {
         }
         setIsOTPModalOpen(true);
     };
-
-    // Step 2: OTP success handler
+ 
     const handleOTPSuccess = () => {
         setIsOTPVerified(true);
         setIsOTPModalOpen(false);
         toast.success("OTP Verified! You can now proceed with payment.");
     };
-
-    // Step 3: Create PayPal order (using resume-specific endpoint)
+ 
     const createPayPalOrder = async (): Promise<string> => {
         try {
             const response = await axios.post(`${API_URL}/api/resume/create-order`, {
@@ -126,13 +117,10 @@ export default function ResumeBuilder() {
             throw error;
         }
     };
-
-    // Step 4: Capture PayPal payment and generate resume (using resume-specific endpoint)
+ 
     const capturePayPalOrder = async (orderID: string) => {
         try {
-            setIsLoading(true);
-
-            // Capture payment AND create resume in one call
+            setIsLoading(true); 
             const captureRes = await axios.post(`${API_URL}/api/resume/capture-order`, {
                 orderID,
                 userId: user._id,
@@ -551,8 +539,7 @@ export default function ResumeBuilder() {
         </PayPalScriptProvider>
     );
 }
-
-// Helper component for resume sections
+ 
 function Section({ title, content }: { title: string; content?: string }) {
     if (!content) return null;
     return (
