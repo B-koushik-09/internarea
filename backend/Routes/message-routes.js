@@ -1,11 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const Message = require("../Model/Message");
-const connect = require("../db");
 
 router.post("/send", async (req, res) => {
     try {
-        await connect();
         const { sender, receiver, content, sharedPost } = req.body;
         if (!sender || !receiver) return res.status(400).json({ error: "Missing sender or receiver" });
 
@@ -25,7 +23,6 @@ router.post("/send", async (req, res) => {
 
 router.get("/conversation/:user1/:user2", async (req, res) => {
     try {
-        await connect();
         const { user1, user2 } = req.params;
         const messages = await Message.find({
             $or: [
@@ -45,7 +42,6 @@ router.get("/conversation/:user1/:user2", async (req, res) => {
 
 router.get("/inbox/:userId", async (req, res) => {
     try {
-        await connect();
         const msgs = await Message.find({ receiver: req.params.userId })
             .populate("sender", "name photo")
             .populate("sharedPost")

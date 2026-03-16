@@ -6,6 +6,38 @@ import { useDispatch, useSelector } from "react-redux";
 import { login, logout, setLoading, selectuser } from "@/Feature/Userslice";
 import axios from "axios";
 import { getDeviceInfo } from "@/Components/Security/DeviceChecker";
+import { logout as logoutAction } from "@/Feature/Userslice";
+
+// 🔑 AXIOS INTERCEPTOR: Handle Token Expiry (401 Unauthorized)
+axios.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem("token");
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
+
+axios.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response?.status === 401) {
+            console.warn("Session expired or invalid (401). Logging out...");
+            // Clear storage
+            localStorage.removeItem("token");
+            localStorage.removeItem("internarea_user");
+            sessionStorage.removeItem("chrome_verified");
+            
+            // Redirect to home and reload to clear state
+            if (typeof window !== 'undefined') {
+                window.location.href = "/";
+            }
+        }
+        return Promise.reject(error);
+    }
+);
 
 const AuthContext = createContext(null);
 
@@ -84,7 +116,7 @@ export const AuthProvider = ({ children }) => {
                     }
 
                     // 3. Sync with Backend to get full user profile (role, id, etc)
-                    const res = await axios.post("https://internarea-wy7x.vercel.app/api/auth/record-login", {
+                    const res = await axios.post("http://localhost:8080/api/auth/record-login", {
                         email: fbUser.email,
                         name: fbUser.displayName,
                         device,
@@ -102,7 +134,7 @@ export const AuthProvider = ({ children }) => {
                             localStorage.setItem("chrome_verified_" + fbUser.email, "true");
                         }
                         setUser(fbUser);
-                        dispatch(login(res.data.user));
+                        dispatch(login({ ...res.data.user, token: res.data.token }));
                         console.log("AuthContext: User synced with backend:", res.data.user);
 
                     } else if (res.data.status === "OTP_REQUIRED") {

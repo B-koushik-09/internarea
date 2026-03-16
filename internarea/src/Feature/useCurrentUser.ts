@@ -11,7 +11,7 @@ export function useCurrentUser() {
     const unsub = onAuthStateChanged(auth, async (fbUser) => {
       if (fbUser?.email) {
         const res = await axios.get(
-          `https://internarea-wy7x.vercel.app/api/user-routes/by-email/${fbUser.email}`
+          `http://localhost:8080/api/user-routes/by-email/${fbUser.email}`
         );
         setUser(res.data);
       } else {

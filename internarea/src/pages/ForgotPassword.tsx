@@ -34,7 +34,7 @@ export default function ForgotPassword() {
 
             // UNIFIED ROUTE: Backend handles both email and phone
             // Daily limit is checked server-side for forgot password purposes
-            const res = await axios.post("https://internarea-wy7x.vercel.app/api/auth/send-otp", {
+            const res = await axios.post("http://localhost:8080/api/auth/send-otp", {
                 identifier: identifier,
                 purpose: purpose
             });
@@ -65,7 +65,7 @@ export default function ForgotPassword() {
             const purpose = method === 'email' ? 'FORGOT_PASSWORD_EMAIL' : 'FORGOT_PASSWORD_SMS';
 
             // UNIFIED ROUTE: Backend handles both email and phone verification
-            await axios.post("https://internarea-wy7x.vercel.app/api/auth/verify-otp", {
+            await axios.post("http://localhost:8080/api/auth/verify-otp", {
                 identifier: identifier,
                 otp,
                 purpose: purpose
@@ -103,7 +103,7 @@ export default function ForgotPassword() {
 
         setLoading(true);
         try {
-            const res = await axios.post("https://internarea-wy7x.vercel.app/api/auth/reset-password", {
+            const res = await axios.post("http://localhost:8080/api/auth/reset-password", {
                 identifier,
                 otp,
                 newPassword
@@ -315,7 +315,7 @@ export default function ForgotPassword() {
                                 Please copy this password and keep it safe. You can change it after logging in.
                             </p>
                         </div>
-                        <Link href="/register">
+                        <Link href="/">
                             <button className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/30">
                                 Login Now
                             </button>

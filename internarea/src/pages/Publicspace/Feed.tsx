@@ -6,6 +6,7 @@ import { Heart, MessageSquare, Share2, MoreHorizontal, Trash2, Send, X, Check, S
 import { toast } from "react-toastify";
 import { selectLanguage } from "@/Feature/LanguageSlice";
 import { translations } from "@/utils/translations";
+import { translateDynamicText } from "@/utils/dynamicTranslate";
 
 export default function Feed() {
   const [posts, setPosts] = useState<any[]>([]);
@@ -27,7 +28,7 @@ export default function Feed() {
 
   const fetchPosts = () => {
     if (user?._id) {
-      axios.get(`https://internarea-wy7x.vercel.app/api/post-routes/feed/${user._id}`)
+      axios.get(`http://localhost:8080/api/post-routes/feed/${user._id}`)
         .then(res => setPosts(res.data))
         .catch(err => console.error(err));
     }
@@ -35,7 +36,7 @@ export default function Feed() {
 
   const fetchFriends = () => {
     if (user?._id) {
-      axios.get(`https://internarea-wy7x.vercel.app/api/friend-routes/list/${user._id}`)
+      axios.get(`http://localhost:8080/api/friend-routes/list/${user._id}`)
         .then(res => setFriends(res.data))
         .catch(e => console.error(e));
     }
@@ -45,9 +46,35 @@ export default function Feed() {
     fetchPosts();
   }, [user]);
 
+  // Translate posts dynamically if language changes
+  useEffect(() => {
+    const translatePosts = async () => {
+      if (currentLanguage === "English") return;
+      
+      const newPosts = [...posts];
+      let changed = false;
+      for (let i = 0; i < newPosts.length; i++) {
+        if (newPosts[i].content && !newPosts[i]._translatedContent) {
+          try {
+            const translated = await translateDynamicText(newPosts[i].content, currentLanguage);
+            if (translated && translated !== newPosts[i].content) {
+              newPosts[i]._translatedContent = translated;
+              changed = true;
+            }
+          } catch (e) { console.error(e); }
+        }
+      }
+      if (changed) setPosts(newPosts);
+    }
+    
+    if (posts.length > 0 && currentLanguage !== "English") {
+      translatePosts();
+    }
+  }, [posts, currentLanguage]);
+
   const like = async (id: string) => {
     try {
-      await axios.post("https://internarea-wy7x.vercel.app/api/post-routes/like", { postId: id, userId: user?._id });
+      await axios.post("http://localhost:8080/api/post-routes/like", { postId: id, userId: user?._id });
       setPosts(prev => prev.map(p => {
         if (p._id === id) {
           const likes = p.likes.includes(user._id)
@@ -72,7 +99,7 @@ export default function Feed() {
 
     try {
       for (const friendId of selectedFriends) {
-        await axios.post("https://internarea-wy7x.vercel.app/api/message/send", {
+        await axios.post("http://localhost:8080/api/message/send", {
           sender: user._id,
           receiver: friendId,
           content: "Shared a post with you",
@@ -91,7 +118,7 @@ export default function Feed() {
   const deletePost = async (id: string) => {
     if (!confirm(t?.public_confirm_delete || "Are you sure you want to delete this post?")) return;
     try {
-      await axios.delete(`https://internarea-wy7x.vercel.app/api/post-routes/delete/${id}`);
+      await axios.delete(`http://localhost:8080/api/post-routes/delete/${id}`);
       toast.success(t?.public_msg_deleted || "Post deleted");
       setPosts(prev => prev.filter(p => p._id !== id));
     } catch (e) {
@@ -102,7 +129,7 @@ export default function Feed() {
   const submitComment = async (postId: string) => {
     if (!commentText.trim()) return;
     try {
-      await axios.post("https://internarea-wy7x.vercel.app/api/post-routes/comment", {
+      await axios.post("http://localhost:8080/api/post-routes/comment", {
         postId,
         userId: user._id,
         text: commentText
@@ -156,7 +183,9 @@ export default function Feed() {
           </div>
 
           <div className="px-4 pb-3">
-            <p className="text-gray-800 text-sm md:text-base whitespace-pre-wrap leading-relaxed">{p.content}</p>
+            <p className="text-gray-800 text-sm md:text-base whitespace-pre-wrap leading-relaxed">
+              {currentLanguage === "English" ? p.content : (p._translatedContent || p.content)}
+            </p>
           </div>
 
           {p.mediaUrl && (

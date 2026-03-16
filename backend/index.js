@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 require("dotenv").config();
 
+const connectDB = require("./db");
 const router = require("./Routes/index");
 
 const app = express();
@@ -20,13 +21,13 @@ app.get("/", (req, res) => {
 // API routes
 app.use("/api", router);
 
-// For local development
-if (process.env.NODE_ENV !== "production") {
-  const PORT = process.env.PORT || 8080;
+// Connect to DB then start server
+const PORT = process.env.PORT || 8080;
+connectDB().then(() => {
   app.listen(PORT, () => {
-    console.log(`Server running locally on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
   });
-}
-
-// Export for Vercel serverless
-module.exports = app;
+}).catch((err) => {
+  console.error("❌ Failed to connect to MongoDB:", err);
+  process.exit(1);
+});

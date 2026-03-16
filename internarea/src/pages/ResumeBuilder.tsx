@@ -7,7 +7,7 @@ import OTPModal from "@/Components/Security/OTPModal";
 import { selectLanguage } from "@/Feature/LanguageSlice";
 import { translations } from "@/utils/translations";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
-import { FileText, CheckCircle, AlertCircle } from "lucide-react";
+import { FileText, CheckCircle, AlertCircle, Trash2, Eye, X } from "lucide-react";
 
 export default function ResumeBuilder() {
     const user = useSelector(selectuser);
@@ -30,6 +30,8 @@ export default function ResumeBuilder() {
     const [isPaymentWindowOpen, setIsPaymentWindowOpen] = useState(false);
     const [generatedResume, setGeneratedResume] = useState<any>(null);
     const [myResumes, setMyResumes] = useState<any[]>([]);
+    const [selectedResume, setSelectedResume] = useState<any>(null);
+    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
     const currentLanguage = useSelector(selectLanguage);
     const t = { ...translations["English"], ...((translations as any)[currentLanguage] || {}) };
@@ -45,6 +47,7 @@ export default function ResumeBuilder() {
             const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
             const istTime = new Date(utc + (3600000 * 5.5));
             const hour = istTime.getHours();
+            // PRODUCTION: Only allow 10:00 AM - 11:00 AM IST (hour === 10)
             setIsPaymentWindowOpen(hour === 10);
         };
         checkTime();
@@ -56,7 +59,8 @@ export default function ResumeBuilder() {
     const fetchMyResumes = async () => {
         if (user?._id) {
             try {
-                const res = await axios.get(`https://internarea-wy7x.vercel.app/api/resume/my/${user._id}`);
+                const res = await axios.get(`http://localhost:8080/api/resume/my/${user._id}`);
+                console.log("Fetched resumes:", res.data);
                 setMyResumes(res.data);
             } catch (err) {
                 console.error("Failed to fetch resumes:", err);
@@ -110,7 +114,7 @@ export default function ResumeBuilder() {
     // Step 3: Create PayPal order (using resume-specific endpoint)
     const createPayPalOrder = async (): Promise<string> => {
         try {
-            const response = await axios.post("https://internarea-wy7x.vercel.app/api/resume/create-order", {
+            const response = await axios.post("http://localhost:8080/api/resume/create-order", {
                 amount: RESUME_PRICE_USD,
                 userId: user._id
             });
@@ -128,7 +132,7 @@ export default function ResumeBuilder() {
             setIsLoading(true);
 
             // Capture payment AND create resume in one call
-            const captureRes = await axios.post("https://internarea-wy7x.vercel.app/api/resume/capture-order", {
+            const captureRes = await axios.post("http://localhost:8080/api/resume/capture-order", {
                 orderID,
                 userId: user._id,
                 details
@@ -143,6 +147,23 @@ export default function ResumeBuilder() {
         } catch (err: any) {
             console.error("[Resume] Payment capture failed:", err);
             toast.error(err.response?.data?.error || "Failed to process payment");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Step 5: Delete Resume
+    const handleDeleteResume = async (resumeId: string) => {
+        if (!window.confirm("Are you sure you want to delete this resume?")) return;
+
+        try {
+            setIsLoading(true);
+            await axios.delete(`http://localhost:8080/api/resume/${resumeId}`);
+            toast.success("Resume deleted successfully");
+            fetchMyResumes(); // Refresh the list
+        } catch (err: any) {
+            console.error("Delete resume failed:", err);
+            toast.error(err.response?.data?.error || "Failed to delete resume");
         } finally {
             setIsLoading(false);
         }
@@ -437,12 +458,85 @@ export default function ResumeBuilder() {
                                         )}
                                     </div>
 
-                                    <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center text-xs text-gray-500">
-                                        <span>{t?.resume_created || "Created"}: {new Date(resume.createdAt).toLocaleDateString()}</span>
-                                        <span>ID: {resume.paymentId?.slice(-8) || "N/A"}</span>
+                                    <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
+                                        <div className="text-xs text-gray-500">
+                                            <span>{t?.resume_created || "Created"}: {new Date(resume.createdAt).toLocaleDateString()}</span>
+                                            <span className="block mt-1">ID: {resume.paymentId?.slice(-8) || "N/A"}</span>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedResume(resume);
+                                                    setIsViewModalOpen(true);
+                                                }}
+                                                className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors group"
+                                                title="View Resume"
+                                            >
+                                                <Eye size={18} className="group-hover:scale-110 transition-transform" />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteResume(resume._id)}
+                                                className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors group"
+                                                title="Delete Resume"
+                                            >
+                                                <Trash2 size={18} className="group-hover:scale-110 transition-transform" />
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Resume View Modal */}
+                {isViewModalOpen && selectedResume && (
+                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+                        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto relative animate-in fade-in zoom-in duration-300">
+                            <button
+                                onClick={() => setIsViewModalOpen(false)}
+                                className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                                <X size={24} />
+                            </button>
+
+                            <div className="p-8">
+                                <div className="flex flex-col md:flex-row gap-8 items-start border-b pb-8 mb-8">
+                                    {selectedResume.details?.photo ? (
+                                        <img
+                                            src={selectedResume.details.photo}
+                                            alt="Profile"
+                                            className="w-32 h-32 rounded-2xl object-cover border-4 border-gray-50 shadow-md"
+                                        />
+                                    ) : (
+                                        <div className="w-32 h-32 rounded-2xl bg-gray-100 flex items-center justify-center text-gray-400">
+                                            <FileText size={48} />
+                                        </div>
+                                    )}
+                                    <div className="flex-1">
+                                        <h2 className="text-3xl font-bold text-gray-900 mb-2">{selectedResume.details?.name}</h2>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-gray-600">
+                                            <p className="flex items-center gap-2">📧 {selectedResume.details?.email || "N/A"}</p>
+                                            <p className="flex items-center gap-2">📞 {selectedResume.details?.phone || "N/A"}</p>
+                                            <p className="flex items-center gap-2 md:col-span-2">📍 {selectedResume.details?.address || "N/A"}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-8">
+                                    <Section title="🎓 Education" content={selectedResume.details?.education} />
+                                    <Section title="⚡ Skills" content={selectedResume.details?.skills} />
+                                    <Section title="💼 Experience" content={selectedResume.details?.experience} />
+                                    <Section title="🏆 Achievements" content={selectedResume.details?.achievements} />
+                                    <Section title="💪 Strengths" content={selectedResume.details?.strengths} />
+                                    <Section title="👤 About Me" content={selectedResume.details?.personalDetails} />
+                                </div>
+
+                                <div className="mt-10 pt-6 border-t border-gray-100 flex justify-between items-center text-sm text-gray-400 italic">
+                                    <p>Document ID: {selectedResume._id}</p>
+                                    <p>Created on: {new Date(selectedResume.createdAt).toLocaleDateString()}</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 )}
@@ -454,5 +548,18 @@ export default function ResumeBuilder() {
                 </div>
             </div>
         </PayPalScriptProvider>
+    );
+}
+
+// Helper component for resume sections
+function Section({ title, content }: { title: string; content?: string }) {
+    if (!content) return null;
+    return (
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <h3 className="text-lg font-semibold text-gray-900 mb-3 border-l-4 border-blue-500 pl-3">{title}</h3>
+            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 text-gray-700 leading-relaxed whitespace-pre-wrap">
+                {content}
+            </div>
+        </div>
     );
 }

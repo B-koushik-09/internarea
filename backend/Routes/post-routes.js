@@ -1,11 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const connect = require("../db");
 const Post = require("../Model/Post");
 const User = require("../Model/User");
 
 const checkLimit = async (userId) => {
-  await connect();
   const user = await User.findById(userId);
   if (!user) return { allowed: false, limit: 0, count: 0 };
 
@@ -43,7 +41,6 @@ router.post("/create", async (req, res) => {
 });
 
 router.get("/feed/:userId", async (req, res) => {
-  await connect();
   const posts = await Post.find()
     .populate("user", "name photo")
     .populate("comments.user", "name photo")
@@ -53,7 +50,6 @@ router.get("/feed/:userId", async (req, res) => {
 });
 
 router.post("/like", async (req, res) => {
-  await connect();
   const { postId, userId } = req.body;
 
   const post = await Post.findById(postId);
@@ -70,7 +66,6 @@ router.post("/like", async (req, res) => {
 });
 
 router.post("/comment", async (req, res) => {
-  await connect();
   const { postId, userId, text } = req.body;
 
   await Post.findByIdAndUpdate(postId, {
@@ -81,7 +76,6 @@ router.post("/comment", async (req, res) => {
 });
 
 router.post("/share", async (req, res) => {
-  await connect();
   const { postId, userId } = req.body;
 
   const original = await Post.findById(postId);
@@ -97,14 +91,12 @@ router.post("/share", async (req, res) => {
 });
 
 router.get("/my/:userId", async (req, res) => {
-  await connect();
   const posts = await Post.find({ user: req.params.userId });
   res.json(posts);
 });
 
 router.delete("/delete/:id", async (req, res) => {
   try {
-    await connect();
     await Post.findByIdAndDelete(req.params.id);
     res.json({ msg: "Post deleted" });
   } catch (e) {

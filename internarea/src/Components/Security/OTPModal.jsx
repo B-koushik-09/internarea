@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 
@@ -8,47 +8,52 @@ const OTPModal = ({ isOpen, onClose, email, onSuccess, purpose }) => {
     const [loading, setLoading] = useState(false);
     const [resending, setResending] = useState(false);
 
+    const handleSendOTP = async () => {
+        setResending(true);
+        try {
+            const res = await axios.post("http://localhost:8080/api/auth/send-otp", {
+                identifier: email,
+                purpose: purpose
+            });
+            toast.success(`OTP sent to ${email}`);
+        } catch (err) {
+            toast.error(err.response?.data?.error || "Failed to send OTP");
+        }
+        setResending(false);
+    };
+
+    useEffect(() => {
+        if (isOpen) {
+            setOtp("");
+            setError("");
+            handleSendOTP();
+        }
+    }, [isOpen, email, purpose]);
+
     if (!isOpen) return null;
 
     const handleVerify = async () => {
         setLoading(true);
         setError("");
-
         try {
-            const res = await axios.post("https://internarea-wy7x.vercel.app/api/auth/verify-otp", {
+            const res = await axios.post("http://localhost:8080/api/auth/verify-otp", {
                 identifier: email,
                 otp,
-                purpose: purpose // Include purpose for verification
+                purpose: purpose
             });
             if (res.data.status === "SUCCESS") {
                 toast.success("OTP Verified!");
+                setOtp("");
+                setError("");
                 onSuccess();
                 onClose();
             } else {
                 setError("Invalid OTP");
             }
         } catch (err) {
-            console.error("Verify OTP Error:", err);
             setError(err.response?.data?.error || "Verification failed");
         }
         setLoading(false);
-    };
-
-    const handleSendOTP = async () => {
-        setResending(true);
-        try {
-            // Trigger backend to send OTP with purpose
-            const res = await axios.post("https://internarea-wy7x.vercel.app/api/auth/send-otp", {
-                identifier: email,
-                purpose: purpose // Include purpose for resend
-            });
-            console.log("Resend OTP Response:", res.data);
-            toast.success(`OTP sent to ${email}`);
-        } catch (err) {
-            console.error("Resend OTP Error:", err);
-            toast.error(err.response?.data?.error || "Failed to send OTP");
-        }
-        setResending(false);
     };
 
     // Convert purpose enum to user-friendly text
@@ -126,7 +131,11 @@ const OTPModal = ({ isOpen, onClose, email, onSuccess, purpose }) => {
                             {resending ? "Sending..." : `Resend OTP to ${email?.split('@')[0]}...`}
                         </button>
                         <button
-                            onClick={onClose}
+                            onClick={() => {
+                                setOtp("");
+                                setError("");
+                                onClose();
+                            }}
                             className="text-gray-400 hover:text-gray-600 font-medium transition-colors"
                         >
                             Cancel

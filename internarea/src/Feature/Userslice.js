@@ -21,8 +21,12 @@ const saveUserToStorage = (user) => {
     try {
       if (user) {
         localStorage.setItem("internarea_user", JSON.stringify(user));
+        if (user.token) {
+          localStorage.setItem("token", user.token);
+        }
       } else {
         localStorage.removeItem("internarea_user");
+        localStorage.removeItem("token");
       }
     } catch (e) {
       console.error("Error saving user to localStorage:", e);

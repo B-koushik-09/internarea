@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const axios = require("axios");
-const connect = require("../db");
 const Resume = require("../Model/Resume");
 const User = require("../Model/User");
 
@@ -113,7 +112,6 @@ router.post("/create-order", checkPaymentTime, async (req, res) => {
 // ✅ CAPTURE RESUME PAYPAL ORDER
 router.post("/capture-order", async (req, res) => {
     try {
-        await connect();
         const { orderID, userId, details } = req.body;
 
         if (!orderID || !userId || !details) {
@@ -183,7 +181,6 @@ router.post("/capture-order", async (req, res) => {
 // ✅ CREATE RESUME (legacy - requires paymentId)
 router.post("/create", async (req, res) => {
     try {
-        await connect();
         const { userId, details, paymentId } = req.body;
         if (!paymentId) return res.status(400).json({ error: "Payment required" });
         const newResume = await Resume.create({
@@ -204,9 +201,29 @@ router.post("/create", async (req, res) => {
 
 // ✅ GET MY RESUMES
 router.get("/my/:userId", async (req, res) => {
-    await connect();
     const resumes = await Resume.find({ user: req.params.userId });
     res.json(resumes);
+});
+
+// ✅ DELETE RESUME
+router.delete("/:id", async (req, res) => {
+    try {
+        const resumeId = req.params.id;
+        const resume = await Resume.findById(resumeId);
+        if (!resume) return res.status(404).json({ error: "Resume not found" });
+
+        const userId = resume.user;
+        await Resume.findByIdAndDelete(resumeId);
+
+        // Remove from user's resumes array
+        await User.findByIdAndUpdate(userId, {
+            $pull: { resumes: resumeId }
+        });
+
+        res.json({ message: "Resume deleted successfully" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 module.exports = router;

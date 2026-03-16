@@ -69,7 +69,7 @@ const Navbar = () => {
 
     try {
       const { browser, device, os } = getDeviceInfo();
-      const res = await axios.post("https://internarea-wy7x.vercel.app/api/auth/login", {
+      const res = await axios.post("http://localhost:8080/api/auth/login", {
         identifier,
         password: pass,
         device,
@@ -80,7 +80,7 @@ const Navbar = () => {
       });
 
       if (res.data.status === "SUCCESS") {
-        dispatch(login(res.data.user));
+        dispatch(login({ ...res.data.user, token: res.data.token }));
         toast.success("Logged in successfully");
         setIsLoginModalOpen(false);
         setLoginPass("");
@@ -91,7 +91,7 @@ const Navbar = () => {
         setIsOTPModalOpen(true);
 
         try {
-          await axios.post("https://internarea-wy7x.vercel.app/api/auth/send-otp", {
+          await axios.post("http://localhost:8080/api/auth/send-otp", {
             identifier,
             purpose: "LOGIN_CHROME_PASSWORD"
           });
@@ -133,7 +133,7 @@ const Navbar = () => {
         setOtpEmail(userEmail);
         setIsOTPModalOpen(true);
 
-        await axios.post("https://internarea-wy7x.vercel.app/api/auth/send-otp", {
+        await axios.post("http://localhost:8080/api/auth/send-otp", {
           identifier: userEmail,
           purpose: "LOGIN_CHROME_GOOGLE"
         });
@@ -155,7 +155,7 @@ const Navbar = () => {
   const recordLogin = async (firebaseUser: any) => {
     try {
       const { browser, device, os } = getDeviceInfo();
-      const res = await axios.post("https://internarea-wy7x.vercel.app/api/auth/record-login", {
+      const res = await axios.post("http://localhost:8080/api/auth/record-login", {
         email: firebaseUser.email,
         name: firebaseUser.displayName,
         device,
@@ -166,7 +166,7 @@ const Navbar = () => {
       });
 
       if (res.data.status === "SUCCESS") {
-        dispatch(login(res.data.user));
+        dispatch(login({ ...res.data.user, token: res.data.token }));
         toast.success("Logged in successfully");
       } else if (res.data.status === "OTP_REQUIRED") {
         return res.data;
@@ -186,7 +186,7 @@ const Navbar = () => {
   const updateLoginAfterOTP = async (firebaseUser: any) => {
     const { browser, device, os } = getDeviceInfo();
     try {
-      const res = await axios.post("https://internarea-wy7x.vercel.app/api/auth/record-login", {
+      const res = await axios.post("http://localhost:8080/api/auth/record-login", {
         email: firebaseUser.email,
         name: firebaseUser.displayName,
         device,
@@ -196,7 +196,7 @@ const Navbar = () => {
         otpVerified: true
       });
       if (res.data.status === "SUCCESS") {
-        dispatch(login(res.data.user));
+        dispatch(login({ ...res.data.user, token: res.data.token }));
         toast.success("Login Verified & Success");
       }
     } catch (e) {
@@ -249,7 +249,7 @@ const Navbar = () => {
       setIsOTPModalOpen(true);
 
       // Trigger OTP send immediately
-      axios.post("https://internarea-wy7x.vercel.app/api/auth/send-otp", {
+      axios.post("http://localhost:8080/api/auth/send-otp", {
         identifier: email,
         purpose: "LANGUAGE_FRENCH"
       })
@@ -276,6 +276,8 @@ const Navbar = () => {
         localStorage.removeItem("chrome_verified_" + currentUser.email);
       }
     }
+    // Revert language to default English on logout to lock French again
+    dispatch(setLanguage("English"));
     dispatch(logout());
     signOut(auth).then(() => {
       toast.success("Logged Out Successfully");
@@ -313,10 +315,10 @@ const Navbar = () => {
         onStandardLogin={handleStandardLogin}
         onSignup={async (data) => {
           try {
-            const res = await axios.post("https://internarea-wy7x.vercel.app/api/auth/register", data);
+            const res = await axios.post("http://localhost:8080/api/auth/register", data);
             if (res.data.status === "SUCCESS") {
               toast.success("Account created! Logging you in...");
-              dispatch(login(res.data.user));
+              dispatch(login({ ...res.data.user, token: res.data.token }));
               setIsLoginModalOpen(false);
             }
           } catch (error: any) {

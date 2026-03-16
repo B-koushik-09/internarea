@@ -13,6 +13,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { selectLanguage } from "@/Feature/LanguageSlice";
 import { translations } from "@/utils/translations";
+import { translateDynamicText } from "@/utils/dynamicTranslate";
 
 const index = () => {
   const currentLanguage = useSelector(selectLanguage);
@@ -31,7 +32,7 @@ const index = () => {
   useEffect(() => {
     const fetchdata = async () => {
       try {
-        const res = await axios.get("https://internarea-wy7x.vercel.app/api/internship")
+        const res = await axios.get("http://localhost:8080/api/internship")
         setinternship(res.data)
         setfilteredInternships(res.data)
       } catch (error) {
@@ -50,8 +51,36 @@ const index = () => {
         .includes(filter.location.toLowerCase());
       return matchesCategory && matchesLocation;
     });
-    setfilteredInternships(filtered);
-  }, [filter, internshipData]);
+
+    // Translation logic
+    const applyTranslations = async () => {
+      if (currentLanguage === "English") {
+        setfilteredInternships(filtered);
+        return;
+      }
+      
+      const newInternships = [...filtered];
+      let changed = false;
+      for (let i = 0; i < newInternships.length; i++) {
+        const j = newInternships[i];
+        if (!j._translatedTitle && j.title) {
+          j._translatedTitle = await translateDynamicText(j.title, currentLanguage);
+          changed = true;
+        }
+        if (!j._translatedCompany && j.company) {
+          j._translatedCompany = await translateDynamicText(j.company, currentLanguage);
+          changed = true;
+        }
+        if (!j._translatedLocation && j.location) {
+          j._translatedLocation = await translateDynamicText(j.location, currentLanguage);
+          changed = true;
+        }
+      }
+      setfilteredInternships(newInternships);
+    };
+
+    applyTranslations();
+  }, [filter, internshipData, currentLanguage]);
   const handlefilterchange = (e: any) => {
     const { name, value, type, checked } = e.target;
     setfilters((prev) => ({
@@ -189,9 +218,9 @@ const index = () => {
                     <span className="font-medium">{t?.listing_hiring || "Actively Hiring"}</span>
                   </div>
                   <h2 className="text-xl font-bold text-gray-900 mb-2">
-                    {internship.title}
+                    {currentLanguage === "English" ? internship.title : (internship._translatedTitle || internship.title)}
                   </h2>
-                  <p className="text-gray-600 mb-4">{internship.company}</p>
+                  <p className="text-gray-600 mb-4">{currentLanguage === "English" ? internship.company : (internship._translatedCompany || internship.company)}</p>
 
                   <div className="grid grid-cols-3 gap-4 mb-6">
                     <div className="flex items-center space-x-2 text-gray-600">
@@ -205,7 +234,7 @@ const index = () => {
                       <Pin className="h-5 w-5" />
                       <div>
                         <p className="text-sm font-medium">{t?.listing_location || "Location"}</p>
-                        <p className="text-sm">{internship.location}</p>
+                        <p className="text-sm">{currentLanguage === "English" ? internship.location : (internship._translatedLocation || internship.location)}</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2 text-gray-600">

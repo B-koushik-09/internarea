@@ -6,6 +6,7 @@ const subscriptionSchema = new mongoose.Schema({
     amount: Number,
     paymentId: String,
     orderId: String,
+    paymentGateway: { type: String, default: "paypal" },
     invoiceUrl: String,
     status: { type: String, enum: ["active", "expired"], default: "active" },
     validUntil: Date

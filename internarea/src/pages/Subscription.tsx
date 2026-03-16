@@ -41,7 +41,7 @@ export default function Subscription() {
             const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
             const istTime = new Date(utc + (3600000 * 5.5));
             const hour = istTime.getHours();
-            // PRODUCTION: Only allow 10:00 AM - 10:59 AM IST (hour === 10)
+            // PRODUCTION: Only allow 10:00 AM - 11:00 AM IST (hour === 10)
             setIsPaymentWindowOpen(hour === 10);
         };
         checkTime();
@@ -55,8 +55,8 @@ export default function Subscription() {
             if (user?._id) {
                 try {
                     const [statusRes, limitRes] = await Promise.all([
-                        axios.get(`https://internarea-wy7x.vercel.app/api/subscription/status/${user._id}`),
-                        axios.get(`https://internarea-wy7x.vercel.app/api/subscription/check-limit/${user._id}`)
+                        axios.get(`http://localhost:8080/api/subscription/status/${user._id}`),
+                        axios.get(`http://localhost:8080/api/subscription/check-limit/${user._id}`)
                     ]);
                     setCurrentPlan(statusRes.data.plan || "Free");
                     setUsageInfo(limitRes.data);
@@ -96,7 +96,7 @@ export default function Subscription() {
             const usdAmount = plan.priceUSD.toFixed(2);
             console.log("[PayPal] Sending to backend - USD amount:", usdAmount);
 
-            const response = await axios.post("https://internarea-wy7x.vercel.app/api/subscription/create-paypal-order", {
+            const response = await axios.post("http://localhost:8080/api/subscription/create-paypal-order", {
                 amount: usdAmount,  // USD amount with 2 decimals
                 amountINR: plan.price,  // Original INR for reference
                 plan: plan.key,
@@ -127,7 +127,7 @@ export default function Subscription() {
             setIsLoading(true);
             const usdAmount = plan.priceUSD.toFixed(2);
 
-            const response = await axios.post("https://internarea-wy7x.vercel.app/api/subscription/capture-paypal-order", {
+            const response = await axios.post("http://localhost:8080/api/subscription/capture-paypal-order", {
                 orderID,
                 userId: user._id,
                 plan: plan.key,
@@ -144,7 +144,7 @@ export default function Subscription() {
                     subscription: { ...user.subscription, plan: plan.key, paymentDate: new Date() }
                 }));
 
-                const limitRes = await axios.get(`https://internarea-production.up.railway.app/api/subscription/check-limit/${user._id}`);
+                const limitRes = await axios.get(`http://localhost:8080/api/subscription/check-limit/${user._id}`);
                 setUsageInfo(limitRes.data);
             }
         } catch (error: any) {
@@ -212,6 +212,13 @@ export default function Subscription() {
                         const translatedName = getPlanName(plan.key);
                         const isSelected = selectedPlan?.key === plan.key;
 
+                        // Plan hierarchy for upgrade/downgrade logic
+                        const planLevels: Record<string, number> = { "Free": 0, "Bronze": 1, "Silver": 2, "Gold": 3 };
+                        const currentLevel = planLevels[currentPlan] || 0;
+                        const planLevel = planLevels[plan.key] || 0;
+                        const isDowngrade = planLevel < currentLevel;
+                        const isUpgrade = planLevel > currentLevel;
+
                         return (
                             <div
                                 key={plan.key}
@@ -254,9 +261,13 @@ export default function Subscription() {
                                 </ul>
 
                                 {/* Button / PayPal */}
-                                {plan.price === 0 || isCurrentPlan ? (
+                                {isCurrentPlan ? (
                                     <button disabled className="mt-auto px-6 py-2.5 rounded-full font-bold text-white bg-gray-400 cursor-not-allowed w-full">
                                         {t?.sub_current || "Current Plan"}
+                                    </button>
+                                ) : isDowngrade ? (
+                                    <button disabled className="mt-auto px-6 py-2.5 rounded-full font-bold text-white bg-red-200 cursor-not-allowed w-full">
+                                        ❌ {t?.sub_downgrade || "Downgrade"}
                                     </button>
                                 ) : !isPaymentWindowOpen ? (
                                     <button disabled className="mt-auto px-6 py-2.5 rounded-full font-bold text-white bg-gray-400 cursor-not-allowed w-full">
@@ -300,7 +311,7 @@ export default function Subscription() {
                                         onClick={() => handleSelectPlan(plan)}
                                         className="mt-auto px-6 py-2.5 rounded-full font-bold text-white bg-blue-600 hover:bg-blue-700 active:scale-95 transition-all w-full"
                                     >
-                                        {t?.sub_buy || "Buy Now"}
+                                        {isUpgrade ? (t?.sub_upgrade || "Upgrade") : (t?.sub_buy || "Buy Now")}
                                     </button>
                                 )}
                             </div>

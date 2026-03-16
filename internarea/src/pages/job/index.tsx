@@ -13,6 +13,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { selectLanguage } from "@/Feature/LanguageSlice";
 import { translations } from "@/utils/translations";
+import { translateDynamicText } from "@/utils/dynamicTranslate";
 
 const index = () => {
   const currentLanguage = useSelector(selectLanguage);
@@ -132,7 +133,7 @@ const index = () => {
   useEffect(() => {
     const fetchdata = async () => {
       try {
-        const res = await axios.get("https://internarea-wy7x.vercel.app/api/job")
+        const res = await axios.get("http://localhost:8080/api/job")
         setjob(res.data)
         setfilteredjobs(res.data)
       } catch (error) {
@@ -151,8 +152,36 @@ const index = () => {
         .includes(filter.location.toLowerCase());
       return matchesCategory && matchesLocation;
     });
-    setfilteredjobs(filtered);
-  }, [filter, filteredJobs]);
+
+    // Translation logic
+    const applyTranslations = async () => {
+      if (currentLanguage === "English") {
+        setfilteredjobs(filtered);
+        return;
+      }
+      
+      const newJobs = [...filtered];
+      let changed = false;
+      for (let i = 0; i < newJobs.length; i++) {
+        const j = newJobs[i];
+        if (!j._translatedTitle && j.title) {
+          j._translatedTitle = await translateDynamicText(j.title, currentLanguage);
+          changed = true;
+        }
+        if (!j._translatedCompany && j.company) {
+          j._translatedCompany = await translateDynamicText(j.company, currentLanguage);
+          changed = true;
+        }
+        if (!j._translatedLocation && j.location) {
+          j._translatedLocation = await translateDynamicText(j.location, currentLanguage);
+          changed = true;
+        }
+      }
+      setfilteredjobs(newJobs);
+    };
+
+    applyTranslations();
+  }, [filter, filteredJobs, currentLanguage]);
   const handlefilterchange = (e: any) => {
     const { name, value, type, checked } = e.target;
     setfilters((prev) => ({
@@ -304,9 +333,9 @@ const index = () => {
                     <span className="font-medium">{t?.listing_hiring || "Actively Hiring"}</span>
                   </div>
                   <h2 className="text-xl font-bold text-gray-900 mb-2">
-                    {job.title}
+                    {currentLanguage === "English" ? job.title : (job._translatedTitle || job.title)}
                   </h2>
-                  <p className="text-gray-600 mb-4">{job.company}</p>
+                  <p className="text-gray-600 mb-4">{currentLanguage === "English" ? job.company : (job._translatedCompany || job.company)}</p>
 
                   <div className="grid grid-cols-3 gap-4 mb-6">
                     <div className="flex items-center space-x-2 text-gray-600">
@@ -320,7 +349,7 @@ const index = () => {
                       <Pin className="h-5 w-5" />
                       <div>
                         <p className="text-sm font-medium">{t?.listing_location || "Location"}</p>
-                        <p className="text-sm">{job.location}</p>
+                        <p className="text-sm">{currentLanguage === "English" ? job.location : (job._translatedLocation || job.location)}</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2 text-gray-600">

@@ -37,7 +37,7 @@ const getISTTime = () => {
 const checkPaymentTime = (req, res, next) => {
     const istTime = getISTTime();
     const hour = istTime.getHours();
-    // PRODUCTION: Only allow payments from 10:00 AM to 10:59 AM IST (hour === 10)
+    // PRODUCTION: Only allow payments from 10:00 AM to 11:00 AM IST (hour === 10)
     if (hour !== 10) {
         return res.status(403).json({
             error: "Payments are only allowed between 10:00 AM and 11:00 AM IST",
@@ -196,7 +196,13 @@ router.post("/capture-paypal-order", async (req, res) => {
         const { sendInvoiceMail } = require("../utils/mailer");
         const user = await User.findById(userId);
         if (user && user.email) {
-            await sendInvoiceMail(user.email, plan, amount, paymentId);
+            await sendInvoiceMail(user.email, {
+                userName: user.userName || user.name || "Subscriber",
+                planName: plan,
+                amount: amount,
+                date: new Date().toLocaleDateString("en-IN"),
+                invoiceId: paymentId
+            });
             console.log(`[INVOICE] Email sent to user ${user.email} for plan ${plan}`);
         }
 
@@ -280,14 +286,14 @@ router.get("/status/:userId", async (req, res) => {
 router.get("/payment-window", (req, res) => {
     const istTime = getISTTime();
     const hour = istTime.getHours();
-    const isOpen = hour >= 12;
+    const isOpen = hour === 10;
 
     res.json({
         isOpen,
         currentHour: hour,
         message: isOpen
-            ? "Payment window is open (12:00 PM - 12:00 AM IST for Testing)"
-            : "Payment window is closed. Payments are only allowed between 12:00 PM - 12:00 AM IST."
+            ? "Payment window is open (10:00 AM - 11:00 AM IST)"
+            : "Payment window is closed. Payments are only allowed between 10:00 AM - 11:00 AM IST."
     });
 });
 

@@ -1,22 +1,19 @@
 const mongoose = require("mongoose");
 
-let cached = global.mongoose;
+const connectDB = async () => {
+    const MONGO_URI = process.env.DATABASE_URL || process.env.MONGO_URL;
 
-if (!cached) {
-    cached = global.mongoose = { conn: null, promise: null };
-}
-
-const connect = async () => {
-    if (cached.conn) return cached.conn;
-
-    if (!cached.promise) {
-        cached.promise = mongoose.connect(process.env.MONGO_URL).then((mongoose) => {
-            return mongoose;
-        });
+    if (!MONGO_URI) {
+        throw new Error("❌ FATAL: DATABASE_URL is not defined in environment variables!");
     }
 
-    cached.conn = await cached.promise;
-    return cached.conn;
+    console.log("[DB] Connecting to MongoDB...");
+
+    await mongoose.connect(MONGO_URI, {
+        serverSelectionTimeoutMS: 5000,
+    });
+
+    console.log("✅ MongoDB Connected Successfully");
 };
 
-module.exports = connect;
+module.exports = connectDB;

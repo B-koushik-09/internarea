@@ -957,7 +957,7 @@ export const translations = {
         sub_apps_this_month: "इस महीने के आवेदन:",
         sub_premium_badge: "प्रीमियम बैज",
         sub_processing: "प्रोसेसिंग...",
-        sub_secure_payments: "Razorpay द्वारा सुरक्षित भुगतान",
+        sub_secure_payments: "PayPal द्वारा सुरक्षित भुगतान",
         sub_invoice_email: "सफल भुगतान के बाद इनवॉइस आपके पंजीकृत ईमेल पर भेजा जाएगा",
 
         // Resume Builder - Hindi
@@ -1244,9 +1244,9 @@ export const translations = {
         nav_subscription: "Planos",
         sub_title: "Escolha Seu Plano",
         sub_window_closed: "Janela de Pagamento Fechada!",
-        sub_window_msg: "Você só pode comprar assinaturas entre 10:00 e 11:00 IST.",
+        sub_window_msg: "Você só pode comprar assinaturas entre 14:00 e 16:00 IST.",
         sub_login_req: "Por favor, faça login primeiro",
-        sub_payment_limit: "Pagamentos só são permitidos entre 10:00 e 11:00 IST",
+        sub_payment_limit: "Pagamentos só são permitidos entre 14:00 e 16:00 IST",
         sub_success: "Assinatura realizada com sucesso para",
         sub_invoice: "plano! Fatura enviada por email.",
         sub_failed: "Pagamento falhou",
@@ -1264,7 +1264,7 @@ export const translations = {
         sub_apps_this_month: "Candidaturas este mês:",
         sub_premium_badge: "Emblema Premium",
         sub_processing: "Processando...",
-        sub_secure_payments: "Pagamentos seguros via Razorpay",
+        sub_secure_payments: "Pagamentos seguros via PayPal",
         sub_invoice_email: "A fatura será enviada para o seu email registrado após o pagamento bem-sucedido",
 
         // Resume Builder - Portuguese
@@ -1296,7 +1296,7 @@ export const translations = {
         resume_paid: "Pago",
         resume_created: "Criado",
         resume_payment_window_closed: "Janela de Pagamento Fechada!",
-        resume_payment_window_msg: "Você só pode comprar entre 10:00 e 11:00 IST.",
+        resume_payment_window_msg: "Você só pode comprar entre 14:00 e 16:00 IST.",
         resume_secure_payments: "Pagamentos seguros via PayPal",
         resume_receipt_email: "O recibo será enviado para o seu email registrado",
         history_os: "Sistema Operacional"
@@ -1572,7 +1572,7 @@ export const translations = {
         sub_apps_this_month: "本月申请次数：",
         sub_premium_badge: "高级徽章",
         sub_processing: "处理中...",
-        sub_secure_payments: "Razorpay 提供安全支付",
+        sub_secure_payments: "PayPal 提供安全支付",
         sub_invoice_email: "付款成功后，发票将发送到您的注册邮箱",
 
         // Resume Builder - Chinese
@@ -1898,7 +1898,7 @@ export const translations = {
         sub_apps_this_month: "Candidatures ce mois :",
         sub_premium_badge: "Badge Premium",
         sub_processing: "Traitement...",
-        sub_secure_payments: "Paiements sécurisés par Razorpay",
+        sub_secure_payments: "Paiements sécurisés par PayPal",
         sub_invoice_email: "La facture sera envoyée à votre email enregistré après le paiement réussi",
 
         // Resume Builder - French

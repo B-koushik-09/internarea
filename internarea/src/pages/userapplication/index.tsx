@@ -62,7 +62,7 @@ const index = () => {
   useEffect(() => {
     const fetchdata = async () => {
       try {
-        const res = await axios.get("https://internarea-wy7x.vercel.app/api/application");
+        const res = await axios.get("http://localhost:8080/api/application");
         setdata(res.data);
       } catch (error) {
         console.log(error);

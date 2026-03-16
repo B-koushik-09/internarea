@@ -33,7 +33,7 @@ const index = () => {
     try {
       setisloading(true);
       const res = await axios.post(
-        "https://internarea-wy7x.vercel.app/api/admin/adminlogin",
+        "http://localhost:8080/api/admin/adminlogin",
         formadata
       );
       toast.success("logged in successfuly");

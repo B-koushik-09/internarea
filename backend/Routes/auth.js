@@ -3,8 +3,9 @@ const router = express.Router();
 const User = require("../Model/User");
 const Otp = require("../Model/Otp");
 const { generateOTP } = require("../utils/otp");
-const { sendOtpMail, sendMail } = require("../utils/mailer");
+const { sendOTPMail, sendMail } = require("../utils/mailer");
 const axios = require("axios");
+const jwt = require("jsonwebtoken");
 
 const getISTTime = () => {
     const now = new Date();
@@ -70,7 +71,8 @@ router.post("/login", async (req, res) => {
         });
         await user.save();
 
-        res.json({ status: "SUCCESS", user });
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+        res.json({ status: "SUCCESS", user, token });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -103,7 +105,8 @@ router.post("/register", async (req, res) => {
         });
 
         await newUser.save();
-        res.status(201).json({ status: "SUCCESS", user: newUser });
+        const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+        res.status(201).json({ status: "SUCCESS", user: newUser, token });
 
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -176,7 +179,8 @@ router.post("/record-login", async (req, res) => {
             await user.save();
         }
 
-        res.json({ status: "SUCCESS", user });
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+        res.json({ status: "SUCCESS", user, token });
     } catch (err) {
         console.error("[record-login] CRITICAL Error:", err);
         console.error("[record-login] Stack:", err.stack);
@@ -188,7 +192,7 @@ router.post("/record-login", async (req, res) => {
     }
 });
 
-const { sendSms } = require("../utils/sms");
+
 
 // Twilio client for phone OTP
 const twilio = require("twilio");
@@ -261,7 +265,7 @@ router.post("/send-otp", async (req, res) => {
                 expiresAt: new Date(Date.now() + 300000) // 5 minutes
             });
 
-            const emailSent = await sendOtpMail(identifier, otp);
+            const emailSent = await sendOTPMail(identifier, otp);
             if (!emailSent) {
                 console.error(`[send-otp] FAILED to send email to ${identifier}`);
                 return res.status(500).json({ error: "Email service failed. Please try again or check spam folder." });

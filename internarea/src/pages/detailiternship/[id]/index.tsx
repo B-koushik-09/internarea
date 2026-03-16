@@ -16,6 +16,7 @@ import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { selectLanguage } from "@/Feature/LanguageSlice";
 import { translations } from "@/utils/translations";
+import { translateDynamicText } from "@/utils/dynamicTranslate";
 // export const internships = [
 //   {
 //     _id: "1",
@@ -74,27 +75,50 @@ import { translations } from "@/utils/translations";
 // ];
 
 const index = () => {
+  const user = useSelector(selectuser)
+  const currentLanguage = useSelector(selectLanguage);
+  const t = { ...translations["English"], ...((translations as any)[currentLanguage] || {}) };
   const router = useRouter();
   const { id } = router.query;
-  const [internshipData, setinternship] = useState<any>([])
+  const [internshipData, setinternship] = useState<any>(null)
+  
   useEffect(() => {
     const fetchdata = async () => {
       try {
-        const res = await axios.get(`https://internarea-wy7x.vercel.app/api/internship/${id}`)
-        setinternship(res.data)
+        const res = await axios.get(`http://localhost:8080/api/internship/${id}`)
+        let data = res.data;
+ 
+        // Translation logic
+        if (currentLanguage !== "English" && data) {
+          const transTitle = await translateDynamicText(data.title, currentLanguage);
+          const transCompany = await translateDynamicText(data.company, currentLanguage);
+          const transLoc = await translateDynamicText(data.location, currentLanguage);
+          const transAboutComp = await translateDynamicText(data.aboutCompany, currentLanguage);
+          const transAboutInt = await translateDynamicText(data.aboutInternship, currentLanguage);
+          const transWho = await translateDynamicText(data.whoCanApply, currentLanguage);
+          
+          data = {
+            ...data,
+            _translatedTitle: transTitle,
+            _translatedCompany: transCompany,
+            _translatedLocation: transLoc,
+            _translatedAboutCompany: transAboutComp,
+            _translatedAboutInternship: transAboutInt,
+            _translatedWho: transWho
+          };
+        }
+ 
+        setinternship(data)
       } catch (error) {
         console.log(error)
       }
     }
-    fetchdata()
-  }, [id])
+    if (id) fetchdata()
+  }, [id, currentLanguage])
   const [availability, setAvailability] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [coverLetter, setCoverLetter] = useState("");
-  const user = useSelector(selectuser)
-  const currentLanguage = useSelector(selectLanguage);
-  const t = { ...translations["English"], ...((translations as any)[currentLanguage] || {}) };
-  if (!internshipData) {
+  if (!internshipData || Object.keys(internshipData).length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -114,7 +138,7 @@ const index = () => {
     // ✅ CHECK SUBSCRIPTION LIMIT BEFORE APPLYING
     if (user?._id) {
       try {
-        const limitCheck = await axios.get(`https://internarea-wy7x.vercel.app/api/subscription/check-limit/${user._id}`);
+        const limitCheck = await axios.get(`http://localhost:8080/api/subscription/check-limit/${user._id}`);
         if (!limitCheck.data.allowed) {
           toast.error(
             `🚫 ${limitCheck.data.message}`,
@@ -138,7 +162,7 @@ const index = () => {
         Application: id,
         availability
       }
-      await axios.post("https://internarea-wy7x.vercel.app/api/application", applicationdata)
+      await axios.post("http://localhost:8080/api/application", applicationdata)
       toast.success("🎉 Application submitted successfully!")
       router.push('/internship')
     } catch (error: any) {
@@ -162,13 +186,13 @@ const index = () => {
             <span className="font-medium">{t?.actively_hiring || "Actively Hiring"}</span>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            {internshipData.title}
+            {currentLanguage === "English" ? internshipData.title : (internshipData._translatedTitle || internshipData.title)}
           </h1>
-          <p className="text-lg text-gray-600 mb-4">{internshipData.company}</p>
+          <p className="text-lg text-gray-600 mb-4">{currentLanguage === "English" ? internshipData.company : (internshipData._translatedCompany || internshipData.company)}</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="flex items-center space-x-2 text-gray-600">
               <MapPin className="h-5 w-5" />
-              <span>{internshipData.location}</span>
+              <span>{currentLanguage === "English" ? internshipData.location : (internshipData._translatedLocation || internshipData.location)}</span>
             </div>
             <div className="flex items-center space-x-2 text-gray-600">
               <DollarSign className="h-5 w-5" />
@@ -189,7 +213,7 @@ const index = () => {
         {/* Company Section */}
         <div className="p-6 border-b">
           <h2 className="text-xl font-bold text-gray-900 mb-4">
-            {t?.apply_about_company || "About"} {internshipData.company}
+            {t?.apply_about_company || "About"} {currentLanguage === "English" ? internshipData.company : (internshipData._translatedCompany || internshipData.company)}
           </h2>
           <div className="flex items-center space-x-2 mb-4">
             <a
@@ -200,19 +224,19 @@ const index = () => {
               <ExternalLink className="h-4 w-4" />
             </a>
           </div>
-          <p className="text-gray-600">{internshipData.aboutCompany}</p>
+          <p className="text-gray-600">{currentLanguage === "English" ? internshipData.aboutCompany : (internshipData._translatedAboutCompany || internshipData.aboutCompany)}</p>
         </div>
         {/* Internship Details Section */}
         <div className="p-6 border-b">
           <h2 className="text-xl font-bold text-gray-900 mb-4">
             {t?.post_label_about_internship || "About the Internship"}
           </h2>
-          <p className="text-gray-600 mb-6">{internshipData.aboutInternship}</p>
+          <p className="text-gray-600 mb-6">{currentLanguage === "English" ? internshipData.aboutInternship : (internshipData._translatedAboutInternship || internshipData.aboutInternship)}</p>
 
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
             {t?.post_label_who || "Who can apply"}
           </h3>
-          <p className="text-gray-600 mb-6">{internshipData.whoCanApply}</p>
+          <p className="text-gray-600 mb-6">{currentLanguage === "English" ? internshipData.whoCanApply : (internshipData._translatedWho || internshipData.whoCanApply)}</p>
 
           <h3 className="text-lg font-semibold text-gray-900 mb-2">{t?.post_label_perks || "Perks"}</h3>
           <p className="text-gray-600 mb-6">{internshipData.perks}</p>
@@ -244,8 +268,8 @@ const index = () => {
           <div className="bg-white rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b">
               <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  {t?.apply_header || "Apply to"} {internshipData.company}
+                <h2 className="text-xl font-bold text-gray-900">
+                  {t?.apply_header || "Apply to"} {currentLanguage === "English" ? internshipData.company : (internshipData._translatedCompany || internshipData.company)}
                 </h2>
                 <button
                   onClick={() => setIsModalOpen(false)}

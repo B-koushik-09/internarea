@@ -25,11 +25,8 @@ router.post("/", async (req, res) => {
   })
 });
 
-const connect = require("../db");
-
 router.get("/", async (req, res) => {
   try {
-    await connect(); // Ensure DB connection
     const data = await Job.find();
     res.status(200).json(data);
   } catch (error) {
@@ -50,4 +47,4 @@ router.get("/:id", async (req, res) => {
     res.status(404).json({ error: "internal server error" });
   }
 });
-module.exports = router
+module.exports = router;

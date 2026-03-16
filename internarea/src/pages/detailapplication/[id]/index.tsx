@@ -19,7 +19,7 @@ const index = () => {
       try {
         setloading(true);
         const res = await axios.get(
-          `https://internarea-wy7x.vercel.app/api/application/${id}`
+          `http://localhost:8080/api/application/${id}`
         );
         console.log(res.data);
         setdata(res.data);
