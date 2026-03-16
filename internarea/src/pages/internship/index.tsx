@@ -259,7 +259,7 @@ const index = () => {
                       <DollarSign className="h-5 w-5" />
                       <div>
                         <p className="text-sm font-medium">{t?.listing_stipend || "Stipend"}</p>
-                        <p className="text-sm">{internship.stipend}</p>
+                        <p className="text-sm">₹ {internship.stipend}{!internship.stipend.toLowerCase().includes('/month') && ' /month'}</p>
                       </div>
                     </div>
                   </div>

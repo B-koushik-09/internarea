@@ -26,6 +26,7 @@ interface Internship {
   location: string;
   stipend: string;
   duration: string;
+  startDate: string;
   category: string;
   _translatedTitle?: string;
   _translatedCompany?: string;
@@ -39,6 +40,7 @@ interface Job {
   location: string;
   CTC: string;
   Experience: string;
+  StartDate: string;
   category: string;
   _translatedTitle?: string;
   _translatedCompany?: string;
@@ -327,11 +329,11 @@ export default function SvgSlider() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Banknote size={18} />
-                  <span>{internship.stipend}</span>
+                  <span>₹ {internship.stipend || "TBD"}{internship.stipend && !internship.stipend.toLowerCase().includes('/month') && ' /month'}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar size={18} />
-                  <span>{internship.duration}</span>
+                  <span>{internship.startDate || internship.duration || "Immediate"}</span>
                 </div>
               </div>
               <div className="flex items-center justify-between mt-6">
@@ -374,11 +376,11 @@ export default function SvgSlider() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Banknote size={18} />
-                  <span>{job.CTC}</span>
+                  <span>₹ {job.CTC}{!job.CTC.toLowerCase().includes('lpa') && ' LPA'}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar size={18} />
-                  <span>{job.Experience}</span>
+                  <span>{job.StartDate || job.Experience || "Immediate"}</span>
                 </div>
               </div>
               <div className="flex items-center justify-between mt-6">

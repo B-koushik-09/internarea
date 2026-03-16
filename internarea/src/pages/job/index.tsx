@@ -259,8 +259,8 @@ const index = () => {
                     <div className="flex items-center space-x-2 text-gray-600">
                       <PlayCircle className="h-5 w-5" />
                       <div>
-                        <p className="text-sm font-medium">{t?.filter_category || "Category"}</p>
-                        <p className="text-sm">{job.category}</p>
+                        <p className="text-sm font-medium">{t?.listing_start_date || "Start Date"}</p>
+                        <p className="text-sm">{job.StartDate || job.Experience || "Immediate"}</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2 text-gray-600">
@@ -274,7 +274,7 @@ const index = () => {
                       <DollarSign className="h-5 w-5" />
                       <div>
                         <p className="text-sm font-medium">{t?.listing_ctc || "CTC"}</p>
-                        <p className="text-sm">{job.CTC}</p>
+                        <p className="text-sm">₹ {job.CTC}{!job.CTC.toLowerCase().includes('lpa') && ' LPA'}</p>
                       </div>
                     </div>
                   </div>

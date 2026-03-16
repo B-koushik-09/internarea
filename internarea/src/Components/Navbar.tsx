@@ -112,9 +112,7 @@ const Navbar = () => {
 
       const result = await signInWithPopup(auth, provider);
       const userEmail = result.user?.email || "";
-
-      // Pre-register user in backend to ensure they exist (especially for new Google users)
-      // recordLogin will return OTP_REQUIRED for Chrome, which is what we want
+ 
       await recordLogin(result.user, false);
 
       // Chrome Security Challenge
@@ -134,8 +132,7 @@ const Navbar = () => {
   const recordLogin = async (firebaseUser: any, otpVerifiedOverride?: boolean) => {
     try {
       const { browser, device, os } = getDeviceInfo();
-      
-      // If override provided use it, otherwise Chrome requires OTP (false) while others don't (true)
+       
       const otpVerified = typeof otpVerifiedOverride === 'boolean' 
         ? otpVerifiedOverride 
         : (browser === "Chrome" ? false : true);
