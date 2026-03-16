@@ -66,9 +66,10 @@ export const AuthProvider = ({ children }) => {
                 console.log("AuthContext: Restoring session from localStorage cache");
                 setUser(cachedUser);
                 dispatch(login(cachedUser));
-                setLocalLoading(false);
-                dispatch(setLoading(false));
             }
+            // Always set loading to false after checking cache to avoid black screen
+            setLocalLoading(false);
+            dispatch(setLoading(false));
             initialLoadDone.current = true;
         }
 
@@ -184,7 +185,7 @@ export const AuthProvider = ({ children }) => {
 
     return (
         <AuthContext.Provider value={{ user, loading }}>
-            {!loading && children}
+            {children}
         </AuthContext.Provider>
     );
 };
