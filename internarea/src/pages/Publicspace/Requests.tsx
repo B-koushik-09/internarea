@@ -5,6 +5,7 @@ import { selectuser } from "@/Feature/Userslice";
 import { Check, X, UserPlus } from "lucide-react";
 import { selectLanguage } from "@/Feature/LanguageSlice";
 import { translations } from "@/utils/translations";
+import { API_URL } from "@/utils/apiConfig";
 
 export default function Requests() {
   const [requests, setRequests] = useState<any[]>([]);
@@ -15,7 +16,7 @@ export default function Requests() {
 
   useEffect(() => {
     if (user?._id) {
-      axios.get(`http://localhost:8080/api/friend-routes/requests/${user._id}`)
+      axios.get(`${API_URL}/api/friend-routes/requests/${user._id}`)
         .then(res => setRequests(res.data))
         .catch(err => console.error("Error fetching requests:", err));
     }
@@ -23,7 +24,7 @@ export default function Requests() {
 
   const accept = async (id: string) => {
     try {
-      await axios.post("http://localhost:8080/api/friend-routes/accept", { requestId: id });
+      await axios.post(`${API_URL}/api/friend-routes/accept`, { requestId: id });
       setRequests(requests.filter(r => r._id !== id));
       alert(t?.public_connected || "Friend request accepted!");
     } catch (e) {

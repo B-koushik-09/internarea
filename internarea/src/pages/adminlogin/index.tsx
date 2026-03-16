@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { selectLanguage } from "@/Feature/LanguageSlice";
 import { translations } from "@/utils/translations";
+import { API_URL } from "@/utils/apiConfig";
 
 const index = () => {
   const currentLanguage = useSelector(selectLanguage);
@@ -33,7 +34,7 @@ const index = () => {
     try {
       setisloading(true);
       const res = await axios.post(
-        "http://localhost:8080/api/admin/adminlogin",
+        `${API_URL}/api/admin/adminlogin`,
         formadata
       );
       toast.success("logged in successfuly");

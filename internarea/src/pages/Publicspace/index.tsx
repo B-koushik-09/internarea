@@ -12,6 +12,7 @@ import Link from "next/link";
 import { LayoutGrid, Users, MessageCircle, Menu, X } from "lucide-react";
 import { selectLanguage } from "@/Feature/LanguageSlice";
 import { translations } from "@/utils/translations";
+import { API_URL } from "@/utils/apiConfig";
 
 export default function PublicHome() {
   const user = useSelector(selectuser);
@@ -31,8 +32,8 @@ export default function PublicHome() {
       // Fetch counts
       const fetchData = async () => {
         try {
-          const fRes = await axios.get(`http://localhost:8080/api/friend-routes/list/${user._id}`);
-          const pRes = await axios.get(`http://localhost:8080/api/post-routes/my/${user._id}`);
+          const fRes = await axios.get(`${API_URL}/api/friend-routes/list/${user._id}`);
+          const pRes = await axios.get(`${API_URL}/api/post-routes/my/${user._id}`);
           setStats({
             friends: fRes.data.length,
             posts: pRes.data.length,

@@ -17,6 +17,7 @@ import { toast } from "react-toastify";
 import { selectLanguage } from "@/Feature/LanguageSlice";
 import { translations } from "@/utils/translations";
 import { translateDynamicText } from "@/utils/dynamicTranslate";
+import { API_URL } from "@/utils/apiConfig";
 // export const internships = [
 //   {
 //     _id: "1",
@@ -85,7 +86,7 @@ const index = () => {
   useEffect(() => {
     const fetchdata = async () => {
       try {
-        const res = await axios.get(`http://localhost:8080/api/internship/${id}`)
+        const res = await axios.get(`${API_URL}/api/internship/${id}`)
         let data = res.data;
  
         // Translation logic
@@ -138,7 +139,7 @@ const index = () => {
     // ✅ CHECK SUBSCRIPTION LIMIT BEFORE APPLYING
     if (user?._id) {
       try {
-        const limitCheck = await axios.get(`http://localhost:8080/api/subscription/check-limit/${user._id}`);
+        const limitCheck = await axios.get(`${API_URL}/api/subscription/check-limit/${user._id}`);
         if (!limitCheck.data.allowed) {
           toast.error(
             `🚫 ${limitCheck.data.message}`,
@@ -162,7 +163,7 @@ const index = () => {
         Application: id,
         availability
       }
-      await axios.post("http://localhost:8080/api/application", applicationdata)
+      await axios.post(`${API_URL}/api/application`, applicationdata)
       toast.success("🎉 Application submitted successfully!")
       router.push('/internship')
     } catch (error: any) {

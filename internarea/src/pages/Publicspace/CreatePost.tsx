@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import { Image, Video, Send } from "lucide-react";
 import { selectLanguage } from "@/Feature/LanguageSlice";
 import { translations } from "@/utils/translations";
+import { API_URL } from "@/utils/apiConfig";
 
 export default function CreatePost({ onPostCreated }: { onPostCreated?: () => void }) {
   const [content, setContent] = useState("");
@@ -28,7 +29,7 @@ export default function CreatePost({ onPostCreated }: { onPostCreated?: () => vo
     }
 
     try {
-      const res = await axios.post("http://localhost:8080/api/post-routes/create", {
+      const res = await axios.post(`${API_URL}/api/post-routes/create`, {
         userId: user._id,
         content,
         mediaUrl

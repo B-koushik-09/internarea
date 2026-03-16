@@ -14,6 +14,7 @@ import { useSelector } from "react-redux";
 import { selectLanguage } from "@/Feature/LanguageSlice";
 import { translations } from "@/utils/translations";
 import { translateDynamicText } from "@/utils/dynamicTranslate";
+import { API_URL } from "@/utils/apiConfig";
 
 const index = () => {
   const currentLanguage = useSelector(selectLanguage);
@@ -133,7 +134,7 @@ const index = () => {
   useEffect(() => {
     const fetchdata = async () => {
       try {
-        const res = await axios.get("http://localhost:8080/api/job")
+        const res = await axios.get(`${API_URL}/api/job`)
         setjob(res.data)
         setfilteredjobs(res.data)
       } catch (error) {

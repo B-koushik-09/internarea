@@ -14,6 +14,7 @@ import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { selectLanguage } from "@/Feature/LanguageSlice";
 import { translations } from "@/utils/translations";
+import { API_URL } from "@/utils/apiConfig";
 // const Applications = [
 //   {
 //     _id: "1",
@@ -61,7 +62,7 @@ const index = () => {
   useEffect(() => {
     const fetchdata = async () => {
       try {
-        const res = await axios.get("http://localhost:8080/api/application");
+        const res = await axios.get(`${API_URL}/api/application`);
         setdata(res.data);
       } catch (error) {
         console.log(error);
@@ -81,7 +82,7 @@ const index = () => {
   const handleacceptandreject = async (id: any, action: any) => {
     try {
       const res = await axios.put(
-        `http://localhost:8080/api/application/${id}`,
+        `${API_URL}/api/application/${id}`,
         { action }
       );
       const updateappliacrtion = data.map((app: any) =>

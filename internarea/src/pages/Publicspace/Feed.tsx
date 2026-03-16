@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import { selectLanguage } from "@/Feature/LanguageSlice";
 import { translations } from "@/utils/translations";
 import { translateDynamicText } from "@/utils/dynamicTranslate";
+import { API_URL } from "@/utils/apiConfig";
 
 export default function Feed() {
   const [posts, setPosts] = useState<any[]>([]);
@@ -28,7 +29,7 @@ export default function Feed() {
 
   const fetchPosts = () => {
     if (user?._id) {
-      axios.get(`http://localhost:8080/api/post-routes/feed/${user._id}`)
+      axios.get(`${API_URL}/api/post-routes/feed/${user._id}`)
         .then(res => setPosts(res.data))
         .catch(err => console.error(err));
     }
@@ -36,7 +37,7 @@ export default function Feed() {
 
   const fetchFriends = () => {
     if (user?._id) {
-      axios.get(`http://localhost:8080/api/friend-routes/list/${user._id}`)
+      axios.get(`${API_URL}/api/friend-routes/list/${user._id}`)
         .then(res => setFriends(res.data))
         .catch(e => console.error(e));
     }
@@ -74,7 +75,7 @@ export default function Feed() {
 
   const like = async (id: string) => {
     try {
-      await axios.post("http://localhost:8080/api/post-routes/like", { postId: id, userId: user?._id });
+      await axios.post(`${API_URL}/api/post-routes/like`, { postId: id, userId: user?._id });
       setPosts(prev => prev.map(p => {
         if (p._id === id) {
           const likes = p.likes.includes(user._id)
@@ -99,7 +100,7 @@ export default function Feed() {
 
     try {
       for (const friendId of selectedFriends) {
-        await axios.post("http://localhost:8080/api/message/send", {
+        await axios.post(`${API_URL}/api/message/send`, {
           sender: user._id,
           receiver: friendId,
           content: "Shared a post with you",
@@ -118,7 +119,7 @@ export default function Feed() {
   const deletePost = async (id: string) => {
     if (!confirm(t?.public_confirm_delete || "Are you sure you want to delete this post?")) return;
     try {
-      await axios.delete(`http://localhost:8080/api/post-routes/delete/${id}`);
+      await axios.delete(`${API_URL}/api/post-routes/delete/${id}`);
       toast.success(t?.public_msg_deleted || "Post deleted");
       setPosts(prev => prev.filter(p => p._id !== id));
     } catch (e) {
@@ -129,7 +130,7 @@ export default function Feed() {
   const submitComment = async (postId: string) => {
     if (!commentText.trim()) return;
     try {
-      await axios.post("http://localhost:8080/api/post-routes/comment", {
+      await axios.post(`${API_URL}/api/post-routes/comment`, {
         postId,
         userId: user._id,
         text: commentText

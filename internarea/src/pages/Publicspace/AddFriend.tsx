@@ -6,6 +6,7 @@ import { Search, UserPlus, Check } from "lucide-react";
 import { toast } from "react-toastify";
 import { selectLanguage } from "@/Feature/LanguageSlice";
 import { translations } from "@/utils/translations";
+import { API_URL } from "@/utils/apiConfig";
 
 export default function AddFriend() {
   const user = useSelector(selectuser);
@@ -25,7 +26,7 @@ export default function AddFriend() {
     }
     setLoading(true);
     try {
-      const res = await axios.get(`http://localhost:8080/api/friend-routes/search/${val}`);
+      const res = await axios.get(`${API_URL}/api/friend-routes/search/${val}`);
       setResults(res.data.filter((u: any) => {
         const isSelfId = user?._id && u._id === user._id;
         const isSelfEmail = user?.email && u.email === user.email;
@@ -41,7 +42,7 @@ export default function AddFriend() {
     if (!user) return toast.error(t?.public_login_req || "Not logged in");
 
     try {
-      await axios.post("http://localhost:8080/api/friend-routes/send", {
+      await axios.post(`${API_URL}/api/friend-routes/send`, {
         from: user._id,
         to: toUser._id
       });

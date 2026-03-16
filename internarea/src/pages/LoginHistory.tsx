@@ -5,6 +5,7 @@ import { selectuser } from "@/Feature/Userslice";
 import axios from "axios";
 import { selectLanguage } from "@/Feature/LanguageSlice";
 import { translations } from "@/utils/translations";
+import { API_URL } from "@/utils/apiConfig";
 
 const LoginHistory = () => {
     const user = useSelector(selectuser);
@@ -24,7 +25,7 @@ const LoginHistory = () => {
 
     const fetchHistory = async () => {
         try {
-            const res = await axios.get(`http://localhost:8080/api/auth/history/${user.email}`);
+            const res = await axios.get(`${API_URL}/api/auth/history/${user.email}`);
             setHistory(res.data.history || []);
         } catch (error) {
             console.error("Failed to fetch history", error);

@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import { selectLanguage } from "@/Feature/LanguageSlice";
 import { translations } from "@/utils/translations";
+import { API_URL } from "@/utils/apiConfig";
 
 const index = () => {
   const [formData, setFormData] = useState({
@@ -55,7 +56,7 @@ const index = () => {
     }
     try {
       setisloading(true);
-      const res = await axios.post("http://localhost:8080/api/job", formData);
+      const res = await axios.post(`${API_URL}/api/job`, formData);
       toast.success(t?.post_success || "job posted successfuly");
       router.push("/adminpanel");
     } catch (error) {

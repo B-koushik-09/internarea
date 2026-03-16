@@ -16,6 +16,7 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 import { selectLanguage } from "@/Feature/LanguageSlice";
 import { translations } from "@/utils/translations";
+import { API_URL } from "@/utils/apiConfig";
 
 interface Internship {
   _id: string;
@@ -87,8 +88,8 @@ export default function SvgSlider() {
     const fetchdata = async () => {
       try {
         const [internshipres, jobres] = await Promise.all([
-          axios.get("http://localhost:8080/api/internship"),
-          axios.get("http://localhost:8080/api/job"),
+          axios.get(`${API_URL}/api/internship`),
+          axios.get(`${API_URL}/api/job`),
         ]);
         setinternship(internshipres.data);
         setjob(jobres.data);

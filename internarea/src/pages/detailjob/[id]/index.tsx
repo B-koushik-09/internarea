@@ -19,6 +19,7 @@ import { selectuser } from "@/Feature/Userslice";
 import { selectLanguage } from "@/Feature/LanguageSlice";
 import { translations } from "@/utils/translations";
 import { translateDynamicText } from "@/utils/dynamicTranslate";
+import { API_URL } from "@/utils/apiConfig";
 // const filteredJobs = [
 //     {
 //       _id: "101",
@@ -130,7 +131,7 @@ const index = () => {
   useEffect(() => {
     const fetchdata = async () => {
       try {
-        const res = await axios.get(`http://localhost:8080/api/job/${id}`);
+        const res = await axios.get(`${API_URL}/api/job/${id}`);
         let data = res.data;
         
         // Translation logic
@@ -184,7 +185,7 @@ const index = () => {
     // ✅ CHECK SUBSCRIPTION LIMIT BEFORE APPLYING
     if (user?._id) {
       try {
-        const limitCheck = await axios.get(`http://localhost:8080/api/subscription/check-limit/${user._id}`);
+        const limitCheck = await axios.get(`${API_URL}/api/subscription/check-limit/${user._id}`);
         if (!limitCheck.data.allowed) {
           toast.error(
             `🚫 ${limitCheck.data.message}`,
@@ -209,7 +210,7 @@ const index = () => {
         availability,
       };
       await axios.post(
-        "http://localhost:8080/api/application",
+        `${API_URL}/api/application`,
         applicationdata
       );
       toast.success("🎉 Application submitted successfully!");

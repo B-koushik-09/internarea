@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { API_URL } from "../../utils/apiConfig";
 
 const OTPModal = ({ isOpen, onClose, email, onSuccess, purpose }) => {
     const [otp, setOtp] = useState("");
@@ -11,7 +12,7 @@ const OTPModal = ({ isOpen, onClose, email, onSuccess, purpose }) => {
     const handleSendOTP = async () => {
         setResending(true);
         try {
-            const res = await axios.post("http://localhost:8080/api/auth/send-otp", {
+            const res = await axios.post(`${API_URL}/api/auth/send-otp`, {
                 identifier: email,
                 purpose: purpose
             });
@@ -36,7 +37,7 @@ const OTPModal = ({ isOpen, onClose, email, onSuccess, purpose }) => {
         setLoading(true);
         setError("");
         try {
-            const res = await axios.post("http://localhost:8080/api/auth/verify-otp", {
+            const res = await axios.post(`${API_URL}/api/auth/verify-otp`, {
                 identifier: email,
                 otp,
                 purpose: purpose

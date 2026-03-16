@@ -5,6 +5,7 @@ import { selectuser, selectLoading } from "@/Feature/Userslice";
 import { Users, Mail } from "lucide-react";
 import { selectLanguage } from "@/Feature/LanguageSlice";
 import { translations } from "@/utils/translations";
+import { API_URL } from "@/utils/apiConfig";
 
 export default function Friends() {
   const [friends, setFriends] = useState<any[]>([]);
@@ -18,7 +19,7 @@ export default function Friends() {
 
   useEffect(() => {
     if (user?._id) {
-      axios.get(`http://localhost:8080/api/friend-routes/list/${user._id}`)
+      axios.get(`${API_URL}/api/friend-routes/list/${user._id}`)
         .then(res => setFriends(res.data))
         .catch(err => console.error(err));
     }

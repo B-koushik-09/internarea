@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import { selectLanguage } from "@/Feature/LanguageSlice";
 import { translations } from "@/utils/translations";
 import axios from "axios";
+import { API_URL } from "@/utils/apiConfig";
 
 interface User {
   name: string;
@@ -31,7 +32,7 @@ const ProfilePage = () => {
       }
 
       try {
-        const res = await axios.get("http://localhost:8080/api/application");
+        const res = await axios.get(`${API_URL}/api/application`);
         const allApplications = res.data;
 
         // Filter applications for current user

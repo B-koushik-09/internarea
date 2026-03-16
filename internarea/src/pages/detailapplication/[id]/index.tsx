@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import React, { useEffect, useState } from "react";
 import { selectLanguage } from "@/Feature/LanguageSlice";
 import { translations } from "@/utils/translations";
+import { API_URL } from "@/utils/apiConfig";
 
 const index = () => {
   const router = useRouter();
@@ -19,7 +20,7 @@ const index = () => {
       try {
         setloading(true);
         const res = await axios.get(
-          `http://localhost:8080/api/application/${id}`
+          `${API_URL}/api/application/${id}`
         );
         console.log(res.data);
         setdata(res.data);

@@ -5,6 +5,7 @@ import { selectuser } from "@/Feature/Userslice";
 import { MessageCircle, X } from "lucide-react";
 import { selectLanguage } from "@/Feature/LanguageSlice";
 import { translations } from "@/utils/translations";
+import { API_URL } from "@/utils/apiConfig";
 
 export default function MessageDrawer() {
     const user = useSelector(selectuser);
@@ -16,7 +17,7 @@ export default function MessageDrawer() {
 
     useEffect(() => {
         if (isOpen && user?._id) {
-            axios.get(`http://localhost:8080/api/message/inbox/${user._id}`)
+            axios.get(`${API_URL}/api/message/inbox/${user._id}`)
                 .then(res => setMessages(res.data))
                 .catch(console.error);
         }

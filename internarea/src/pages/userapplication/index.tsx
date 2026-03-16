@@ -14,6 +14,7 @@ import { selectuser } from "@/Feature/Userslice";
 import { useSelector } from "react-redux";
 import { selectLanguage } from "@/Feature/LanguageSlice";
 import { translations } from "@/utils/translations";
+import { API_URL } from "@/utils/apiConfig";
 
 const Applications = [
   {
@@ -62,7 +63,7 @@ const index = () => {
   useEffect(() => {
     const fetchdata = async () => {
       try {
-        const res = await axios.get("http://localhost:8080/api/application");
+        const res = await axios.get(`${API_URL}/api/application`);
         setdata(res.data);
       } catch (error) {
         console.log(error);
