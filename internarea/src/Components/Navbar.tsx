@@ -89,17 +89,6 @@ const Navbar = () => {
         setLoginPass(pass);
         setOtpPurpose("LOGIN_CHROME_PASSWORD");
         setIsOTPModalOpen(true);
-
-        try {
-          await axios.post(`${API_URL}/api/auth/send-otp`, {
-            identifier,
-            purpose: "LOGIN_CHROME_PASSWORD"
-          });
-          toast.info(`OTP sent to ${identifier} (Chrome Security)`);
-        } catch (err) {
-          console.error(err);
-          toast.error("Failed to send OTP");
-        }
       }
     } catch (error: any) {
       console.error(error);
@@ -133,12 +122,6 @@ const Navbar = () => {
         setOtpPurpose("LOGIN_CHROME_GOOGLE");
         setOtpEmail(userEmail);
         setIsOTPModalOpen(true);
-
-        await axios.post(`${API_URL}/api/auth/send-otp`, {
-          identifier: userEmail,
-          purpose: "LOGIN_CHROME_GOOGLE"
-        });
-        toast.info(`OTP sent to ${userEmail}`);
         return;
       }
     } catch (error) {
@@ -218,7 +201,7 @@ const Navbar = () => {
         sessionStorage.setItem("chrome_verified", "true");
         localStorage.setItem("chrome_verified_" + user.email, "true");
       }
-      await recordLogin(user);
+      await recordLogin(user, true);
     }
 
     if (otpPurpose === "LANGUAGE_FRENCH") {
@@ -246,18 +229,6 @@ const Navbar = () => {
       const email = user?.email;
       setOtpEmail(email);
       setIsOTPModalOpen(true);
-
-      // Trigger OTP send immediately
-      axios.post(`${API_URL}/api/auth/send-otp`, {
-        identifier: email,
-        purpose: "LANGUAGE_FRENCH"
-      })
-        .then(() => toast.info(`OTP sent to ${email} for language verification`))
-        .catch(err => {
-          console.error(err);
-          toast.error("Failed to send verification OTP");
-        });
-
     } else {
       dispatch(setLanguage(lang));
       setTargetLanguage(""); // Reset target

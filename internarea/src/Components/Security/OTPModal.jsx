@@ -25,18 +25,19 @@ const OTPModal = ({ isOpen, onClose, email, onSuccess, purpose }) => {
         setResending(false);
     };
 
-    // Prevent double OTP trigger
-    const sentRef = useRef(false);
     useEffect(() => {
-        if (isOpen) {
+        if (isOpen && email) {
             setOtp("");
             setError("");
-            // Prevent double trigger on mount/re-render
+            // Send OTP once when modal opens
             if (!hasSentInitial.current) {
                 handleSendOTP();
                 hasSentInitial.current = true;
             }
-        } else {
+        }
+        
+        // Reset ref when modal closes to allow resend on next open
+        if (!isOpen) {
             hasSentInitial.current = false;
         }
     }, [isOpen, email, purpose]);
