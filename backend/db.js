@@ -7,7 +7,17 @@ const connectDB = async () => {
         throw new Error("DATABASE_URL is not defined");
     }
 
-    console.log("MongoDB Connected Successfully");
+    if (mongoose.connection.readyState >= 1) {
+        return;
+    }
+
+    try {
+        await mongoose.connect(MONGO_URI);
+        console.log("MongoDB Connected Successfully");
+    } catch (error) {
+        console.error("MongoDB Connection Error:", error);
+        throw error;
+    }
 };
 
 module.exports = connectDB;
