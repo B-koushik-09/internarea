@@ -182,9 +182,7 @@ router.post("/record-login", async (req, res) => {
 
 
 
-// Twilio client for phone OTP
-const twilio = require("twilio");
-const client = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH);
+
  
 const VALID_PURPOSES = [
     'LOGIN_CHROME_GOOGLE',
@@ -216,8 +214,6 @@ router.post("/send-otp", async (req, res) => {
 
         const today = getTodayKey();
 
-        // Limit removed as per user request
-        /*
         if (purpose === 'FORGOT_PASSWORD_EMAIL' || purpose === 'FORGOT_PASSWORD_SMS') {
             if (user.lastForgotDate === today) {
                 return res.status(429).json({
@@ -227,38 +223,28 @@ router.post("/send-otp", async (req, res) => {
             user.lastForgotDate = today;
             await user.save();
         }
-        */
 
-        const isEmail = identifier && identifier.includes("@");
+        const otp = generateOTP();
+        const targetEmail = user.email;  
 
-        if (isEmail || purpose === 'FORGOT_PASSWORD_EMAIL' || purpose === 'FORGOT_PASSWORD_SMS') {
-            const otp = generateOTP();
-            const targetEmail = user.email; // Always use the registered email
+        await Otp.deleteMany({ email: targetEmail, purpose: purpose });
 
-            await Otp.deleteMany({ email: targetEmail, purpose: purpose });
+        await Otp.create({
+            email: targetEmail,
+            otp,
+            purpose: purpose,
+            isUsed: false,
+            expiresAt: new Date(Date.now() + 300000) 
+        });
 
-            await Otp.create({
-                email: targetEmail,
-                otp,
-                purpose: purpose,
-                isUsed: false,
-                expiresAt: new Date(Date.now() + 300000) 
-            });
-
-            const emailSent = await sendOTPMail(targetEmail, otp);
-            if (!emailSent) {
-                console.error(`[send-otp] FAILED to send email to ${targetEmail}`);
-                return res.status(500).json({ error: "Email service failed. Please try again or check spam folder." });
-            }
-            console.log(`[send-otp] OTP sent to ${targetEmail} for purpose: ${purpose}`);
-            return res.json({ message: `OTP sent to your registered email: ${targetEmail.replace(/(.{2})(.*)(@.*)/, "$1***$3")}`, purpose: purpose });
+        const emailSent = await sendOTPMail(targetEmail, otp);
+        if (!emailSent) {
+            console.error(`[send-otp] FAILED to send email to ${targetEmail}`);
+            return res.status(500).json({ error: "Email service failed. Please try again or check spam folder." });
         }
+        console.log(`[send-otp] OTP sent to ${targetEmail} for purpose: ${purpose}`);
+        return res.json({ message: `OTP sent to your registered email: ${targetEmail.replace(/(.{2})(.*)(@.*)/, "$1***$3")}`, purpose: purpose });
 
-        await client.verify.v2.services(process.env.TWILIO_VERIFY_SID)
-            .verifications.create({ to: `+91${identifier}`, channel: "sms" });
-
-        console.log(`[send-otp] SMS OTP sent to ${identifier} for purpose: ${purpose}`);
-        res.json({ message: "OTP sent via SMS", purpose: purpose });
     } catch (err) {
         console.error("[send-otp] Error:", err);
         res.status(500).json({ error: "Failed to send OTP" });
@@ -300,19 +286,11 @@ router.post("/verify-otp", async (req, res) => {
                 console.log(`[verify-otp] Invalid OTP for ${user.email}, purpose: ${purpose}`);
                 return res.status(400).json({ error: "Invalid or Expired OTP" });
             } 
-            // validOtp.isUsed = true; // Don't mark as used here! reset-password will do it.
-            // await validOtp.save();
+           
 
             console.log(`[verify-otp] OTP verified for ${user.email}, purpose: ${purpose}`);
         } else {
-            const check = await client.verify.v2.services(process.env.TWILIO_VERIFY_SID)
-                .verificationChecks
-                .create({ to: `+91${identifier}`, code: otp });
-
-            if (check.status !== "approved") {
-                return res.status(400).json({ error: "Invalid OTP" });
-            }
-            console.log(`[verify-otp] SMS OTP verified for ${identifier}, purpose: ${purpose}`);
+            return res.status(400).json({ error: "SMS verification is disabled." });
         }
 
         res.json({ status: "SUCCESS", message: "OTP Verified", purpose: purpose });
@@ -335,8 +313,7 @@ router.post("/reset-password", async (req, res) => {
             $or: [{ email: identifier }, { phone: identifier }]
         });
         if (!user) return res.status(404).json({ error: "User not found" });
-
-        // For forgot password, we ALWAYS verify against the registered email in Otp model
+ 
         const validOtp = await Otp.findOne({
             email: user.email,
             otp,
