@@ -144,6 +144,14 @@ export const AuthProvider = ({ children }) => {
                 } catch (e) {
                     console.error("Auth Sync Error", e);
 
+                    if (e.response?.status === 403 || e.response?.data?.status === "BLOCKED") {
+                        console.warn("AuthContext: Access denied by backend rule. Logging out...");
+                        try { await auth.signOut(); } catch (err) {}
+                        setUser(null);
+                        dispatch(logoutAction());
+                        return;
+                    }
+
                     const { browser } = getDeviceInfo();
                     const isChrome = browser === "Chrome";
                     const localVerified = typeof window !== 'undefined' && localStorage.getItem("chrome_verified_" + fbUser.email) === "true";

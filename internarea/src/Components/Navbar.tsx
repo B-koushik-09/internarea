@@ -284,13 +284,14 @@ const Navbar = () => {
           try {
             const res = await axios.post(`${API_URL}/api/auth/register`, data);
             if (res.data.status === "SUCCESS") {
-              toast.success("Account created! Logging you in...");
-              dispatch(login({ ...res.data.user, token: res.data.token }));
-              setIsLoginModalOpen(false);
+              toast.success("Account created successfully! Please login to continue.");
+              return true;
             }
+            return false;
           } catch (error: any) {
             console.error(error);
             toast.error(error.response?.data?.error || "Registration Failed");
+            return false;
           }
         }}
         t={t}

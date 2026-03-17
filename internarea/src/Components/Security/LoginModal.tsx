@@ -7,7 +7,7 @@ interface LoginModalProps {
     onClose: () => void;
     onGoogleLogin: () => void;
     onStandardLogin: (identifier: string, pass: string) => Promise<void>;
-    onSignup: (data: any) => Promise<void>;
+    onSignup: (data: any) => Promise<boolean>;
     t?: any;
 }
 
@@ -46,12 +46,15 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onGoogleLogin,
         }
 
         setLoading(true);
-        await onSignup({
+        const success = await onSignup({
             name: signupData.name,
             email: signupData.email,
             phone: signupData.phone,
             password: signupData.password
         });
+        if (success) {
+            setView('login');
+        }
         setLoading(false);
     };
 
