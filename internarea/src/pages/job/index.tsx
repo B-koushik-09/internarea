@@ -76,19 +76,27 @@ const index = () => {
       try {
         const translationPromises = untranslatedIndices.flatMap(i => {
           const j = newJobs[i];
-          const promises = [];
-          if (!j._translatedTitle && j.title) promises.push(translateDynamicText(j.title, currentLanguage).then(res => ({ i, field: '_translatedTitle', res })));
-          if (!j._translatedCompany && j.company) promises.push(translateDynamicText(j.company, currentLanguage).then(res => ({ i, field: '_translatedCompany', res })));
-          if (!j._translatedLocation && j.location) promises.push(translateDynamicText(j.location, currentLanguage).then(res => ({ i, field: '_translatedLocation', res })));
-          return promises;
+          
+          // Use parallel calls per item
+          const p = Promise.all([
+            !j._translatedTitle && j.title ? translateDynamicText(j.title, currentLanguage) : Promise.resolve(null),
+            !j._translatedCompany && j.company ? translateDynamicText(j.company, currentLanguage) : Promise.resolve(null),
+            !j._translatedLocation && j.location ? translateDynamicText(j.location, currentLanguage) : Promise.resolve(null)
+          ]).then(([title, company, location]) => ({
+            i,
+            title,
+            company,
+            location
+          }));
+          
+          return [p];
         });
 
         const results = await Promise.all(translationPromises);
-        results.forEach(({ i, field, res }) => {
-          if (res && res !== newJobs[i][field.replace('_translated', '').toLowerCase()]) {
-            newJobs[i][field] = res;
-            changed = true;
-          }
+        results.forEach(({ i, title, company, location }) => {
+          if (title) { newJobs[i]._translatedTitle = title; changed = true; }
+          if (company) { newJobs[i]._translatedCompany = company; changed = true; }
+          if (location) { newJobs[i]._translatedLocation = location; changed = true; }
         });
 
         setfilteredjobs(newJobs);

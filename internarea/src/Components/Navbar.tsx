@@ -62,7 +62,7 @@ const Navbar = () => {
   };
 
   const handleStandardLogin = async (identifier: string, pass: string, otpVerified = false) => {
-    // Check mobile time restriction
+    // Check mobile time restriction for login action
     if (!checkMobileTimeRestriction()) {
       return;
     }
@@ -285,6 +285,18 @@ const Navbar = () => {
             const res = await axios.post(`${API_URL}/api/auth/register`, data);
             if (res.data.status === "SUCCESS") {
               toast.success("Account created successfully! Please login to continue.");
+              
+              // Inform mobile users about the time restriction after they are moved to login view
+              const { device } = getDeviceInfo();
+              if (device.toLowerCase().includes("mobile")) {
+                const now = new Date();
+                const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+                const istTime = new Date(utc + (3600000 * 5.5));
+                const hour = istTime.getHours();
+                if (hour < 10 || hour >= 13) {
+                  toast.info("ℹ️ Account created. Please note: Mobile login is only allowed between 10 AM – 1 PM IST.");
+                }
+              }
               return true;
             }
             return false;

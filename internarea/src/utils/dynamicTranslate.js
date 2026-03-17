@@ -18,7 +18,7 @@ export const translateDynamicText = async (text, targetLang) => {
     const code = langCodeMap[targetLang] || "fr";  
     const today = new Date().toDateString();
     
-    const cacheKey = `translate_${code}_${today}_${text.substring(0, 40).replace(/[^a-zA-Z0-9]/g, '_')}`;
+    const cacheKey = `translate_${code}_${text.substring(0, 100).replace(/[^a-zA-Z0-9]/g, '_')}`;
 
     try {
         const cached = localStorage.getItem(cacheKey);
@@ -40,14 +40,15 @@ export const translateDynamicText = async (text, targetLang) => {
             try {
                 localStorage.setItem(cacheKey, translated);
             } catch (e) {
-                console.warn("Translation cache write error (localStorage full?):", e);
                 if (e.name === 'QuotaExceededError') {
+                    // Optimized cleanup: remove oldest translation keys
+                    const keys = [];
                     for (let i = 0; i < localStorage.length; i++) {
                         const key = localStorage.key(i);
-                        if (key && key.startsWith('translate_') && !key.includes(today)) {
-                            localStorage.removeItem(key);
-                        }
+                        if (key && key.startsWith('translate_')) keys.push(key);
                     }
+                    keys.sort().slice(0, Math.max(10, Math.floor(keys.length / 5))).forEach(k => localStorage.removeItem(k));
+                    try { localStorage.setItem(cacheKey, translated); } catch (e2) {}
                 }
             }
 

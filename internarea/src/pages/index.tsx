@@ -125,22 +125,26 @@ export default function SvgSlider() {
           .filter(i => i !== -1);
 
         if (untranslatedInternshipIndices.length > 0) {
-          const promises = untranslatedInternshipIndices.flatMap(i => {
+          const promises = untranslatedInternshipIndices.map(i => {
             const item = filteredInternships[i];
-            const p = [];
-            if (!item._translatedTitle && item.title) p.push(translateDynamicText(item.title, currentLanguage).then(res => ({ type: 'internship', i, field: '_translatedTitle', res })));
-            if (!item._translatedCompany && item.company) p.push(translateDynamicText(item.company, currentLanguage).then(res => ({ type: 'internship', i, field: '_translatedCompany', res })));
-            if (!item._translatedLocation && item.location) p.push(translateDynamicText(item.location, currentLanguage).then(res => ({ type: 'internship', i, field: '_translatedLocation', res })));
-            return p;
+            return Promise.all([
+              !item._translatedTitle && item.title ? translateDynamicText(item.title, currentLanguage) : Promise.resolve(null),
+              !item._translatedCompany && item.company ? translateDynamicText(item.company, currentLanguage) : Promise.resolve(null),
+              !item._translatedLocation && item.location ? translateDynamicText(item.location, currentLanguage) : Promise.resolve(null)
+            ]).then(([title, company, location]) => ({ i, title, company, location }));
           });
 
           const results = await Promise.all(promises);
           if (results.length > 0) {
             setinternship(prev => {
               const next = [...prev];
-              results.forEach(({ i, field, res }) => {
+              results.forEach(({ i, title, company, location }) => {
                 const globalIndex = prev.findIndex(item => item._id === filteredInternships[i]._id);
-                if (globalIndex !== -1 && res) next[globalIndex] = { ...next[globalIndex], [field]: res };
+                if (globalIndex !== -1) {
+                  if (title) next[globalIndex]._translatedTitle = title;
+                  if (company) next[globalIndex]._translatedCompany = company;
+                  if (location) next[globalIndex]._translatedLocation = location;
+                }
               });
               return next;
             });
@@ -155,22 +159,26 @@ export default function SvgSlider() {
           .filter(i => i !== -1);
 
         if (untranslatedJobIndices.length > 0) {
-          const promises = untranslatedJobIndices.flatMap(i => {
+          const promises = untranslatedJobIndices.map(i => {
             const item = filteredJobs[i];
-            const p = [];
-            if (!item._translatedTitle && item.title) p.push(translateDynamicText(item.title, currentLanguage).then(res => ({ type: 'job', i, field: '_translatedTitle', res })));
-            if (!item._translatedCompany && item.company) p.push(translateDynamicText(item.company, currentLanguage).then(res => ({ type: 'job', i, field: '_translatedCompany', res })));
-            if (!item._translatedLocation && item.location) p.push(translateDynamicText(item.location, currentLanguage).then(res => ({ type: 'job', i, field: '_translatedLocation', res })));
-            return p;
+            return Promise.all([
+              !item._translatedTitle && item.title ? translateDynamicText(item.title, currentLanguage) : Promise.resolve(null),
+              !item._translatedCompany && item.company ? translateDynamicText(item.company, currentLanguage) : Promise.resolve(null),
+              !item._translatedLocation && item.location ? translateDynamicText(item.location, currentLanguage) : Promise.resolve(null)
+            ]).then(([title, company, location]) => ({ i, title, company, location }));
           });
 
           const results = await Promise.all(promises);
           if (results.length > 0) {
             setjob(prev => {
               const next = [...prev];
-              results.forEach(({ i, field, res }) => {
+              results.forEach(({ i, title, company, location }) => {
                 const globalIndex = prev.findIndex(item => item._id === filteredJobs[i]._id);
-                if (globalIndex !== -1 && res) next[globalIndex] = { ...next[globalIndex], [field]: res };
+                if (globalIndex !== -1) {
+                  if (title) next[globalIndex]._translatedTitle = title;
+                  if (company) next[globalIndex]._translatedCompany = company;
+                  if (location) next[globalIndex]._translatedLocation = location;
+                }
               });
               return next;
             });

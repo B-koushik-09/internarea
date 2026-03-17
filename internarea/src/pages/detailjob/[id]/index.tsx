@@ -136,12 +136,21 @@ const index = () => {
         
         // Translation logic
         if (currentLanguage !== "English" && data) {
-          const transTitle = await translateDynamicText(data.title, currentLanguage);
-          const transCompany = await translateDynamicText(data.company, currentLanguage);
-          const transLoc = await translateDynamicText(data.location, currentLanguage);
-          const transAboutComp = await translateDynamicText(data.aboutCompany, currentLanguage);
-          const transAboutJob = await translateDynamicText(data.aboutJob, currentLanguage);
-          const transWho = await translateDynamicText(data.whoCanApply, currentLanguage);
+          const [
+            transTitle,
+            transCompany,
+            transLoc,
+            transAboutComp,
+            transAboutJob,
+            transWho
+          ] = await Promise.all([
+            translateDynamicText(data.title, currentLanguage),
+            translateDynamicText(data.company, currentLanguage),
+            translateDynamicText(data.location, currentLanguage),
+            translateDynamicText(data.aboutCompany, currentLanguage),
+            translateDynamicText(data.aboutJob, currentLanguage),
+            translateDynamicText(data.whoCanApply, currentLanguage)
+          ]);
           
           data = {
             ...data,
