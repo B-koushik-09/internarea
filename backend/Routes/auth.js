@@ -316,22 +316,7 @@ router.post("/verify-otp", async (req, res) => {
     }
 });
 
-router.post("/verify-phone-forgot-otp", async (req, res) => {
-    try {
-        const { phone, otp } = req.body;
 
-        const check = await client.verify.v2.services(process.env.TWILIO_VERIFY_SID)
-            .verificationChecks
-            .create({ to: `+91${phone}`, code: otp });
-
-        if (check.status !== "approved")
-            return res.status(400).json({ error: "Invalid OTP" });
-
-        res.json({ success: true });
-    } catch (err) {
-        res.status(400).json({ error: "Invalid OTP" });
-    }
-});
 
 router.post("/reset-password", async (req, res) => {
     try {
