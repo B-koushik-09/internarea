@@ -142,14 +142,16 @@ const index = () => {
             transLoc,
             transAboutComp,
             transAboutJob,
-            transWho
+            transWho,
+            transCTC
           ] = await Promise.all([
             translateDynamicText(data.title, currentLanguage),
             translateDynamicText(data.company, currentLanguage),
             translateDynamicText(data.location, currentLanguage),
             translateDynamicText(data.aboutCompany, currentLanguage),
             translateDynamicText(data.aboutJob, currentLanguage),
-            translateDynamicText(data.whoCanApply, currentLanguage)
+            translateDynamicText(data.whoCanApply, currentLanguage),
+            translateDynamicText(data.CTC, currentLanguage)
           ]);
           
           data = {
@@ -159,7 +161,8 @@ const index = () => {
             _translatedLocation: transLoc,
             _translatedAboutCompany: transAboutComp,
             _translatedAboutJob: transAboutJob,
-            _translatedWho: transWho
+            _translatedWho: transWho,
+            _translatedCTC: transCTC
           };
         }
         
@@ -191,7 +194,7 @@ const index = () => {
       return;
     }
 
-    // ✅ CHECK SUBSCRIPTION LIMIT BEFORE APPLYING
+    //  CHECK SUBSCRIPTION LIMIT BEFORE APPLYING
     if (user?._id) {
       try {
         const limitCheck = await axios.get(`${API_URL}/api/subscription/check-limit/${user._id}`);
@@ -204,8 +207,7 @@ const index = () => {
           return;
         }
       } catch (limitErr) {
-        console.error("Failed to check subscription limit:", limitErr);
-        // Continue with application if limit check fails (graceful degradation)
+        console.error("Failed to check subscription limit:", limitErr); 
       }
     }
 
@@ -254,7 +256,7 @@ const index = () => {
             </div>
             <div className="flex items-center space-x-2 text-gray-600">
               <DollarSign className="h-5 w-5" />
-              <span>CTC {jobdata.CTC}</span>
+              <span>CTC {currentLanguage === "English" ? jobdata.CTC : (jobdata._translatedCTC || jobdata.CTC)}</span>
             </div>
             <div className="flex items-center space-x-2 text-gray-600">
               <Book className="h-5 w-5" />

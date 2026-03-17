@@ -11,14 +11,14 @@ export const translateDynamicText = async (text, targetLang) => {
         "Spanish": "es",
         "Hindi": "hi",
         "Portuguese": "pt",
-        "Chinese": "zh",
+        "Chinese": "zh-CN",
         "French": "fr"
     };
 
     const code = langCodeMap[targetLang] || "fr";  
-    const today = new Date().toDateString();
     
-    const cacheKey = `translate_${code}_${text.substring(0, 100).replace(/[^a-zA-Z0-9]/g, '_')}`;
+    // v2 cache key to clear out potentially bad older cached entries
+    const cacheKey = `tr_v2_${code}_${text.substring(0, 100).replace(/[^a-zA-Z0-9]/g, '_')}`;
 
     try {
         const cached = localStorage.getItem(cacheKey);

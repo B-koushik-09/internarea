@@ -31,6 +31,7 @@ interface Internship {
   _translatedTitle?: string;
   _translatedCompany?: string;
   _translatedLocation?: string;
+  _translatedStipend?: string;
 }
 
 interface Job {
@@ -45,6 +46,7 @@ interface Job {
   _translatedTitle?: string;
   _translatedCompany?: string;
   _translatedLocation?: string;
+  _translatedSalary?: string;
 }
 
 export default function SvgSlider() {
@@ -130,20 +132,25 @@ export default function SvgSlider() {
             return Promise.all([
               !item._translatedTitle && item.title ? translateDynamicText(item.title, currentLanguage) : Promise.resolve(null),
               !item._translatedCompany && item.company ? translateDynamicText(item.company, currentLanguage) : Promise.resolve(null),
-              !item._translatedLocation && item.location ? translateDynamicText(item.location, currentLanguage) : Promise.resolve(null)
-            ]).then(([title, company, location]) => ({ i, title, company, location }));
+              !item._translatedLocation && item.location ? translateDynamicText(item.location, currentLanguage) : Promise.resolve(null),
+              !item._translatedStipend && item.stipend ? translateDynamicText(item.stipend, currentLanguage) : Promise.resolve(null)
+            ]).then(([title, company, location, stipend]) => ({ i, title, company, location, stipend }));
           });
 
           const results = await Promise.all(promises);
           if (results.length > 0) {
             setinternship(prev => {
               const next = [...prev];
-              results.forEach(({ i, title, company, location }) => {
+              results.forEach(({ i, title, company, location, stipend }) => {
                 const globalIndex = prev.findIndex(item => item._id === filteredInternships[i]._id);
                 if (globalIndex !== -1) {
-                  if (title) next[globalIndex]._translatedTitle = title;
-                  if (company) next[globalIndex]._translatedCompany = company;
-                  if (location) next[globalIndex]._translatedLocation = location;
+                  next[globalIndex] = {
+                    ...next[globalIndex],
+                    ...(title && { _translatedTitle: title }),
+                    ...(company && { _translatedCompany: company }),
+                    ...(location && { _translatedLocation: location }),
+                    ...(stipend && { _translatedStipend: stipend })
+                  };
                 }
               });
               return next;
@@ -155,7 +162,7 @@ export default function SvgSlider() {
       // Handle Jobs
       if (filteredJobs.length > 0) {
         const untranslatedJobIndices = filteredJobs
-          .map((item: any, i) => (!item._translatedTitle || !item._translatedCompany || !item._translatedLocation) ? i : -1)
+          .map((item: any, i) => (!item._translatedTitle || !item._translatedCompany || !item._translatedLocation || !item._translatedSalary) ? i : -1)
           .filter(i => i !== -1);
 
         if (untranslatedJobIndices.length > 0) {
@@ -164,20 +171,25 @@ export default function SvgSlider() {
             return Promise.all([
               !item._translatedTitle && item.title ? translateDynamicText(item.title, currentLanguage) : Promise.resolve(null),
               !item._translatedCompany && item.company ? translateDynamicText(item.company, currentLanguage) : Promise.resolve(null),
-              !item._translatedLocation && item.location ? translateDynamicText(item.location, currentLanguage) : Promise.resolve(null)
-            ]).then(([title, company, location]) => ({ i, title, company, location }));
+              !item._translatedLocation && item.location ? translateDynamicText(item.location, currentLanguage) : Promise.resolve(null),
+              !item._translatedSalary && item.CTC ? translateDynamicText(item.CTC, currentLanguage) : Promise.resolve(null)
+            ]).then(([title, company, location, salary]) => ({ i, title, company, location, salary }));
           });
 
           const results = await Promise.all(promises);
           if (results.length > 0) {
             setjob(prev => {
               const next = [...prev];
-              results.forEach(({ i, title, company, location }) => {
+              results.forEach(({ i, title, company, location, salary }) => {
                 const globalIndex = prev.findIndex(item => item._id === filteredJobs[i]._id);
                 if (globalIndex !== -1) {
-                  if (title) next[globalIndex]._translatedTitle = title;
-                  if (company) next[globalIndex]._translatedCompany = company;
-                  if (location) next[globalIndex]._translatedLocation = location;
+                  next[globalIndex] = {
+                    ...next[globalIndex],
+                    ...(title && { _translatedTitle: title }),
+                    ...(company && { _translatedCompany: company }),
+                    ...(location && { _translatedLocation: location }),
+                    ...(salary && { _translatedSalary: salary })
+                  };
                 }
               });
               return next;
@@ -337,7 +349,7 @@ export default function SvgSlider() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Banknote size={18} />
-                  <span>₹ {internship.stipend || "TBD"}{internship.stipend && !internship.stipend.toLowerCase().includes('/month') && ' /month'}</span>
+                  <span>{currentLanguage === "English" ? (internship.stipend || "TBD") : (internship._translatedStipend || internship.stipend || "TBD")}{internship.stipend && !internship.stipend.toLowerCase().includes('/month') && ' /month'}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar size={18} />
@@ -384,7 +396,7 @@ export default function SvgSlider() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Banknote size={18} />
-                  <span>₹ {job.CTC}{!job.CTC.toLowerCase().includes('lpa') && ' LPA'}</span>
+                  <span>₹ {currentLanguage === "English" ? job.CTC : (job._translatedSalary || job.CTC)}{!job.CTC.toLowerCase().includes('lpa') && ' LPA'}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar size={18} />

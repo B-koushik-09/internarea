@@ -75,31 +75,40 @@ const index = () => {
       try {
         const translationPromises = untranslatedIndices.flatMap(i => {
           const j = newInternships[i];
-          const promises = [];
           
           // Use parallel calls per item
           const p = Promise.all([
             !j._translatedTitle && j.title ? translateDynamicText(j.title, currentLanguage) : Promise.resolve(null),
             !j._translatedCompany && j.company ? translateDynamicText(j.company, currentLanguage) : Promise.resolve(null),
-            !j._translatedLocation && j.location ? translateDynamicText(j.location, currentLanguage) : Promise.resolve(null)
-          ]).then(([title, company, location]) => ({
+            !j._translatedLocation && j.location ? translateDynamicText(j.location, currentLanguage) : Promise.resolve(null),
+            !j._translatedStipend && j.stipend ? translateDynamicText(j.stipend, currentLanguage) : Promise.resolve(null)
+          ]).then(([title, company, location, stipend]) => ({
             i,
             title,
             company,
-            location
+            location,
+            stipend
           }));
           
           return [p];
         });
 
         const results = await Promise.all(translationPromises);
-        results.forEach(({ i, title, company, location }) => {
-          if (title) { newInternships[i]._translatedTitle = title; changed = true; }
-          if (company) { newInternships[i]._translatedCompany = company; changed = true; }
-          if (location) { newInternships[i]._translatedLocation = location; changed = true; }
+        results.forEach(({ i, title, company, location, stipend }) => {
+          // CLONE the object to ensure React detects the change
+          newInternships[i] = {
+            ...newInternships[i],
+            ...(title && { _translatedTitle: title }),
+            ...(company && { _translatedCompany: company }),
+            ...(location && { _translatedLocation: location }),
+            ...(stipend && { _translatedStipend: stipend })
+          };
+          changed = true;
         });
 
-        setfilteredInternships(newInternships);
+        if (changed) {
+          setfilteredInternships([...newInternships]);
+        }
       } catch (e) {
         console.error("Translation error:", e);
         setfilteredInternships(filtered);
@@ -268,7 +277,7 @@ const index = () => {
                       <DollarSign className="h-5 w-5" />
                       <div>
                         <p className="text-sm font-medium">{t?.listing_stipend || "Stipend"}</p>
-                        <p className="text-sm">₹ {internship.stipend}{!internship.stipend.toLowerCase().includes('/month') && ' /month'}</p>
+                        <p className="text-sm">₹ {currentLanguage === "English" ? internship.stipend : (internship._translatedStipend || internship.stipend)}{!internship.stipend.toLowerCase().includes('/month') && ' /month'}</p>
                       </div>
                     </div>
                   </div>

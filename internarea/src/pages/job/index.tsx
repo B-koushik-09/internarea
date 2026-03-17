@@ -81,25 +81,34 @@ const index = () => {
           const p = Promise.all([
             !j._translatedTitle && j.title ? translateDynamicText(j.title, currentLanguage) : Promise.resolve(null),
             !j._translatedCompany && j.company ? translateDynamicText(j.company, currentLanguage) : Promise.resolve(null),
-            !j._translatedLocation && j.location ? translateDynamicText(j.location, currentLanguage) : Promise.resolve(null)
-          ]).then(([title, company, location]) => ({
+            !j._translatedLocation && j.location ? translateDynamicText(j.location, currentLanguage) : Promise.resolve(null),
+            !j._translatedSalary && j.CTC ? translateDynamicText(j.CTC, currentLanguage) : Promise.resolve(null)
+          ]).then(([title, company, location, salary]) => ({
             i,
             title,
             company,
-            location
+            location,
+            salary
           }));
           
           return [p];
         });
 
         const results = await Promise.all(translationPromises);
-        results.forEach(({ i, title, company, location }) => {
-          if (title) { newJobs[i]._translatedTitle = title; changed = true; }
-          if (company) { newJobs[i]._translatedCompany = company; changed = true; }
-          if (location) { newJobs[i]._translatedLocation = location; changed = true; }
+        results.forEach(({ i, title, company, location, salary }) => {
+          newJobs[i] = {
+            ...newJobs[i],
+            ...(title && { _translatedTitle: title }),
+            ...(company && { _translatedCompany: company }),
+            ...(location && { _translatedLocation: location }),
+            ...(salary && { _translatedSalary: salary })
+          };
+          changed = true;
         });
 
-        setfilteredjobs(newJobs);
+        if (changed) {
+          setfilteredjobs([...newJobs]);
+        }
       } catch (e) {
         console.error("Translation error:", e);
         setfilteredjobs(filtered);
@@ -282,7 +291,7 @@ const index = () => {
                       <DollarSign className="h-5 w-5" />
                       <div>
                         <p className="text-sm font-medium">{t?.listing_ctc || "CTC"}</p>
-                        <p className="text-sm">₹ {job.CTC}{!job.CTC.toLowerCase().includes('lpa') && ' LPA'}</p>
+                        <p className="text-sm">₹ {currentLanguage === "English" ? job.CTC : (job._translatedSalary || job.CTC)}{!job.CTC.toLowerCase().includes('lpa') && ' LPA'}</p>
                       </div>
                     </div>
                   </div>

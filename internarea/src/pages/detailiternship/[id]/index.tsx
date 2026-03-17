@@ -97,14 +97,16 @@ const index = () => {
             transLoc,
             transAboutComp,
             transAboutInt,
-            transWho
+            transWho,
+            transStipend
           ] = await Promise.all([
             translateDynamicText(data.title, currentLanguage),
             translateDynamicText(data.company, currentLanguage),
             translateDynamicText(data.location, currentLanguage),
             translateDynamicText(data.aboutCompany, currentLanguage),
             translateDynamicText(data.aboutInternship, currentLanguage),
-            translateDynamicText(data.whoCanApply, currentLanguage)
+            translateDynamicText(data.whoCanApply, currentLanguage),
+            translateDynamicText(data.stipend, currentLanguage)
           ]);
           
           data = {
@@ -114,7 +116,8 @@ const index = () => {
             _translatedLocation: transLoc,
             _translatedAboutCompany: transAboutComp,
             _translatedAboutInternship: transAboutInt,
-            _translatedWho: transWho
+            _translatedWho: transWho,
+            _translatedStipend: transStipend
           };
         }
  
@@ -206,7 +209,7 @@ const index = () => {
             </div>
             <div className="flex items-center space-x-2 text-gray-600">
               <DollarSign className="h-5 w-5" />
-              <span>{internshipData.stipend}</span>
+              <span>{currentLanguage === "English" ? internshipData.stipend : (internshipData._translatedStipend || internshipData.stipend)}</span>
             </div>
             <div className="flex items-center space-x-2 text-gray-600">
               <Calendar className="h-5 w-5" />
