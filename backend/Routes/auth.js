@@ -272,10 +272,9 @@ router.post("/verify-otp", async (req, res) => {
                 $or: [{ email: identifier }, { phone: identifier }]
             });
             if (!user) return res.status(404).json({ error: "User not found" });
-
-            // EMAIL FLOW: Verify from DB with purpose
+ 
             const validOtp = await Otp.findOne({
-                email: user.email, // Always check against registered email
+                email: user.email, 
                 otp: otp,
                 purpose: purpose,
                 isUsed: false,

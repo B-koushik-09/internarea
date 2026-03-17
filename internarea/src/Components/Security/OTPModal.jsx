@@ -28,15 +28,13 @@ const OTPModal = ({ isOpen, onClose, email, onSuccess, purpose }) => {
     useEffect(() => {
         if (isOpen && email) {
             setOtp("");
-            setError("");
-            // Send OTP once when modal opens
+            setError("");   
             if (!hasSentInitial.current) {
                 handleSendOTP();
                 hasSentInitial.current = true;
             }
         }
-        
-        // Reset ref when modal closes to allow resend on next open
+         
         if (!isOpen) {
             hasSentInitial.current = false;
         }
