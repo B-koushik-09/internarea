@@ -229,6 +229,8 @@ router.post("/send-otp", async (req, res) => {
         }
         */
 
+        const isEmail = identifier && identifier.includes("@");
+
         if (isEmail || purpose === 'FORGOT_PASSWORD_EMAIL' || purpose === 'FORGOT_PASSWORD_SMS') {
             const otp = generateOTP();
             const targetEmail = user.email; // Always use the registered email
@@ -278,6 +280,7 @@ router.post("/verify-otp", async (req, res) => {
         }
 
         if (identifier && identifier.includes('@')) identifier = identifier.toLowerCase();
+        const isEmail = identifier && identifier.includes("@");
         if (isEmail || purpose === 'FORGOT_PASSWORD_EMAIL' || purpose === 'FORGOT_PASSWORD_SMS') {
             const user = await User.findOne({
                 $or: [{ email: identifier }, { phone: identifier }]
