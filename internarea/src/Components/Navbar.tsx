@@ -321,16 +321,16 @@ const Navbar = () => {
                   <span className="text-xs font-semibold text-gray-700">{currentLanguage.substring(0, 2).toUpperCase()}</span>
                 </div>
                 <select
-                  className="absolute inset-0 opacity-0 cursor-pointer"
+                  className="absolute inset-0 opacity-0 cursor-pointer text-black"
                   value={currentLanguage}
                   onChange={handleLanguageChange}
                 >
-                  <option value="English">English</option>
-                  <option value="Spanish">Spanish</option>
-                  <option value="Hindi">Hindi</option>
-                  <option value="Portuguese">Portuguese</option>
-                  <option value="Chinese">Chinese</option>
-                  <option value="French">French (Locked)</option>
+                  <option value="English" className="text-black bg-white">English</option>
+                  <option value="Spanish" className="text-black bg-white">Spanish</option>
+                  <option value="Hindi" className="text-black bg-white">Hindi</option>
+                  <option value="Portuguese" className="text-black bg-white">Portuguese</option>
+                  <option value="Chinese" className="text-black bg-white">Chinese</option>
+                  <option value="French" className="text-black bg-white">French (Locked)</option>
                 </select>
               </div>
 
