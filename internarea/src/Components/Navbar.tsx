@@ -312,8 +312,28 @@ const Navbar = () => {
               </Link>
             </div>
 
-            {/* Mobile Login Button - Always visible on mobile */}
-            <div className="flex md:hidden items-center space-x-2">
+            {/* Mobile Actions: Language + Login/User */}
+            <div className="flex md:hidden items-center space-x-3">
+              {/* Mobile Language Switcher */}
+              <div className="relative">
+                <div className="flex items-center space-x-1 border rounded-lg px-2 py-1.5 cursor-pointer hover:bg-gray-50 bg-white shadow-sm">
+                  <Globe size={16} className="text-gray-500" />
+                  <span className="text-xs font-semibold text-gray-700">{currentLanguage.substring(0, 2).toUpperCase()}</span>
+                </div>
+                <select
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                  value={currentLanguage}
+                  onChange={handleLanguageChange}
+                >
+                  <option value="English">English</option>
+                  <option value="Spanish">Spanish</option>
+                  <option value="Hindi">Hindi</option>
+                  <option value="Portuguese">Portuguese</option>
+                  <option value="Chinese">Chinese</option>
+                  <option value="French">French (Locked)</option>
+                </select>
+              </div>
+
               {isLoading ? (
                 <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
               ) : user ? (
