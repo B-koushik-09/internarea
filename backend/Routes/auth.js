@@ -216,6 +216,8 @@ router.post("/send-otp", async (req, res) => {
 
         const today = getTodayKey();
 
+        // Limit removed as per user request
+        /*
         if (purpose === 'FORGOT_PASSWORD_EMAIL' || purpose === 'FORGOT_PASSWORD_SMS') {
             if (user.lastForgotDate === today) {
                 return res.status(429).json({
@@ -225,6 +227,7 @@ router.post("/send-otp", async (req, res) => {
             user.lastForgotDate = today;
             await user.save();
         }
+        */
 
         if (isEmail || purpose === 'FORGOT_PASSWORD_EMAIL' || purpose === 'FORGOT_PASSWORD_SMS') {
             const otp = generateOTP();
