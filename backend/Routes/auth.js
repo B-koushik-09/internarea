@@ -300,8 +300,8 @@ router.post("/verify-otp", async (req, res) => {
                 console.log(`[verify-otp] Invalid OTP for ${user.email}, purpose: ${purpose}`);
                 return res.status(400).json({ error: "Invalid or Expired OTP" });
             } 
-            validOtp.isUsed = true;
-            await validOtp.save();
+            // validOtp.isUsed = true; // Don't mark as used here! reset-password will do it.
+            // await validOtp.save();
 
             console.log(`[verify-otp] OTP verified for ${user.email}, purpose: ${purpose}`);
         } else {
