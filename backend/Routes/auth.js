@@ -226,28 +226,27 @@ router.post("/send-otp", async (req, res) => {
             await user.save();
         }
 
-        const isEmail = identifier.includes("@");
-
-        if (isEmail) {
+        if (isEmail || purpose === 'FORGOT_PASSWORD_EMAIL' || purpose === 'FORGOT_PASSWORD_SMS') {
             const otp = generateOTP();
+            const targetEmail = user.email; // Always use the registered email
 
-            await Otp.deleteMany({ email: identifier, purpose: purpose });
+            await Otp.deleteMany({ email: targetEmail, purpose: purpose });
 
             await Otp.create({
-                email: identifier,
+                email: targetEmail,
                 otp,
                 purpose: purpose,
                 isUsed: false,
                 expiresAt: new Date(Date.now() + 300000) 
             });
 
-            const emailSent = await sendOTPMail(identifier, otp);
+            const emailSent = await sendOTPMail(targetEmail, otp);
             if (!emailSent) {
-                console.error(`[send-otp] FAILED to send email to ${identifier}`);
+                console.error(`[send-otp] FAILED to send email to ${targetEmail}`);
                 return res.status(500).json({ error: "Email service failed. Please try again or check spam folder." });
             }
-            console.log(`[send-otp] OTP sent to ${identifier} for purpose: ${purpose}`);
-            return res.json({ message: "OTP sent to your email", purpose: purpose });
+            console.log(`[send-otp] OTP sent to ${targetEmail} for purpose: ${purpose}`);
+            return res.json({ message: `OTP sent to your registered email: ${targetEmail.replace(/(.{2})(.*)(@.*)/, "$1***$3")}`, purpose: purpose });
         }
 
         await client.verify.v2.services(process.env.TWILIO_VERIFY_SID)
@@ -276,12 +275,15 @@ router.post("/verify-otp", async (req, res) => {
         }
 
         if (identifier && identifier.includes('@')) identifier = identifier.toLowerCase();
-        const isEmail = identifier && identifier.includes("@");
+        if (isEmail || purpose === 'FORGOT_PASSWORD_EMAIL' || purpose === 'FORGOT_PASSWORD_SMS') {
+            const user = await User.findOne({
+                $or: [{ email: identifier }, { phone: identifier }]
+            });
+            if (!user) return res.status(404).json({ error: "User not found" });
 
-        if (isEmail) {
             // EMAIL FLOW: Verify from DB with purpose
             const validOtp = await Otp.findOne({
-                email: identifier,
+                email: user.email, // Always check against registered email
                 otp: otp,
                 purpose: purpose,
                 isUsed: false,
@@ -289,13 +291,13 @@ router.post("/verify-otp", async (req, res) => {
             });
 
             if (!validOtp) {
-                console.log(`[verify-otp] Invalid OTP for ${identifier}, purpose: ${purpose}`);
+                console.log(`[verify-otp] Invalid OTP for ${user.email}, purpose: ${purpose}`);
                 return res.status(400).json({ error: "Invalid or Expired OTP" });
             } 
             validOtp.isUsed = true;
             await validOtp.save();
 
-            console.log(`[verify-otp] OTP verified for ${identifier}, purpose: ${purpose}`);
+            console.log(`[verify-otp] OTP verified for ${user.email}, purpose: ${purpose}`);
         } else {
             const check = await client.verify.v2.services(process.env.TWILIO_VERIFY_SID)
                 .verificationChecks
@@ -336,20 +338,22 @@ router.post("/reset-password", async (req, res) => {
         let { identifier, otp, newPassword } = req.body;
         if (identifier && identifier.includes('@')) identifier = identifier.toLowerCase();
 
+        await connect();
+
         const user = await User.findOne({
             $or: [{ email: identifier }, { phone: identifier }]
         });
         if (!user) return res.status(404).json({ error: "User not found" });
 
-        if (identifier.includes("@")) {
-            const validOtp = await Otp.findOne({
-                email: identifier,
-                otp,
-                expiresAt: { $gt: new Date() }
-            });
-            if (!validOtp) return res.status(400).json({ error: "Invalid or expired OTP" });
-            await Otp.deleteOne({ _id: validOtp._id });
-        }
+        // For forgot password, we ALWAYS verify against the registered email in Otp model
+        const validOtp = await Otp.findOne({
+            email: user.email,
+            otp,
+            isUsed: false,
+            expiresAt: { $gt: new Date() }
+        });
+
+        if (!validOtp) return res.status(400).json({ error: "Invalid or expired OTP" });
 
         if (user.password === newPassword) {
             return res.status(400).json({ error: "New password cannot be the same as your old password" });
@@ -359,59 +363,14 @@ router.post("/reset-password", async (req, res) => {
         user.lastPasswordReset = getISTTime();
         await user.save();
 
+        validOtp.isUsed = true;
+        await validOtp.save();
+
         res.json({ status: "SUCCESS", message: "Password reset successfully" });
 
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ error: "Failed to reset password" });
-    }
-});
-
-
-
-router.post("/verify-phone", async (req, res) => {
-    try {
-        const { user_json_url } = req.body;
-
-        const response = await axios.get(user_json_url);
-        const data = response.data;
-        const phone = data.user_country_code + data.user_phone_number;
-        const user = await User.findOne({ phone });
-        if (!user) {
-            return res.status(404).json({ error: "No user found with this phone number." });
-        }
-
-        // Usage limit (Once per day)
-        const today = new Date().toISOString().split('T')[0]; 
-        if (user.lastResetDate === today) {
-            return res.status(429).json({ error: "You can use this option only once per day." });
-        }
-
-        const generatePassword = () => {
-            const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-            let p = "";
-            for (let i = 0; i < 10; i++) p += letters[Math.floor(Math.random() * letters.length)];
-            return p;
-        };
-        const newPassword = generatePassword();
- 
-        user.password = newPassword; 
-        user.lastResetDate = today;
-        await user.save();
-        res.json({ success: true, newPassword });
-
-    } catch (err) {
-        console.error("Phone verification error:", err);
-        res.status(500).json({ error: "Verification failed" });
-    }
-});
-
-router.post("/forgot-password", async (req, res) => {
-    try {
-        const { identifier } = req.body; 
-        res.status(400).json({ error: "Please use the new reset flow." });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
     }
 });
 

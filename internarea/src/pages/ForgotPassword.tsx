@@ -63,7 +63,7 @@ export default function ForgotPassword() {
                 purpose: purpose
             });
 
-            toast.success(t.fp_btn_verify + " Success"); 
+            toast.success(t.fp_btn_verify + " Success");
             setStep('reset');
         } catch (err: any) {
             console.error(err);
@@ -72,7 +72,7 @@ export default function ForgotPassword() {
             setLoading(false);
         }
     };
- 
+
     const generatePassword = () => {
         const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
         let ret = "";
@@ -101,7 +101,7 @@ export default function ForgotPassword() {
             });
             toast.success(t.fp_success || "Password changed successfully.");
             setTimeout(() => {
-                router.push("/"); 
+                router.push("/");
             }, 3000);
         } catch (err: any) {
             toast.error(err.response?.data?.error || "Failed to reset password");
@@ -247,7 +247,7 @@ export default function ForgotPassword() {
                                     <Lock className="h-5 w-5 text-gray-400" />
                                 </div>
                                 <input
-                                    type="text" 
+                                    type="text"
                                     required
                                     className="focus:ring-blue-500 text-black focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-lg py-3 border"
                                     placeholder="*******"
