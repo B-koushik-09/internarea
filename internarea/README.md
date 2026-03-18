@@ -1,40 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# InternArea - Internshala Clone
 
-## Getting Started
+InternArea is a comprehensive recruitment platform designed to help students find internships and full-time jobs. This project is a feature-rich and built using a modern full-stack architecture.
 
-First, run the development server:
+## 🚀 Features
+
+### Authentication & Security
+- **Secure Authentication**: Email/Password and Phone-based login support.
+- **OTP-to-Email Flow**: Secure 6-digit OTP delivery directly to the user's registered email for both verification and password resets, ensuring compliance and trial-gateway ease.
+- **Mobile Access Controls**: Time-restricted access for mobile users to enhance platform security.
+- **Login History**: Tracks login devices, browsers, and IP addresses.
+
+### Features
+- **Internship & Job Discovery**: Browse and search through various categories like Big Brands, Engineering, Design, and Data Science.
+- **Multilingual Support**: Real-time translation into multiple languages (Hindi, Spanish, French, etc.) with parallel API fetching and persistent caching for high performance.
+- **Dynamic Content**: Listings for stipends, duration, start dates, and detailed job descriptions.
+- **Application Management**: User-friendly application tracking for students.
+
+## 🛠️ Technology Stack
+
+### Frontend
+- **Framework**: Next.js (Pages Router)
+- **State Management**: Redux Toolkit
+- **Styling**: Tailwind CSS
+- **Animations/UI**: Lucide Icons, Swiper for interactive sliders, React Toastify for notifications.
+- **Data Fetching**: Axios
+
+### Backend
+- **Server**: Node.js & Express
+- **Database**: MongoDB (via Mongoose)
+- **Security**: JSON Web Tokens (JWT) for session management.
+- **Communication**: Brevo API for transactional emails (OTP delivery).
+
+## 📦 Project Structure
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+├── backend/            
+│   ├── Model/          
+│   ├── Routes/         
+│   └── utils/          
+└── internarea/         
+    ├── src/
+    │   ├── Components/ 
+    │   ├── Feature/    
+    │   ├── pages/      
+    │   └── utils/      
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ⚙️ Setup & Installation
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+### 1. Prerequisites
+- Node.js installed
+- MongoDB URI
+- Brevo API Key (for email services)
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+### 2. Frontend Setup
+```bash
+cd internarea
+npm install
+npm run dev
+```
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+### 3. Backend Setup
+```bash
+cd backend
+npm install
+node index.js
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+## 📜 Environment Variables
+- `NEXT_PUBLIC_API_URL`: Points to your backend server.
+- `MONGO_URI`: MongoDB connection string.
+- `BREVO_API_KEY`: Key for email delivery service.
+- `JWT_SECRET`: Secret for token generation.
