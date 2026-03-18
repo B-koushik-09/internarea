@@ -126,6 +126,11 @@ export const translations = {
         listing_type_internship: "Internship",
         listing_type_job: "Job",
         listing_posted: "Posted recently",
+        immediate_text: "Immediate",
+        stipend_prefix: "₹",
+        stipend_suffix: "/month",
+        salary_suffix: "LPA",
+        tbd_text: "TBD",
 
         // Public Space
         public_my_space: "My Space",
@@ -473,6 +478,11 @@ export const translations = {
         listing_type_internship: "Pasantía",
         listing_type_job: "Trabajo",
         listing_posted: "Publicado recientemente",
+        immediate_text: "Inmediato",
+        stipend_prefix: "₹",
+        stipend_suffix: "/mes",
+        salary_suffix: "LPA",
+        tbd_text: "TBD",
 
         // Public Space
         public_my_space: "Mi Espacio",
@@ -780,6 +790,11 @@ export const translations = {
         listing_type_internship: "इंटर्नशिप",
         listing_type_job: "नौकरी",
         listing_posted: "हाल ही में पोस्ट किया गया",
+        immediate_text: "तुरंत",
+        stipend_prefix: "₹",
+        stipend_suffix: "/माह",
+        salary_suffix: "LPA",
+        tbd_text: "TBD",
 
         // Public Space
         public_my_space: "मेरा स्पेस",

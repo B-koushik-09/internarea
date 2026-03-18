@@ -32,6 +32,9 @@ interface Internship {
   _translatedCompany?: string;
   _translatedLocation?: string;
   _translatedStipend?: string;
+  _translatedDuration?: string;
+  _translatedStartDate?: string;
+  _translatedLang?: string;
 }
 
 interface Job {
@@ -47,6 +50,9 @@ interface Job {
   _translatedCompany?: string;
   _translatedLocation?: string;
   _translatedSalary?: string;
+  _translatedExperience?: string;
+  _translatedStartDate?: string;
+  _translatedLang?: string;
 }
 
 export default function SvgSlider() {
@@ -123,33 +129,38 @@ export default function SvgSlider() {
       if (currentLanguage === "English") return;
       if (filteredInternships.length > 0) {
         const untranslatedInternshipIndices = filteredInternships
-          .map((item: any, i) => (!item._translatedTitle || !item._translatedCompany || !item._translatedLocation) ? i : -1)
+          .map((item: any, i) => (item._translatedLang !== currentLanguage || !item._translatedTitle || !item._translatedCompany || !item._translatedLocation) ? i : -1)
           .filter(i => i !== -1);
 
         if (untranslatedInternshipIndices.length > 0) {
           const promises = untranslatedInternshipIndices.map(i => {
             const item = filteredInternships[i];
             return Promise.all([
-              !item._translatedTitle && item.title ? translateDynamicText(item.title, currentLanguage) : Promise.resolve(null),
-              !item._translatedCompany && item.company ? translateDynamicText(item.company, currentLanguage) : Promise.resolve(null),
-              !item._translatedLocation && item.location ? translateDynamicText(item.location, currentLanguage) : Promise.resolve(null),
-              !item._translatedStipend && item.stipend ? translateDynamicText(item.stipend, currentLanguage) : Promise.resolve(null)
-            ]).then(([title, company, location, stipend]) => ({ i, title, company, location, stipend }));
+              translateDynamicText(item.title, currentLanguage),
+              translateDynamicText(item.company, currentLanguage),
+              translateDynamicText(item.location, currentLanguage),
+              item.stipend ? translateDynamicText(item.stipend, currentLanguage) : Promise.resolve(null),
+              item.duration ? translateDynamicText(item.duration, currentLanguage) : Promise.resolve(null),
+              item.startDate ? translateDynamicText(item.startDate, currentLanguage) : Promise.resolve(null),
+            ]).then(([title, company, location, stipend, duration, startDate]) => ({ i, title, company, location, stipend, duration, startDate }));
           });
 
           const results = await Promise.all(promises);
           if (results.length > 0) {
             setinternship(prev => {
               const next = [...prev];
-              results.forEach(({ i, title, company, location, stipend }) => {
+              results.forEach(({ i, title, company, location, stipend, duration, startDate }) => {
                 const globalIndex = prev.findIndex(item => item._id === filteredInternships[i]._id);
                 if (globalIndex !== -1) {
                   next[globalIndex] = {
                     ...next[globalIndex],
+                    _translatedLang: currentLanguage,
                     ...(title && { _translatedTitle: title }),
                     ...(company && { _translatedCompany: company }),
                     ...(location && { _translatedLocation: location }),
-                    ...(stipend && { _translatedStipend: stipend })
+                    ...(stipend && { _translatedStipend: stipend }),
+                    ...(duration && { _translatedDuration: duration }),
+                    ...(startDate && { _translatedStartDate: startDate })
                   };
                 }
               });
@@ -162,33 +173,38 @@ export default function SvgSlider() {
       // Handle Jobs
       if (filteredJobs.length > 0) {
         const untranslatedJobIndices = filteredJobs
-          .map((item: any, i) => (!item._translatedTitle || !item._translatedCompany || !item._translatedLocation || !item._translatedSalary) ? i : -1)
+          .map((item: any, i) => (item._translatedLang !== currentLanguage || !item._translatedTitle || !item._translatedCompany || !item._translatedLocation || !item._translatedSalary) ? i : -1)
           .filter(i => i !== -1);
 
         if (untranslatedJobIndices.length > 0) {
           const promises = untranslatedJobIndices.map(i => {
             const item = filteredJobs[i];
             return Promise.all([
-              !item._translatedTitle && item.title ? translateDynamicText(item.title, currentLanguage) : Promise.resolve(null),
-              !item._translatedCompany && item.company ? translateDynamicText(item.company, currentLanguage) : Promise.resolve(null),
-              !item._translatedLocation && item.location ? translateDynamicText(item.location, currentLanguage) : Promise.resolve(null),
-              !item._translatedSalary && item.CTC ? translateDynamicText(item.CTC, currentLanguage) : Promise.resolve(null)
-            ]).then(([title, company, location, salary]) => ({ i, title, company, location, salary }));
+              translateDynamicText(item.title, currentLanguage),
+              translateDynamicText(item.company, currentLanguage),
+              translateDynamicText(item.location, currentLanguage),
+              item.CTC ? translateDynamicText(item.CTC, currentLanguage) : Promise.resolve(null),
+              item.Experience ? translateDynamicText(item.Experience, currentLanguage) : Promise.resolve(null),
+              item.StartDate ? translateDynamicText(item.StartDate, currentLanguage) : Promise.resolve(null)
+            ]).then(([title, company, location, salary, exp, startDate]) => ({ i, title, company, location, salary, exp, startDate }));
           });
 
           const results = await Promise.all(promises);
           if (results.length > 0) {
             setjob(prev => {
               const next = [...prev];
-              results.forEach(({ i, title, company, location, salary }) => {
+              results.forEach(({ i, title, company, location, salary, exp, startDate }) => {
                 const globalIndex = prev.findIndex(item => item._id === filteredJobs[i]._id);
                 if (globalIndex !== -1) {
                   next[globalIndex] = {
                     ...next[globalIndex],
+                    _translatedLang: currentLanguage,
                     ...(title && { _translatedTitle: title }),
                     ...(company && { _translatedCompany: company }),
                     ...(location && { _translatedLocation: location }),
-                    ...(salary && { _translatedSalary: salary })
+                    ...(salary && { _translatedSalary: salary }),
+                    ...(exp && { _translatedExperience: exp }),
+                    ...(startDate && { _translatedStartDate: startDate })
                   };
                 }
               });
@@ -349,16 +365,16 @@ export default function SvgSlider() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Banknote size={18} />
-                  <span>{currentLanguage === "English" ? (internship.stipend || "TBD") : (internship._translatedStipend || internship.stipend || "TBD")}{internship.stipend && !internship.stipend.toLowerCase().includes('/month') && ' /month'}</span>
+                  <span>{t?.stipend_prefix || '₹'} {currentLanguage === "English" ? (internship.stipend || "TBD") : (internship._translatedStipend || internship.stipend || "TBD")}{internship.stipend && !internship.stipend.toLowerCase().includes('/month') && ` ${t?.stipend_suffix || '/month'}`}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar size={18} />
-                  <span>{internship.startDate || internship.duration || "Immediate"}</span>
+                  <span>{currentLanguage === "English" ? (internship.startDate || internship.duration || "Immediate") : (internship._translatedStartDate || internship._translatedDuration || internship.startDate || internship.duration || t?.immediate_text || "Immediate")}</span>
                 </div>
               </div>
               <div className="flex items-center justify-between mt-6">
                 <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">
-                  Internship
+                  {t?.listing_type_internship || "Internship"}
                 </span>
                 <Link
                   href={`/detailiternship/${internship._id}`}
@@ -396,16 +412,16 @@ export default function SvgSlider() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Banknote size={18} />
-                  <span>₹ {currentLanguage === "English" ? job.CTC : (job._translatedSalary || job.CTC)}{!job.CTC.toLowerCase().includes('lpa') && ' LPA'}</span>
+                  <span>{t?.stipend_prefix || '₹'} {currentLanguage === "English" ? job.CTC : (job._translatedSalary || job.CTC)}{job.CTC && !job.CTC.toLowerCase().includes('lpa') && ` ${t?.salary_suffix || 'LPA'}`}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar size={18} />
-                  <span>{job.StartDate || job.Experience || "Immediate"}</span>
+                  <span>{currentLanguage === "English" ? (job.StartDate || job.Experience || "Immediate") : (job._translatedStartDate || job._translatedExperience || job.StartDate || job.Experience || t?.immediate_text || "Immediate")}</span>
                 </div>
               </div>
               <div className="flex items-center justify-between mt-6">
                 <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">
-                  Jobs
+                  {t?.listing_type_job || "Jobs"}
                 </span>
                 <Link
                   href={`/detailjob/${job._id}`}

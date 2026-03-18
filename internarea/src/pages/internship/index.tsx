@@ -64,7 +64,7 @@ const index = () => {
       let changed = false;
 
       const untranslatedIndices = newInternships
-        .map((j, i) => (!j._translatedTitle || !j._translatedCompany || !j._translatedLocation) ? i : -1)
+        .map((j, i) => (j._translatedLang !== currentLanguage || !j._translatedTitle || !j._translatedCompany || !j._translatedLocation || !j._translatedStipend) ? i : -1)
         .filter(i => i !== -1);
 
       if (untranslatedIndices.length === 0) {
@@ -78,30 +78,37 @@ const index = () => {
           
           // Use parallel calls per item
           const p = Promise.all([
-            !j._translatedTitle && j.title ? translateDynamicText(j.title, currentLanguage) : Promise.resolve(null),
-            !j._translatedCompany && j.company ? translateDynamicText(j.company, currentLanguage) : Promise.resolve(null),
-            !j._translatedLocation && j.location ? translateDynamicText(j.location, currentLanguage) : Promise.resolve(null),
-            !j._translatedStipend && j.stipend ? translateDynamicText(j.stipend, currentLanguage) : Promise.resolve(null)
-          ]).then(([title, company, location, stipend]) => ({
+            translateDynamicText(j.title, currentLanguage),
+            translateDynamicText(j.company, currentLanguage),
+            translateDynamicText(j.location, currentLanguage),
+            j.stipend ? translateDynamicText(j.stipend, currentLanguage) : Promise.resolve(null),
+            j.duration ? translateDynamicText(j.duration, currentLanguage) : Promise.resolve(null),
+            j.startDate ? translateDynamicText(j.startDate, currentLanguage) : Promise.resolve(null)
+          ]).then(([title, company, location, stipend, duration, startDate]) => ({
             i,
             title,
             company,
             location,
-            stipend
+            stipend,
+            duration,
+            startDate
           }));
           
           return [p];
         });
 
         const results = await Promise.all(translationPromises);
-        results.forEach(({ i, title, company, location, stipend }) => {
+        results.forEach(({ i, title, company, location, stipend, duration, startDate }) => {
           // CLONE the object to ensure React detects the change
           newInternships[i] = {
             ...newInternships[i],
+            _translatedLang: currentLanguage,
             ...(title && { _translatedTitle: title }),
             ...(company && { _translatedCompany: company }),
             ...(location && { _translatedLocation: location }),
-            ...(stipend && { _translatedStipend: stipend })
+            ...(stipend && { _translatedStipend: stipend }),
+            ...(duration && { _translatedDuration: duration }),
+            ...(startDate && { _translatedStartDate: startDate })
           };
           changed = true;
         });
@@ -263,7 +270,7 @@ const index = () => {
                       <PlayCircle className="h-5 w-5" />
                       <div>
                         <p className="text-sm font-medium">{t?.listing_start_date || "Start Date"}</p>
-                        <p className="text-sm">{internship.startDate}</p>
+                        <p className="text-sm">{currentLanguage === "English" ? (internship.startDate || internship.duration || "Immediate") : (internship._translatedStartDate || internship._translatedDuration || internship.startDate || internship.duration || t?.immediate_text || "Immediate")}</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2 text-gray-600">
@@ -277,7 +284,7 @@ const index = () => {
                       <DollarSign className="h-5 w-5" />
                       <div>
                         <p className="text-sm font-medium">{t?.listing_stipend || "Stipend"}</p>
-                        <p className="text-sm">₹ {currentLanguage === "English" ? internship.stipend : (internship._translatedStipend || internship.stipend)}{!internship.stipend.toLowerCase().includes('/month') && ' /month'}</p>
+                        <p className="text-sm">{t?.stipend_prefix || '₹'} {currentLanguage === "English" ? internship.stipend : (internship._translatedStipend || internship.stipend)}{internship.stipend && !internship.stipend.toLowerCase().includes('/month') && ` ${t?.stipend_suffix || '/month'}`}</p>
                       </div>
                     </div>
                   </div>

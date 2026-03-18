@@ -65,7 +65,7 @@ const index = () => {
       let changed = false;
 
       const untranslatedIndices = newJobs
-        .map((j, i) => (!j._translatedTitle || !j._translatedCompany || !j._translatedLocation) ? i : -1)
+        .map((j, i) => (j._translatedLang !== currentLanguage || !j._translatedTitle || !j._translatedCompany || !j._translatedLocation || !j._translatedSalary) ? i : -1)
         .filter(i => i !== -1);
 
       if (untranslatedIndices.length === 0) {
@@ -79,29 +79,36 @@ const index = () => {
           
           // Use parallel calls per item
           const p = Promise.all([
-            !j._translatedTitle && j.title ? translateDynamicText(j.title, currentLanguage) : Promise.resolve(null),
-            !j._translatedCompany && j.company ? translateDynamicText(j.company, currentLanguage) : Promise.resolve(null),
-            !j._translatedLocation && j.location ? translateDynamicText(j.location, currentLanguage) : Promise.resolve(null),
-            !j._translatedSalary && j.CTC ? translateDynamicText(j.CTC, currentLanguage) : Promise.resolve(null)
-          ]).then(([title, company, location, salary]) => ({
+            translateDynamicText(j.title, currentLanguage),
+            translateDynamicText(j.company, currentLanguage),
+            translateDynamicText(j.location, currentLanguage),
+            j.CTC ? translateDynamicText(j.CTC, currentLanguage) : Promise.resolve(null),
+            j.Experience ? translateDynamicText(j.Experience, currentLanguage) : Promise.resolve(null),
+            j.StartDate ? translateDynamicText(j.StartDate, currentLanguage) : Promise.resolve(null)
+          ]).then(([title, company, location, salary, exp, startDate]) => ({
             i,
             title,
             company,
             location,
-            salary
+            salary,
+            exp,
+            startDate
           }));
           
           return [p];
         });
 
         const results = await Promise.all(translationPromises);
-        results.forEach(({ i, title, company, location, salary }) => {
+        results.forEach(({ i, title, company, location, salary, exp, startDate }) => {
           newJobs[i] = {
             ...newJobs[i],
+            _translatedLang: currentLanguage,
             ...(title && { _translatedTitle: title }),
             ...(company && { _translatedCompany: company }),
             ...(location && { _translatedLocation: location }),
-            ...(salary && { _translatedSalary: salary })
+            ...(salary && { _translatedSalary: salary }),
+            ...(exp && { _translatedExperience: exp }),
+            ...(startDate && { _translatedStartDate: startDate })
           };
           changed = true;
         });
@@ -277,7 +284,7 @@ const index = () => {
                       <PlayCircle className="h-5 w-5" />
                       <div>
                         <p className="text-sm font-medium">{t?.listing_start_date || "Start Date"}</p>
-                        <p className="text-sm">{job.StartDate || job.Experience || "Immediate"}</p>
+                        <p className="text-sm">{currentLanguage === "English" ? (job.StartDate || job.Experience || "Immediate") : (job._translatedStartDate || job._translatedExperience || job.StartDate || job.Experience || t?.immediate_text || "Immediate")}</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2 text-gray-600">
@@ -291,13 +298,13 @@ const index = () => {
                       <DollarSign className="h-5 w-5" />
                       <div>
                         <p className="text-sm font-medium">{t?.listing_ctc || "CTC"}</p>
-                        <p className="text-sm">₹ {currentLanguage === "English" ? job.CTC : (job._translatedSalary || job.CTC)}{!job.CTC.toLowerCase().includes('lpa') && ' LPA'}</p>
+                        <p className="text-sm">{t?.stipend_prefix || '₹'} {currentLanguage === "English" ? job.CTC : (job._translatedSalary || job.CTC)}{job.CTC && !job.CTC.toLowerCase().includes('lpa') && ` ${t?.salary_suffix || 'LPA'}`}</p>
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">
+                       <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">
                         {t?.listing_type_job || "Jobs"}
                       </span>
                       <div className="flex items-center space-x-1 text-green-600">
