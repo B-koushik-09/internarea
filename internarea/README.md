@@ -2,8 +2,11 @@
 
 InternArea is a comprehensive recruitment platform designed to help students find internships and full-time jobs. This project is a feature-rich and built using a modern full-stack architecture.
 
-## 🚀 Features
+## Deployment
+Frontend : https://internarea.vercel.app/
+Backend : https://internarea-backend.vercel.app/
 
+## Features
 ### Authentication & Security
 - **Secure Authentication**: Email/Password and Phone-based login support.
 - **OTP-to-Email Flow**: Secure 6-digit OTP delivery directly to the user's registered email for both verification and password resets, ensuring compliance and trial-gateway ease.
@@ -16,7 +19,7 @@ InternArea is a comprehensive recruitment platform designed to help students fin
 - **Dynamic Content**: Listings for stipends, duration, start dates, and detailed job descriptions.
 - **Application Management**: User-friendly application tracking for students.
 
-## 🛠️ Technology Stack
+##  Technology Stack
 
 ### Frontend
 - **Framework**: Next.js (Pages Router)
@@ -31,7 +34,7 @@ InternArea is a comprehensive recruitment platform designed to help students fin
 - **Security**: JSON Web Tokens (JWT) for session management.
 - **Communication**: Brevo API for transactional emails (OTP delivery).
 
-## 📦 Project Structure
+## Project Structure
 
 ```bash
 ├── backend/            
@@ -46,7 +49,7 @@ InternArea is a comprehensive recruitment platform designed to help students fin
     │   └── utils/      
 ```
 
-## ⚙️ Setup & Installation
+## Setup & Installation
 
 ### 1. Prerequisites
 - Node.js installed
@@ -67,7 +70,7 @@ npm install
 node index.js
 ```
 
-## 📜 Environment Variables
+## Environment Variables
 - `NEXT_PUBLIC_API_URL`: Points to your backend server.
 - `MONGO_URI`: MongoDB connection string.
 - `BREVO_API_KEY`: Key for email delivery service.
