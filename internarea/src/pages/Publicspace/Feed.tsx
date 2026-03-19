@@ -57,8 +57,8 @@ export default function Feed() {
 
       // Group untranslated posts
       const untranslatedIndices = newPosts
-        .map((p, i) => (p.content && !p._translatedContent ? i : -1))
-        .filter(i => i !== -1);
+        .map((p: any, i: number) => (p.content && !p._translatedContent ? i : -1))
+        .filter((i: number) => i !== -1);
 
       if (untranslatedIndices.length === 0) return;
 
@@ -68,7 +68,7 @@ export default function Feed() {
           untranslatedIndices.map(i => translateDynamicText(newPosts[i].content, currentLanguage))
         );
 
-        translations.forEach((translated, index) => {
+        translations.forEach((translated: string | null, index: number) => {
           const originalIndex = untranslatedIndices[index];
           if (translated && translated !== newPosts[originalIndex].content) {
             newPosts[originalIndex]._translatedContent = translated;
