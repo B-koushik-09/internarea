@@ -70,7 +70,11 @@ const ProfilePage = () => {
                 <img
                   src={user?.photo}
                   alt={user?.name}
-                  className="w-24 h-24 rounded-full border-4 border-white shadow-lg"
+                  className="w-24 h-24 rounded-full border-4 border-white shadow-lg object-cover"
+                  onError={(e: any) => {
+                    e.target.onerror = null;
+                    e.target.src = "https://via.placeholder.com/100?text=Profile";
+                  }}
                 />
               ) : (
                 <div className="w-24 h-24 rounded-full border-4 border-white shadow-lg bg-gray-200 flex items-center justify-center">

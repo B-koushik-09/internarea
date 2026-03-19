@@ -284,7 +284,12 @@ const index = () => {
                       <PlayCircle className="h-5 w-5" />
                       <div>
                         <p className="text-sm font-medium">{t?.listing_start_date || "Start Date"}</p>
-                        <p className="text-sm">{currentLanguage === "English" ? (job.StartDate || job.Experience || "Immediate") : (job._translatedStartDate || job._translatedExperience || job.StartDate || job.Experience || t?.immediate_text || "Immediate")}</p>
+                        <p className="text-sm">{(() => {
+                          const rawDate = job.StartDate || job.Experience || "";
+                          if (currentLanguage === "English") return rawDate || "Immediate";
+                          if (rawDate.toLowerCase() === "immediate" || !rawDate) return t?.immediate_text || "Immediate";
+                          return job._translatedStartDate || job._translatedExperience || rawDate;
+                        })()}</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2 text-gray-600">
@@ -298,7 +303,14 @@ const index = () => {
                       <DollarSign className="h-5 w-5" />
                       <div>
                         <p className="text-sm font-medium">{t?.listing_ctc || "CTC"}</p>
-                        <p className="text-sm">{t?.stipend_prefix || '₹'} {currentLanguage === "English" ? job.CTC : (job._translatedSalary || job.CTC)}{job.CTC && !job.CTC.toLowerCase().includes('lpa') && ` ${t?.salary_suffix || 'LPA'}`}</p>
+                        <p className="text-sm">{(() => {
+                          const val = currentLanguage === "English" ? (job.CTC || t?.tbd_text || "TBD") : (job._translatedSalary || job.CTC || t?.tbd_text || "TBD");
+                          if (val === "TBD" || val === t?.tbd_text) return val;
+                          if (typeof val === 'string' && !val.toLowerCase().includes('lpa')) {
+                            return `${t?.stipend_prefix || '₹'} ${val} ${t?.salary_suffix || 'LPA'}`;
+                          }
+                          return val.startsWith(t?.stipend_prefix || '₹') ? val : `${t?.stipend_prefix || '₹'} ${val}`;
+                        })()}</p>
                       </div>
                     </div>
                   </div>

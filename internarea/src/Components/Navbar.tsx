@@ -29,6 +29,11 @@ const Navbar = () => {
   const [targetLanguage, setTargetLanguage] = useState("");
   const [otpEmail, setOtpEmail] = useState("");
   const [loginPass, setLoginPass] = useState("");
+  const [mounted, setMounted] = useState(false);
+ 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const t = { ...translations["English"], ...((translations as any)[currentLanguage] || {}) };
 
@@ -140,6 +145,7 @@ const Navbar = () => {
       const res = await axios.post(`${API_URL}/api/auth/record-login`, {
         email: firebaseUser.email,
         name: firebaseUser.displayName,
+        photo: firebaseUser.photoURL,
         device,
         browser,
         os,
@@ -171,6 +177,7 @@ const Navbar = () => {
       const res = await axios.post(`${API_URL}/api/auth/record-login`, {
         email: firebaseUser.email,
         name: firebaseUser.displayName,
+        photo: firebaseUser.photoURL,
         device,
         browser,
         os,
@@ -346,7 +353,9 @@ const Navbar = () => {
                 </select>
               </div>
 
-              {isLoading ? (
+              {!mounted ? (
+                <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full opacity-0"></div>
+              ) : isLoading ? (
                 <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
               ) : user ? (
                 <div className="flex items-center space-x-2">
@@ -401,7 +410,9 @@ const Navbar = () => {
             </div>
 
             <div className="hidden md:flex items-center space-x-4">
-              {isLoading ? (
+              {!mounted ? (
+                <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full opacity-0"></div>
+              ) : isLoading ? (
                 <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
               ) : user ? (
                 <div className="relative group z-50">

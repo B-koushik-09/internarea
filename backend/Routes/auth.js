@@ -113,7 +113,7 @@ const connect = require("../db");
 router.post("/record-login", async (req, res) => {
     try {
         await connect();  
-        const { email, device, browser, os, ip, otpVerified, name, isRefresh } = req.body;
+        const { email, device, browser, os, ip, otpVerified, name, isRefresh, photo } = req.body;
 
         console.log(`[record-login] Request received for: ${email}, isRefresh: ${isRefresh}, otpVerified: ${otpVerified}`);
 
@@ -129,8 +129,12 @@ router.post("/record-login", async (req, res) => {
             user = await User.create({
                 email,
                 name: name || "Internshala User",
+                photo: photo || "https://via.placeholder.com/100",
                 loginHistory: []
             });
+        } else if (photo && !user.photo) {
+            user.photo = photo;
+            await user.save();
         }
 
         const istTime = getISTTime();

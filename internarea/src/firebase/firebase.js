@@ -24,6 +24,7 @@ if (typeof window !== "undefined") {
 
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
+provider.setCustomParameters({ prompt: 'select_account' });
 
 if (typeof window !== "undefined") {
   import("firebase/auth").then(({ setPersistence, browserLocalPersistence }) => {

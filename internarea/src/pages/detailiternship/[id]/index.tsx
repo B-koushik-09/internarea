@@ -98,7 +98,10 @@ const index = () => {
             transAboutComp,
             transAboutInt,
             transWho,
-            transStipend
+            transStipend,
+            transPerks,
+            transAdditional,
+            transCategory
           ] = await Promise.all([
             translateDynamicText(data.title, currentLanguage),
             translateDynamicText(data.company, currentLanguage),
@@ -106,7 +109,10 @@ const index = () => {
             translateDynamicText(data.aboutCompany, currentLanguage),
             translateDynamicText(data.aboutInternship, currentLanguage),
             translateDynamicText(data.whoCanApply, currentLanguage),
-            translateDynamicText(data.stipend, currentLanguage)
+            translateDynamicText(data.stipend, currentLanguage),
+            translateDynamicText(data.perks, currentLanguage),
+            translateDynamicText(data.additionalInfo, currentLanguage),
+            translateDynamicText(data.category, currentLanguage)
           ]);
           
           data = {
@@ -117,7 +123,10 @@ const index = () => {
             _translatedAboutCompany: transAboutComp,
             _translatedAboutInternship: transAboutInt,
             _translatedWho: transWho,
-            _translatedStipend: transStipend
+            _translatedStipend: transStipend,
+            _translatedPerks: transPerks,
+            _translatedAdditional: transAdditional,
+            _translatedCategory: transCategory
           };
         }
  
@@ -131,6 +140,21 @@ const index = () => {
   const [availability, setAvailability] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [coverLetter, setCoverLetter] = useState("");
+  const [myResumes, setMyResumes] = useState<any[]>([]);
+ 
+  useEffect(() => {
+    const fetchMyResumes = async () => {
+      if (user?._id) {
+        try {
+          const res = await axios.get(`${API_URL}/api/resume/my/${user._id}`);
+          setMyResumes(res.data);
+        } catch (err) {
+          console.error("Failed to fetch resumes:", err);
+        }
+      }
+    };
+    fetchMyResumes();
+  }, [user]);
   if (!internshipData || Object.keys(internshipData).length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -166,6 +190,8 @@ const index = () => {
       }
     }
 
+    const latestResume = myResumes.length > 0 ? myResumes[myResumes.length - 1] : null;
+ 
     try {
       const applicationdata = {
         category: internshipData.category,
@@ -173,7 +199,8 @@ const index = () => {
         coverLetter: coverLetter,
         user: user,
         Application: id,
-        availability
+        availability,
+        resume: latestResume ? latestResume.details : null
       }
       await axios.post(`${API_URL}/api/application`, applicationdata)
       toast.success("🎉 Application submitted successfully!")
@@ -202,18 +229,34 @@ const index = () => {
             {currentLanguage === "English" ? internshipData.title : (internshipData._translatedTitle || internshipData.title)}
           </h1>
           <p className="text-lg text-gray-600 mb-4">{currentLanguage === "English" ? internshipData.company : (internshipData._translatedCompany || internshipData.company)}</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="flex items-center space-x-2 text-gray-600">
               <MapPin className="h-5 w-5" />
               <span>{currentLanguage === "English" ? internshipData.location : (internshipData._translatedLocation || internshipData.location)}</span>
             </div>
             <div className="flex items-center space-x-2 text-gray-600">
               <DollarSign className="h-5 w-5" />
-              <span>{currentLanguage === "English" ? internshipData.stipend : (internshipData._translatedStipend || internshipData.stipend)}</span>
+              <span>{(() => {
+                const val = currentLanguage === "English" ? (internshipData.stipend || t?.tbd_text || "TBD") : (internshipData._translatedStipend || internshipData.stipend || t?.tbd_text || "TBD");
+                if (val === "TBD" || val === t?.tbd_text) return val;
+                if (typeof val === 'string' && !val.toLowerCase().includes('/month')) {
+                  return `${t?.stipend_prefix || '₹'} ${val} ${t?.stipend_suffix || '/month'}`;
+                }
+                return val.startsWith(t?.stipend_prefix || '₹') ? val : `${t?.stipend_prefix || '₹'} ${val}`;
+              })()}</span>
             </div>
             <div className="flex items-center space-x-2 text-gray-600">
               <Calendar className="h-5 w-5" />
-              <span>{internshipData.startDate}</span>
+              <span>{(() => {
+                const rawDate = internshipData.startDate || "";
+                if (currentLanguage === "English") return rawDate || "Immediate";
+                if (rawDate.toLowerCase() === "immediate" || !rawDate) return t?.immediate_text || "Immediate";
+                return internshipData._translatedStartDate || rawDate;
+              })()}</span>
+            </div>
+            <div className="flex items-center space-x-2 text-gray-600">
+              <Clock className="h-5 w-5" />
+              <span>{currentLanguage === "English" ? internshipData.Duration : (internshipData._translatedDuration || internshipData.Duration)}</span>
             </div>
           </div>
           <div className="mt-4 flex items-center space-x-2">
@@ -252,12 +295,12 @@ const index = () => {
           <p className="text-gray-600 mb-6">{currentLanguage === "English" ? internshipData.whoCanApply : (internshipData._translatedWho || internshipData.whoCanApply)}</p>
 
           <h3 className="text-lg font-semibold text-gray-900 mb-2">{t?.post_label_perks || "Perks"}</h3>
-          <p className="text-gray-600 mb-6">{internshipData.perks}</p>
+          <p className="text-gray-600 mb-6">{currentLanguage === "English" ? internshipData.perks : (internshipData._translatedPerks || internshipData.perks)}</p>
 
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
             {t?.post_label_additional || "Additional Information"}
           </h3>
-          <p className="text-gray-600 mb-6">{internshipData.additionalInfo}</p>
+          <p className="text-gray-600 mb-6">{currentLanguage === "English" ? internshipData.additionalInfo : (internshipData._translatedAdditional || internshipData.additionalInfo)}</p>
 
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
             {t?.post_label_openings || "Number of Openings"}

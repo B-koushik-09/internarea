@@ -416,12 +416,19 @@ export default function ResumeBuilder() {
                     </div>
                 )}
 
-                {/* My Resumes Section */}
-                {myResumes.length > 0 && (
+                {/* My Resumes Section - Always visible for logged-in users */}
+                {user && (
                     <div className="mt-10">
                         <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
                             📋 {t?.resume_my_resumes || "My Resumes"} ({myResumes.length})
                         </h3>
+                        {myResumes.length === 0 ? (
+                            <div className="bg-white border border-gray-200 rounded-xl p-8 text-center">
+                                <FileText className="mx-auto text-gray-300 mb-4" size={48} />
+                                <p className="text-gray-500 text-lg font-medium">No resumes yet</p>
+                                <p className="text-gray-400 text-sm mt-2">Build your first resume using the form above!</p>
+                            </div>
+                        ) : (
                         <div className="grid gap-6 md:grid-cols-2">
                             {myResumes.map((resume, index) => (
                                 <div key={resume._id || index} className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow p-6">
@@ -475,6 +482,7 @@ export default function ResumeBuilder() {
                                 </div>
                             ))}
                         </div>
+                        )}
                     </div>
                 )}
 

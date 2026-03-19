@@ -270,7 +270,12 @@ const index = () => {
                       <PlayCircle className="h-5 w-5" />
                       <div>
                         <p className="text-sm font-medium">{t?.listing_start_date || "Start Date"}</p>
-                        <p className="text-sm">{currentLanguage === "English" ? (internship.startDate || internship.duration || "Immediate") : (internship._translatedStartDate || internship._translatedDuration || internship.startDate || internship.duration || t?.immediate_text || "Immediate")}</p>
+                        <p className="text-sm">{(() => {
+                          const rawDate = internship.startDate || internship.duration || "";
+                          if (currentLanguage === "English") return rawDate || "Immediate";
+                          if (rawDate.toLowerCase() === "immediate" || !rawDate) return t?.immediate_text || "Immediate";
+                          return internship._translatedStartDate || internship._translatedDuration || rawDate;
+                        })()}</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2 text-gray-600">
@@ -284,7 +289,14 @@ const index = () => {
                       <DollarSign className="h-5 w-5" />
                       <div>
                         <p className="text-sm font-medium">{t?.listing_stipend || "Stipend"}</p>
-                        <p className="text-sm">{t?.stipend_prefix || '₹'} {currentLanguage === "English" ? internship.stipend : (internship._translatedStipend || internship.stipend)}{internship.stipend && !internship.stipend.toLowerCase().includes('/month') && ` ${t?.stipend_suffix || '/month'}`}</p>
+                        <p className="text-sm">{(() => {
+                          const val = currentLanguage === "English" ? (internship.stipend || t?.tbd_text || "TBD") : (internship._translatedStipend || internship.stipend || t?.tbd_text || "TBD");
+                          if (val === "TBD" || val === t?.tbd_text) return val;
+                          if (typeof val === 'string' && !val.toLowerCase().includes('/month')) {
+                            return `${t?.stipend_prefix || '₹'} ${val} ${t?.stipend_suffix || '/month'}`;
+                          }
+                          return val.startsWith(t?.stipend_prefix || '₹') ? val : `${t?.stipend_prefix || '₹'} ${val}`;
+                        })()}</p>
                       </div>
                     </div>
                   </div>

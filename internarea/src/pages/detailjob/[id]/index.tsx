@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import {
   ArrowUpRight,
   Book,
+  Briefcase,
   Calendar,
   Cat,
   Clock,
@@ -143,7 +144,11 @@ const index = () => {
             transAboutComp,
             transAboutJob,
             transWho,
-            transCTC
+            transCTC,
+            transPerks,
+            transAdditional,
+            transExp,
+            transCategory
           ] = await Promise.all([
             translateDynamicText(data.title, currentLanguage),
             translateDynamicText(data.company, currentLanguage),
@@ -151,7 +156,11 @@ const index = () => {
             translateDynamicText(data.aboutCompany, currentLanguage),
             translateDynamicText(data.aboutJob, currentLanguage),
             translateDynamicText(data.whoCanApply, currentLanguage),
-            translateDynamicText(data.CTC, currentLanguage)
+            translateDynamicText(data.CTC, currentLanguage),
+            translateDynamicText(data.perks, currentLanguage),
+            translateDynamicText(data.AdditionalInfo, currentLanguage),
+            translateDynamicText(data.Experience, currentLanguage),
+            translateDynamicText(data.category, currentLanguage)
           ]);
           
           data = {
@@ -162,7 +171,11 @@ const index = () => {
             _translatedAboutCompany: transAboutComp,
             _translatedAboutJob: transAboutJob,
             _translatedWho: transWho,
-            _translatedCTC: transCTC
+            _translatedCTC: transCTC,
+            _translatedPerks: transPerks,
+            _translatedAdditional: transAdditional,
+            _translatedExperience: transExp,
+            _translatedCategory: transCategory
           };
         }
         
@@ -177,6 +190,21 @@ const index = () => {
   const [availability, setAvailability] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [coverLetter, setCoverLetter] = useState("");
+  const [myResumes, setMyResumes] = useState<any[]>([]);
+ 
+  useEffect(() => {
+    const fetchMyResumes = async () => {
+      if (user?._id) {
+        try {
+          const res = await axios.get(`${API_URL}/api/resume/my/${user._id}`);
+          setMyResumes(res.data);
+        } catch (err) {
+          console.error("Failed to fetch resumes:", err);
+        }
+      }
+    };
+    fetchMyResumes();
+  }, [user]);
   if (!jobdata || Object.keys(jobdata).length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -211,6 +239,8 @@ const index = () => {
       }
     }
 
+    const latestResume = myResumes.length > 0 ? myResumes[myResumes.length - 1] : null;
+ 
     try {
       const applicationdata = {
         category: jobdata.category,
@@ -219,6 +249,7 @@ const index = () => {
         user: user,
         Application: id,
         availability,
+        resume: latestResume ? latestResume.details : null
       };
       await axios.post(
         `${API_URL}/api/application`,
@@ -249,18 +280,29 @@ const index = () => {
             {currentLanguage === "English" ? jobdata.title : (jobdata._translatedTitle || jobdata.title)}
           </h1>
           <p className="text-lg text-gray-600 mb-4">{currentLanguage === "English" ? jobdata.company : (jobdata._translatedCompany || jobdata.company)}</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="flex items-center space-x-2 text-gray-600">
               <MapPin className="h-5 w-5" />
               <span>{currentLanguage === "English" ? jobdata.location : (jobdata._translatedLocation || jobdata.location)}</span>
             </div>
             <div className="flex items-center space-x-2 text-gray-600">
               <DollarSign className="h-5 w-5" />
-              <span>CTC {currentLanguage === "English" ? jobdata.CTC : (jobdata._translatedCTC || jobdata.CTC)}</span>
+              <span>CTC {(() => {
+                const val = currentLanguage === "English" ? (jobdata.CTC || t?.tbd_text || "TBD") : (jobdata._translatedCTC || jobdata.CTC || t?.tbd_text || "TBD");
+                if (val === "TBD" || val === t?.tbd_text) return val;
+                if (typeof val === 'string' && !val.toLowerCase().includes('lpa')) {
+                  return `${t?.stipend_prefix || '₹'} ${val} ${t?.salary_suffix || 'LPA'}`;
+                }
+                return val.startsWith(t?.stipend_prefix || '₹') ? val : `${t?.stipend_prefix || '₹'} ${val}`;
+              })()}</span>
             </div>
             <div className="flex items-center space-x-2 text-gray-600">
               <Book className="h-5 w-5" />
-              <span>{jobdata.category}</span>
+              <span>{currentLanguage === "English" ? jobdata.category : (jobdata._translatedCategory || jobdata.category)}</span>
+            </div>
+            <div className="flex items-center space-x-2 text-gray-600">
+              <Briefcase className="h-5 w-5" />
+              <span>{currentLanguage === "English" ? jobdata.Experience : (jobdata._translatedExperience || jobdata.Experience)}</span>
             </div>
           </div>
           <div className="mt-4 flex items-center space-x-2">
@@ -299,12 +341,12 @@ const index = () => {
           <p className="text-gray-600 mb-6">{currentLanguage === "English" ? jobdata.whoCanApply : (jobdata._translatedWho || jobdata.whoCanApply)}</p>
 
           <h3 className="text-lg font-semibold text-gray-900 mb-2">{t?.post_label_perks || "Perks"}</h3>
-          <p className="text-gray-600 mb-6">{jobdata.perks}</p>
+          <p className="text-gray-600 mb-6">{currentLanguage === "English" ? jobdata.perks : (jobdata._translatedPerks || jobdata.perks)}</p>
 
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
             {t?.post_label_additional || "Additional Information"}
           </h3>
-          <p className="text-gray-600 mb-6">{jobdata.AdditionalInfo}</p>
+          <p className="text-gray-600 mb-6">{currentLanguage === "English" ? jobdata.AdditionalInfo : (jobdata._translatedAdditional || jobdata.AdditionalInfo)}</p>
         </div>
         {/* Apply Button */}
         <div className="p-6 flex justify-center">

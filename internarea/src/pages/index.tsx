@@ -365,11 +365,23 @@ export default function SvgSlider() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Banknote size={18} />
-                  <span>{t?.stipend_prefix || '₹'} {currentLanguage === "English" ? (internship.stipend || "TBD") : (internship._translatedStipend || internship.stipend || "TBD")}{internship.stipend && !internship.stipend.toLowerCase().includes('/month') && ` ${t?.stipend_suffix || '/month'}`}</span>
+                  <span>{(() => {
+                    const val = currentLanguage === "English" ? (internship.stipend || t?.tbd_text || "TBD") : (internship._translatedStipend || internship.stipend || t?.tbd_text || "TBD");
+                    if (val === "TBD" || val === t?.tbd_text) return val;
+                    if (typeof val === 'string' && !val.toLowerCase().includes('/month')) {
+                      return `${t?.stipend_prefix || '₹'} ${val} ${t?.stipend_suffix || '/month'}`;
+                    }
+                    return val.startsWith(t?.stipend_prefix || '₹') ? val : `${t?.stipend_prefix || '₹'} ${val}`;
+                  })()}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar size={18} />
-                  <span>{currentLanguage === "English" ? (internship.startDate || internship.duration || "Immediate") : (internship._translatedStartDate || internship._translatedDuration || internship.startDate || internship.duration || t?.immediate_text || "Immediate")}</span>
+                  <span>{(() => {
+                    const rawDate = internship.startDate || internship.duration || "";
+                    if (currentLanguage === "English") return rawDate || "Immediate";
+                    if (rawDate.toLowerCase() === "immediate" || !rawDate) return t?.immediate_text || "Immediate";
+                    return internship._translatedStartDate || internship._translatedDuration || rawDate;
+                  })()}</span>
                 </div>
               </div>
               <div className="flex items-center justify-between mt-6">
@@ -412,11 +424,23 @@ export default function SvgSlider() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Banknote size={18} />
-                  <span>{t?.stipend_prefix || '₹'} {currentLanguage === "English" ? job.CTC : (job._translatedSalary || job.CTC)}{job.CTC && !job.CTC.toLowerCase().includes('lpa') && ` ${t?.salary_suffix || 'LPA'}`}</span>
+                  <span>{(() => {
+                    const val = currentLanguage === "English" ? (job.CTC || t?.tbd_text || "TBD") : (job._translatedSalary || job.CTC || t?.tbd_text || "TBD");
+                    if (val === "TBD" || val === t?.tbd_text) return val;
+                    if (typeof val === 'string' && !val.toLowerCase().includes('lpa')) {
+                      return `${t?.stipend_prefix || '₹'} ${val} ${t?.salary_suffix || 'LPA'}`;
+                    }
+                    return val.startsWith(t?.stipend_prefix || '₹') ? val : `${t?.stipend_prefix || '₹'} ${val}`;
+                  })()}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar size={18} />
-                  <span>{currentLanguage === "English" ? (job.StartDate || job.Experience || "Immediate") : (job._translatedStartDate || job._translatedExperience || job.StartDate || job.Experience || t?.immediate_text || "Immediate")}</span>
+                  <span>{(() => {
+                    const rawDate = job.StartDate || job.Experience || "";
+                    if (currentLanguage === "English") return rawDate || "Immediate";
+                    if (rawDate.toLowerCase() === "immediate" || !rawDate) return t?.immediate_text || "Immediate";
+                    return job._translatedStartDate || job._translatedExperience || rawDate;
+                  })()}</span>
                 </div>
               </div>
               <div className="flex items-center justify-between mt-6">
