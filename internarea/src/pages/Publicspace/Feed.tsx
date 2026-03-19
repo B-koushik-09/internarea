@@ -171,7 +171,14 @@ export default function Feed() {
             <div className="flex space-x-3 items-center">
               <div className="w-10 h-10 bg-gray-100 rounded-full flex-shrink-0 p-0.5 border border-gray-100">
                 {p.user?.photo ? (
-                  <img src={p.user.photo} className="w-full h-full rounded-full object-cover" />
+                  <img 
+                    src={p.user.photo} 
+                    className="w-full h-full rounded-full object-cover" 
+                    onError={(e: any) => {
+                      e.target.onerror = null;
+                      e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(p.user?.name || 'U')}&background=random`;
+                    }}
+                  />
                 ) : (
                   <div className="w-full h-full rounded-full flex items-center justify-center font-bold text-gray-500 bg-gray-200">
                     {p.user?.name ? p.user.name[0] : "U"}
@@ -251,7 +258,17 @@ export default function Feed() {
                   p.comments.map((c: any, idx: number) => (
                     <div key={idx} className="flex space-x-2">
                       <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-xs font-bold text-blue-600 flex-shrink-0 overflow-hidden">
-                        {c.user?.photo ? <img src={c.user.photo} className="w-full h-full object-cover" /> : (c.user?.name?.[0] || 'U')}
+                        {c.user?.photo ? (
+                          <img 
+                            src={c.user.photo} 
+                            className="w-full h-full object-cover" 
+                            onError={(e: any) => {
+                              e.target.onerror = null;
+                              e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(c.user?.name || 'U')}&background=random`;
+                            }}
+                          />
+                        ) : (c.user?.name?.[0] || 'U')}
+
                       </div>
                       <div className="bg-white p-2 rounded-lg rounded-tl-none shadow-sm border border-gray-200 text-sm">
                         <p className="font-bold text-xs text-gray-900 mb-0.5">{c.user?.name || "Unknown"}</p>

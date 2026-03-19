@@ -360,12 +360,16 @@ const Navbar = () => {
               ) : user ? (
                 <div className="flex items-center space-x-2">
                   <img
-                    src={user.photo || "https://via.placeholder.com/40"}
+                    src={user.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'U')}&background=random`}
                     alt=""
                     className="w-8 h-8 rounded-full border border-gray-200 object-cover"
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                    onError={(e: any) => {
+                      e.target.onerror = null;
+                      e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'U')}&background=random`;
+                    }}
                   />
-                </div>
+                  </div>
               ) : (
                 <button
                   onClick={() => setIsLoginModalOpen(true)}
@@ -417,7 +421,15 @@ const Navbar = () => {
               ) : user ? (
                 <div className="relative group z-50">
                   <button className="flex items-center space-x-2 focus:outline-none py-2 hover:bg-gray-50 rounded-full px-2 transition-colors">
-                    <img src={user.photo || "https://via.placeholder.com/40"} alt="" className="w-8 h-8 rounded-full border border-gray-200 object-cover" />
+                     <img 
+                       src={user.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'U')}&background=random`} 
+                       alt="" 
+                       className="w-8 h-8 rounded-full border border-gray-200 object-cover" 
+                       onError={(e: any) => {
+                         e.target.onerror = null;
+                         e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'U')}&background=random`;
+                       }}
+                     />
                     <span className="font-medium text-gray-700 max-w-[100px] truncate">{user.name || "User"}</span>
                     <ChevronDown size={14} className="text-gray-500 transition-transform group-hover:rotate-180" />
                   </button>

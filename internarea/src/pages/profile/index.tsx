@@ -73,7 +73,7 @@ const ProfilePage = () => {
                   className="w-24 h-24 rounded-full border-4 border-white shadow-lg object-cover"
                   onError={(e: any) => {
                     e.target.onerror = null;
-                    e.target.src = "https://via.placeholder.com/100?text=Profile";
+                    e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'U')}&background=random&size=100`;
                   }}
                 />
               ) : (

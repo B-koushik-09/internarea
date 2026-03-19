@@ -95,7 +95,7 @@ router.post("/register", async (req, res) => {
             email,
             phone,
             password,
-            photo: "https://via.placeholder.com/100", // Default avatar
+            photo: `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'U')}&background=random&size=100`, // Default avatar
             createdAt: new Date().toISOString()
         });
 
@@ -129,7 +129,7 @@ router.post("/record-login", async (req, res) => {
             user = await User.create({
                 email,
                 name: name || "Internshala User",
-                photo: photo || "https://via.placeholder.com/100",
+                photo: photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'U')}&background=random&size=100`,
                 loginHistory: []
             });
         } else if (photo && user.photo !== photo) {

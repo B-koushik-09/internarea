@@ -58,7 +58,7 @@ const index = () => {
                   src={data?.user?.photo}
                   onError={(e: any) => {
                     e.target.onerror = null;
-                    e.target.src = "https://via.placeholder.com/400?text=No+Photo";
+                    e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(data?.user?.name || 'U')}&background=random&size=400`;
                   }}
                 />
               ) : (

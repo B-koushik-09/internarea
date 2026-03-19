@@ -216,7 +216,7 @@ const index = () => {
                               alt=""
                               onError={(e: any) => {
                                 e.target.onerror = null;
-                                e.target.src = "https://via.placeholder.com/40";
+                                e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(application.user?.name || 'U')}&background=random`;
                               }}
                             />
                           ) : (

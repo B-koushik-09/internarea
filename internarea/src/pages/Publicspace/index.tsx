@@ -21,6 +21,7 @@ export default function PublicHome() {
   const [stats, setStats] = useState({ friends: 0, posts: 0, refresh: 0 });
   // State for Navigation
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const closeSidebar = () => setIsSidebarOpen(false);
 
   const currentLanguage = useSelector(selectLanguage);
@@ -49,7 +50,11 @@ export default function PublicHome() {
     router.push("/login");
   }
 
-  if (isLoading) {
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted || isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-gray-50">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
@@ -66,7 +71,14 @@ export default function PublicHome() {
         {/* Mobile Sidebar Toggle (Visible only on mobile) */}
         <div className="lg:hidden flex items-center justify-between mb-4 bg-white p-4 rounded-xl shadow-sm border border-gray-200 sticky top-20 z-30">
           <div className="flex items-center space-x-3">
-            <img src={user?.photo || "https://via.placeholder.com/40"} className="w-10 h-10 rounded-full" />
+            <img 
+              src={user?.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'U')}&background=random`} 
+              className="w-10 h-10 rounded-full object-cover" 
+              onError={(e: any) => {
+                e.target.onerror = null;
+                e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'U')}&background=random`;
+              }} 
+            />
             <span className="font-bold text-gray-800">{t?.public_my_space || "My Space"}</span>
           </div>
           <button onClick={() => setIsSidebarOpen(true)} className="p-2 bg-gray-100 rounded-lg text-gray-700 hover:bg-gray-200">
@@ -88,7 +100,14 @@ export default function PublicHome() {
               <div className="p-4 space-y-6">
                 {/* Profile Summary */}
                 <div className="bg-blue-50 rounded-xl p-4 text-center border border-blue-100">
-                  <img src={user?.photo || "https://via.placeholder.com/150"} className="w-16 h-16 rounded-full mx-auto mb-2 border-2 border-white shadow-md object-cover" />
+                  <img 
+                    src={user?.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'U')}&background=random&size=150`} 
+                    className="w-16 h-16 rounded-full mx-auto mb-2 border-2 border-white shadow-md object-cover" 
+                    onError={(e: any) => {
+                      e.target.onerror = null;
+                      e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'U')}&background=random&size=150`;
+                    }}
+                  />
                   <h3 className="font-bold text-gray-900">{user?.name}</h3>
                   <p className="text-xs text-gray-500 mb-3">{user?.email}</p>
                   <div className="flex justify-center space-x-4 text-xs font-semibold text-gray-700">
@@ -117,7 +136,14 @@ export default function PublicHome() {
             {user && (
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-center top-24">
                 <div className="relative inline-block">
-                  <img src={user.photo || "https://via.placeholder.com/150"} className="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-white shadow-md object-cover" />
+                  <img 
+                    src={user.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'U')}&background=random&size=150`} 
+                    className="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-white shadow-md object-cover" 
+                    onError={(e: any) => {
+                      e.target.onerror = null;
+                      e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'U')}&background=random&size=150`;
+                    }}
+                  />
                   <div className="absolute bottom-4 right-2 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
                 </div>
                 <h2 className="text-xl font-bold text-gray-900">{user.name}</h2>
@@ -152,7 +178,14 @@ export default function PublicHome() {
           <div className="lg:col-span-6 space-y-6 order-first lg:order-2">
             <div className="lg:hidden bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between mb-4">
               <div className="flex items-center space-x-3">
-                <img src={user?.photo || "https://via.placeholder.com/40"} className="w-12 h-12 rounded-full border border-gray-100" />
+                <img 
+                  src={user?.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'U')}&background=random&size=100`} 
+                  className="w-12 h-12 rounded-full border border-gray-100 object-cover" 
+                  onError={(e: any) => {
+                    e.target.onerror = null;
+                    e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'U')}&background=random&size=100`;
+                  }}
+                />
                 <div>
                   <h3 className="font-bold text-gray-900">{user?.name}</h3>
                   <div className="flex space-x-2 text-xs text-gray-500">

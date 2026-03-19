@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema({
 
   lastResetDate: { type: String }, 
   lastForgotDate: { type: String }, 
-  photo: { type: String, default: "https://via.placeholder.com/100" },
+  photo: { type: String, default: "https://ui-avatars.com/api/?name=User&background=random&size=100" },
   resumeAccess: { type: Boolean, default: false },
   resumes: [{ type: mongoose.Schema.Types.ObjectId, ref: "Resume" }],
   profileLanguage: { type: String, default: "English" }
