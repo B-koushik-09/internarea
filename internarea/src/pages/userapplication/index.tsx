@@ -208,8 +208,22 @@ const index = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10 flex items-center justify-center bg-gray-100 rounded-full">
-                          <User className="h-5 w-5 text-gray-600" />
+                        <div className="flex-shrink-0 h-10 w-10">
+                          {application.user?.photo ? (
+                            <img
+                              className="h-10 w-10 rounded-full object-cover border border-gray-200"
+                              src={application.user.photo}
+                              alt=""
+                              onError={(e: any) => {
+                                e.target.onerror = null;
+                                e.target.src = "https://via.placeholder.com/40";
+                              }}
+                            />
+                          ) : (
+                            <div className="h-10 w-10 flex items-center justify-center bg-gray-100 rounded-full">
+                              <User className="h-5 w-5 text-gray-600" />
+                            </div>
+                          )}
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">

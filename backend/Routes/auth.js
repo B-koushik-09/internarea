@@ -132,7 +132,8 @@ router.post("/record-login", async (req, res) => {
                 photo: photo || "https://via.placeholder.com/100",
                 loginHistory: []
             });
-        } else if (photo && !user.photo) {
+        } else if (photo && user.photo !== photo) {
+            // Always update if photo is different, especially to replace placeholders
             user.photo = photo;
             await user.save();
         }

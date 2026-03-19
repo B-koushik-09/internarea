@@ -1703,6 +1703,11 @@ export const translations = {
         listing_type_internship: "Stage",
         listing_type_job: "Emploi",
         listing_posted: "Publié récemment",
+        immediate_text: "Immédiat",
+        stipend_prefix: "₹",
+        stipend_suffix: "/mois",
+        salary_suffix: "LPA",
+        tbd_text: "À définir",
 
         // Listings (Filters)
         filter_title: "Filtres",

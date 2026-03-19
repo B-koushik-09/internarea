@@ -121,7 +121,16 @@ const staticTranslations = {
         "0-1 years": "0-1 ans",
         "1-2 years": "1-2 ans",
         "0-6 months": "0-6 mois",
-        "Fresher": "Débutant"
+        "Fresher": "Débutant",
+        "Flexible working hours": "Horaires de travail flexibles",
+        "Internship completion certificate": "Certificat de fin de stage",
+        "Opportunity for full-time job offer": "Offre d'emploi à temps plein",
+        "Mentorship from experienced developers": "Mentorat de développeurs expérimentés",
+        "Access to company learning resources": "Accès aux ressources de l'entreprise",
+        "Networking opportunities": "Opportunités de réseautage",
+        "LPA": "LPA",
+        "per month": "par mois",
+        "/month": "/mois"
     }
 };
 
