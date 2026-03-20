@@ -9,7 +9,7 @@ const { getPayPalAccessToken, getISTTime, isPaymentWindowOpen, PAYPAL_API } = re
 const checkPaymentTime = (req, res, next) => {
     if (!isPaymentWindowOpen()) {
         return res.status(403).json({
-            error: "Payments are only allowed between 11:00 AM and 5:00 PM IST",
+            error: "Payments are only allowed between 10:00 AM and 11:00 AM IST",
             currentISTHour: getISTTime().getHours()
         });
     }

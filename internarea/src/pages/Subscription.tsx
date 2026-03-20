@@ -39,7 +39,7 @@ export default function Subscription() {
             const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
             const istTime = new Date(utc + (3600000 * 5.5));
             const hour = istTime.getHours();
-            setIsPaymentWindowOpen(hour >= 11 && hour < 17);
+            setIsPaymentWindowOpen(hour === 10);
         };
         checkTime();
         const interval = setInterval(checkTime, 60000);
@@ -71,7 +71,7 @@ export default function Subscription() {
         }
         if (plan.price === 0) return;
         if (!isPaymentWindowOpen) {
-            toast.error(t?.sub_payment_limit || "Payments are allowed only between 11:00 AM and 5:00 PM IST");
+            toast.error(t?.sub_payment_limit || "Payments are allowed only between 10:00 AM and 11:00 AM IST");
             return;
         }
         setSelectedPlan(plan);
@@ -178,7 +178,7 @@ export default function Subscription() {
                 {!isPaymentWindowOpen && (
                     <div className="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-lg mb-8 text-center">
                         <strong>🕐 {t?.sub_window_closed || "Payment Window Closed!"} </strong>
-                        <span>{t?.sub_window_msg || "You can only purchase subscriptions between 11:00 AM and 5:00 PM IST."}</span>
+                        <span>{t?.sub_window_msg || "You can only purchase subscriptions between 10:00 AM and 11:00 AM IST."}</span>
                     </div>
                 )}
 

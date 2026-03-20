@@ -35,7 +35,7 @@ const getISTTime = () => {
 const isPaymentWindowOpen = () => {
     const istTime = getISTTime();
     const hour = istTime.getHours();
-    return hour >= 11 && hour < 17;
+    return hour === 10;
 };
 
 module.exports = {
