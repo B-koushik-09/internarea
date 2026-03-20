@@ -4,17 +4,7 @@ const axios = require("axios");
 const Resume = require("../Model/Resume");
 const User = require("../Model/User");
  
-const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
-const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
-const PAYPAL_API = process.env.PAYPAL_MODE === "live"
-    ? "https://api-m.paypal.com"
-    : "https://api-m.sandbox.paypal.com";
-
-const getISTTime = () => {
-    const now = new Date();
-    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-    return new Date(utc + (3600000 * 5.5));
-};
+const { getPayPalAccessToken, getISTTime, PAYPAL_API } = require("../utils/paypal");
  
 const checkPaymentTime = (req, res, next) => {
     const istTime = getISTTime();

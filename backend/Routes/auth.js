@@ -7,11 +7,7 @@ const { sendOTPMail, sendMail } = require("../utils/mailer");
 const axios = require("axios");
 const jwt = require("jsonwebtoken");
 
-const getISTTime = () => {
-    const now = new Date();
-    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-    return new Date(utc + (3600000 * 5.5));
-};
+const { getISTTime } = require("../utils/paypal");
 function getTodayKey() {
     return new Date().toISOString().split("T")[0]; // YYYY-MM-DD
 }
