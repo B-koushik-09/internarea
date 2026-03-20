@@ -5,17 +5,14 @@ const connect = require("../db");
 const Subscription = require("../Model/Subscription");
 const User = require("../Model/User");
  
-const { getPayPalAccessToken, getISTTime, PAYPAL_API } = require("../utils/paypal");
+const { getPayPalAccessToken, getISTTime, isPaymentWindowOpen, PAYPAL_API } = require("../utils/paypal");
 
 
-// Payment window check (10-11 AM IST)
 const checkPaymentTime = (req, res, next) => {
-    const istTime = getISTTime();
-    const hour = istTime.getHours();
-    if (hour !== 10) {
+    if (!isPaymentWindowOpen()) {
         return res.status(403).json({
-            error: "Payments are only allowed between 10:00 AM and 11:00 AM IST",
-            currentISTHour: hour
+            error: "Payments are only allowed between 11:00 AM and 5:00 PM IST",
+            currentISTHour: getISTTime().getHours()
         });
     }
     next();
@@ -213,16 +210,16 @@ router.get("/status/:userId", async (req, res) => {
 });
  
 router.get("/payment-window", (req, res) => {
+    const isOpen = isPaymentWindowOpen();
     const istTime = getISTTime();
     const hour = istTime.getHours();
-    const isOpen = hour === 10;
 
     res.json({
         isOpen,
         currentHour: hour,
         message: isOpen
-            ? "Payment window is open (10:00 AM - 11:00 AM IST)"
-            : "Payment window is closed. Payments are only allowed between 10:00 AM - 11:00 AM IST."
+            ? "Payment window is open (11:00 AM - 5:00 PM IST)"
+            : "Payment window is closed. Payments are only allowed between 11:00 AM - 5:00 PM IST."
     });
 });
 

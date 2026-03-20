@@ -32,8 +32,15 @@ const getISTTime = () => {
     return new Date(utc + (3600000 * 5.5));
 };
 
+const isPaymentWindowOpen = () => {
+    const istTime = getISTTime();
+    const hour = istTime.getHours();
+    return hour >= 11 && hour < 17;
+};
+
 module.exports = {
     getPayPalAccessToken,
     getISTTime,
+    isPaymentWindowOpen,
     PAYPAL_API
 };

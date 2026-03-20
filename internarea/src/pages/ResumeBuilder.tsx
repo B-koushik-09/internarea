@@ -46,7 +46,7 @@ export default function ResumeBuilder() {
             const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
             const istTime = new Date(utc + (3600000 * 5.5));
             const hour = istTime.getHours();
-            setIsPaymentWindowOpen(hour === 10);
+            setIsPaymentWindowOpen(hour >= 11 && hour < 17);
         };
         checkTime();
         const interval = setInterval(checkTime, 60000);
@@ -92,7 +92,7 @@ export default function ResumeBuilder() {
         }
         if (!validateForm()) return;
         if (!isPaymentWindowOpen) {
-            toast.error("Payments are allowed only between 10:00 AM and 11:00 AM IST");
+            toast.error("Payments are allowed only between 11:00 AM and 5:00 PM IST");
             return;
         }
         setIsOTPModalOpen(true);
@@ -188,7 +188,7 @@ export default function ResumeBuilder() {
                 {!isPaymentWindowOpen && (
                     <div className="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-lg mb-6 text-center flex items-center justify-center gap-2">
                         <AlertCircle size={20} />
-                        <span><strong>{t?.resume_payment_window_closed || "Payment Window Closed!"}</strong> {t?.resume_payment_window_msg || "You can only purchase between 10:00 AM and 11:00 AM IST."}</span>
+                        <span><strong>{t?.resume_payment_window_closed || "Payment Window Closed!"}</strong> {t?.resume_payment_window_msg || "You can only purchase between 11:00 AM and 5:00 PM IST."}</span>
                     </div>
                 )}
 
