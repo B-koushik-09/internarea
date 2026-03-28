@@ -4,10 +4,10 @@ InternArea is a comprehensive recruitment platform designed to help students fin
 
 ## Deployment
 Frontend : https://internarea.vercel.app/
-Backend : https://internarea-backend.vercel.app/
+Backend : https://internarea-4g9n.onrender.com
 
 ## Project Documentation
-- **[Full Project Report (PDF)](../Project-report.pdf)**: Comprehensive documentation covering the project's architecture, design, and implementation details.
+- **[Full Project Report (PDF)](Project-report.pdf)**: Comprehensive documentation covering the project's architecture, design, and implementation details.
 
 ## Features
 ### Authentication & Security
